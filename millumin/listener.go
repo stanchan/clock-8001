@@ -37,6 +37,14 @@ func (state *LayerState) mediaPaused(mediaPaused MediaPaused) {
 }
 
 func (state *LayerState) mediaStopped(mediaStopped MediaStopped) {
+	// millumin sends mediaStarted -> mediaStopped when switching medias
+	// ignore the following mediaStopped if we have already started a different media
+	if state.Info.Index > 0 && mediaStopped.MediaInfo.Index != state.Info.Index {
+		log.Printf("Media stopped (ignore): %#v", state)
+
+		return
+	}
+
 	state.Updated = time.Now()
 	state.Playing = false
 	state.Info = mediaStopped.MediaInfo
