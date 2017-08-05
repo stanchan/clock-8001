@@ -9,6 +9,7 @@ import (
 
 var Options struct {
 	ListenAddr string `long:"listen"`
+	Debug      bool   `long:"debug"`
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
@@ -22,6 +23,12 @@ func main() {
 
 	var oscServer = osc.Server{
 		Addr: Options.ListenAddr,
+	}
+
+	if Options.Debug {
+		oscServer.Handle("*", func(msg *osc.Message) {
+			osc.PrintMessage(msg)
+		})
 	}
 
 	var milluminListener millumin.Listener
