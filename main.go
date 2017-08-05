@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/SpComb/osc-test/millumin"
+	"github.com/SpComb/osc-tally/millumin"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"log"
 )
 
 var Options struct {
-	ListenAddr string `long:"listen"`
-	Debug      bool   `long:"debug"`
+	ListenAddr string `long:"osc-listen"`
+	Debug      bool   `long:"osc-debug"`
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
