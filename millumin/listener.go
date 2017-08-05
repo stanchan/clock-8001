@@ -3,9 +3,57 @@ package millumin
 import (
 	"github.com/hypebeast/go-osc/osc"
 	"log"
+	"time"
 )
 
+type MediaState struct {
+	Playing  bool
+	Info     MediaInfo
+	Duration float32
+	Paused   bool
+	Time     float32
+}
+
+func (state *MediaState) mediaStarted(mediaStarted MediaStarted) {
+	state.Playing = true
+	state.Info = mediaStarted.MediaInfo
+	state.Duration = mediaStarted.MediaInfo.Duration
+	state.Paused = false
+	state.Time = 0.0
+
+	log.Printf("Media started: %#v", state)
+}
+
+func (state *MediaState) mediaPaused(mediaPaused MediaPaused) {
+	state.Paused = true
+	state.Info = mediaPaused.MediaInfo
+	state.Duration = mediaPaused.MediaInfo.Duration
+
+	log.Printf("Media paused: %#v", state)
+}
+
+func (state *MediaState) mediaStopped(mediaStopped MediaStopped) {
+	state.Playing = false
+	state.Info = mediaStopped.MediaInfo
+	state.Duration = mediaStopped.MediaInfo.Duration
+
+	log.Printf("Media stopped: %#v", state)
+}
+
+func (state *MediaState) mediaTime(mediaTime MediaTime) {
+	state.Duration = mediaTime.Duration
+	state.Time = mediaTime.Value
+
+	log.Printf("Media time: %#v", state)
+}
+
 type Listener struct {
+	mediaState MediaState
+	updateTime time.Time
+}
+
+func (listener *Listener) update() {
+	listener.updateTime = time.Now()
 }
 
 func (listener *Listener) handleMediaStarted(msg *osc.Message) {
@@ -14,7 +62,8 @@ func (listener *Listener) handleMediaStarted(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		log.Printf("Media started: %#v", message)
+		listener.mediaState.mediaStarted(message)
+		listener.update()
 	}
 }
 
@@ -24,7 +73,8 @@ func (listener *Listener) handleMediaTime(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		log.Printf("Media time: %#v", message)
+		listener.mediaState.mediaTime(message)
+		listener.update()
 	}
 }
 
@@ -34,7 +84,8 @@ func (listener *Listener) handleMediaPaused(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		log.Printf("Media paused: %#v", message)
+		listener.mediaState.mediaPaused(message)
+		listener.update()
 	}
 }
 
@@ -44,7 +95,8 @@ func (listener *Listener) handleMediaStopped(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		log.Printf("Media stopped: %#v", message)
+		listener.mediaState.mediaStopped(message)
+		listener.update()
 	}
 }
 
