@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
-type MediaState struct {
+type LayerState struct {
+	Layer    string
+	Updated  time.Time
 	Playing  bool
 	Info     MediaInfo
 	Duration float32
@@ -14,7 +16,8 @@ type MediaState struct {
 	Time     float32
 }
 
-func (state *MediaState) mediaStarted(mediaStarted MediaStarted) {
+func (state *LayerState) mediaStarted(mediaStarted MediaStarted) {
+	state.Updated = time.Now()
 	state.Playing = true
 	state.Info = mediaStarted.MediaInfo
 	state.Duration = mediaStarted.MediaInfo.Duration
@@ -24,7 +27,8 @@ func (state *MediaState) mediaStarted(mediaStarted MediaStarted) {
 	log.Printf("Media started: %#v", state)
 }
 
-func (state *MediaState) mediaPaused(mediaPaused MediaPaused) {
+func (state *LayerState) mediaPaused(mediaPaused MediaPaused) {
+	state.Updated = time.Now()
 	state.Paused = true
 	state.Info = mediaPaused.MediaInfo
 	state.Duration = mediaPaused.MediaInfo.Duration
@@ -32,7 +36,8 @@ func (state *MediaState) mediaPaused(mediaPaused MediaPaused) {
 	log.Printf("Media paused: %#v", state)
 }
 
-func (state *MediaState) mediaStopped(mediaStopped MediaStopped) {
+func (state *LayerState) mediaStopped(mediaStopped MediaStopped) {
+	state.Updated = time.Now()
 	state.Playing = false
 	state.Info = mediaStopped.MediaInfo
 	state.Duration = mediaStopped.MediaInfo.Duration
@@ -40,63 +45,87 @@ func (state *MediaState) mediaStopped(mediaStopped MediaStopped) {
 	log.Printf("Media stopped: %#v", state)
 }
 
-func (state *MediaState) mediaTime(mediaTime MediaTime) {
+func (state *LayerState) mediaTime(mediaTime MediaTime) {
+	state.Updated = time.Now()
 	state.Duration = mediaTime.Duration
 	state.Time = mediaTime.Value
 
 	log.Printf("Media time: %#v", state)
 }
 
-type Listener struct {
-	mediaState MediaState
-	updateTime time.Time
+func MakeListener() *Listener {
+	var listener = Listener{
+		layers: make(map[string]*LayerState),
+	}
+
+	return &listener
 }
 
-func (listener *Listener) update() {
-	listener.updateTime = time.Now()
+type Listener struct {
+	layers map[string]*LayerState
+}
+
+func (listener *Listener) updateLayer(layer string) *LayerState {
+	if state := listener.layers[layer]; state == nil {
+		state = &LayerState{Layer: layer}
+
+		listener.layers[layer] = state
+
+		return state
+	} else {
+		return state
+	}
 }
 
 func (listener *Listener) handleMediaStarted(msg *osc.Message) {
+	var layer string
 	var message MediaStarted
 
-	if err := message.UnmarshalOSC(msg); err != nil {
+	if err := parseAddressLayer(msg, &layer); err != nil {
+		log.Printf("Unmarshal %v address: %v", msg, err)
+	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.mediaState.mediaStarted(message)
-		listener.update()
+		listener.updateLayer(layer).mediaStarted(message)
 	}
 }
 
 func (listener *Listener) handleMediaTime(msg *osc.Message) {
+	var layer string
 	var message MediaTime
 
-	if err := message.UnmarshalOSC(msg); err != nil {
+	if err := parseAddressLayer(msg, &layer); err != nil {
+		log.Printf("Unmarshal %v address: %v", msg, err)
+	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.mediaState.mediaTime(message)
-		listener.update()
+		listener.updateLayer(layer).mediaTime(message)
 	}
 }
 
 func (listener *Listener) handleMediaPaused(msg *osc.Message) {
+	var layer string
 	var message MediaPaused
 
-	if err := message.UnmarshalOSC(msg); err != nil {
+	if err := parseAddressLayer(msg, &layer); err != nil {
+		log.Printf("Unmarshal %v address: %v", msg, err)
+	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.mediaState.mediaPaused(message)
-		listener.update()
+		listener.updateLayer(layer).mediaPaused(message)
 	}
 }
 
 func (listener *Listener) handleMediaStopped(msg *osc.Message) {
+	var layer string
 	var message MediaStopped
 
-	if err := message.UnmarshalOSC(msg); err != nil {
+	if err := parseAddressLayer(msg, &layer); err != nil {
+		log.Printf("Unmarshal %v address: %v", msg, err)
+	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.mediaState.mediaStopped(message)
-		listener.update()
+		listener.updateLayer(layer).mediaStopped(message)
 	}
 }
 

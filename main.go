@@ -31,7 +31,7 @@ func main() {
 		})
 	}
 
-	var milluminListener millumin.Listener
+	var milluminListener = millumin.MakeListener()
 
 	milluminListener.Setup(&oscServer)
 
