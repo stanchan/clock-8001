@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type State map[string]LayerState
+
 type LayerState struct {
 	Layer    string
 	Updated  time.Time
@@ -71,19 +73,43 @@ func (state *LayerState) mediaTime(mediaTime MediaTime) {
 	log.Printf("Media time: %v", state)
 }
 
-func MakeListener() *Listener {
+func MakeListener(oscServer *osc.Server) *Listener {
 	var listener = Listener{
-		layers: make(map[string]*LayerState),
+		layers:    make(map[string]*LayerState),
+		listeners: make(map[chan State]struct{}),
 	}
+
+	listener.setup(oscServer)
 
 	return &listener
 }
 
 type Listener struct {
-	layers map[string]*LayerState
+	layers    map[string]*LayerState
+	listeners map[chan State]struct{}
 }
 
-func (listener *Listener) updateLayer(layer string) *LayerState {
+func (listener *Listener) Listen() chan State {
+	var listenChan = make(chan State)
+
+	listener.listeners[listenChan] = struct{}{}
+
+	return listenChan
+}
+
+func (listener *Listener) update() {
+	var state = make(State)
+
+	for layer, layerState := range listener.layers {
+		state[layer] = *layerState
+	}
+
+	for listenChan, _ := range listener.listeners {
+		listenChan <- state
+	}
+}
+
+func (listener *Listener) layer(layer string) *LayerState {
 	if state := listener.layers[layer]; state == nil {
 		state = &LayerState{Layer: layer}
 
@@ -104,7 +130,8 @@ func (listener *Listener) handleMediaStarted(msg *osc.Message) {
 	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.updateLayer(layer).mediaStarted(message)
+		listener.layer(layer).mediaStarted(message)
+		listener.update()
 	}
 }
 
@@ -117,7 +144,8 @@ func (listener *Listener) handleMediaTime(msg *osc.Message) {
 	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.updateLayer(layer).mediaTime(message)
+		listener.layer(layer).mediaTime(message)
+		listener.update()
 	}
 }
 
@@ -130,7 +158,8 @@ func (listener *Listener) handleMediaPaused(msg *osc.Message) {
 	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.updateLayer(layer).mediaPaused(message)
+		listener.layer(layer).mediaPaused(message)
+		listener.update()
 	}
 }
 
@@ -143,7 +172,8 @@ func (listener *Listener) handleMediaStopped(msg *osc.Message) {
 	} else if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		listener.updateLayer(layer).mediaStopped(message)
+		listener.layer(layer).mediaStopped(message)
+		listener.update()
 	}
 }
 
@@ -153,7 +183,7 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	}
 }
 
-func (listener *Listener) Setup(server *osc.Server) {
+func (listener *Listener) setup(server *osc.Server) {
 	registerHandler(server, "/millumin/layer:*/mediaStarted", listener.handleMediaStarted)
 	registerHandler(server, "/millumin/layer:*/media/time", listener.handleMediaTime)
 	registerHandler(server, "/millumin/layer:*/mediaPaused", listener.handleMediaPaused)
