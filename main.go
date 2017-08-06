@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/SpComb/osc-tally/clock"
 	"github.com/SpComb/osc-tally/millumin"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
@@ -8,11 +10,99 @@ import (
 )
 
 var Options struct {
+	ClockClientOptions      clock.ClientOptions `group:"qmsk/osc-tally clock client"`
+	ClockRemainingThreshold float32             `long:"clock-remaining-threshold"`
+
 	ListenAddr string `long:"osc-listen"`
 	Debug      bool   `long:"osc-debug"`
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
+
+func updateClock(clockClient *clock.Client, state millumin.State) error {
+	// default is empty state when nothing is playing
+	var clockCount = clock.CountMessage{}
+
+	// XXX: select named layer, not first playing?
+	for _, layerState := range state {
+		if !layerState.Playing {
+			continue
+		}
+
+		if layerState.Paused {
+			clockCount = clock.CountMessage{
+				ColorRed:   0,
+				ColorGreen: 0,
+				ColorBlue:  255,
+				Symbol:     "~",
+			}
+		} else if layerState.Remaining() > Options.ClockRemainingThreshold {
+			clockCount = clock.CountMessage{
+				ColorRed:   0,
+				ColorGreen: 0,
+				ColorBlue:  255,
+				Symbol:     " ",
+			}
+		} else {
+			clockCount = clock.CountMessage{
+				ColorRed:   0,
+				ColorGreen: 0,
+				ColorBlue:  255,
+				Symbol:     " ",
+			}
+		}
+
+		clockCount.Count = int32(layerState.Remaining() + 0.5)
+
+		break
+	}
+
+	return clockClient.SendCount(clockCount)
+}
+
+func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
+	for state := range listenChan {
+		// TODO: also refresh on tick
+		if err := updateClock(clockClient, state); err != nil {
+			log.Fatalf("update clock: %v", err)
+		} else {
+			log.Printf("update clock")
+		}
+	}
+}
+
+func startClockClient(milluminListener *millumin.Listener) error {
+	client, err := Options.ClockClientOptions.MakeClient()
+	if err != nil {
+		return err
+	} else {
+
+	}
+
+	go runClockClient(client, milluminListener.Listen())
+
+	return nil
+}
+
+func run(oscServer *osc.Server) error {
+	if Options.Debug {
+		oscServer.Handle("*", func(msg *osc.Message) {
+			osc.PrintMessage(msg)
+		})
+	}
+
+	var milluminListener = millumin.MakeListener(oscServer)
+
+	if Options.ClockClientOptions.Connect == "" {
+
+	} else if err := startClockClient(milluminListener); err != nil {
+		return fmt.Errorf("start clock client: %v", err)
+	}
+
+	log.Printf("osc server: listen %v", oscServer.Addr)
+
+	return oscServer.ListenAndServe()
+}
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
@@ -25,19 +115,7 @@ func main() {
 		Addr: Options.ListenAddr,
 	}
 
-	if Options.Debug {
-		oscServer.Handle("*", func(msg *osc.Message) {
-			osc.PrintMessage(msg)
-		})
-	}
-
-	var milluminListener = millumin.MakeListener()
-
-	milluminListener.Setup(&oscServer)
-
-	log.Printf("osc server: listen %v", oscServer.Addr)
-
-	if err := oscServer.ListenAndServe(); err != nil {
-		log.Fatalf("osc server: %v", err)
+	if err := run(&oscServer); err != nil {
+		log.Fatalf("%v", err)
 	}
 }

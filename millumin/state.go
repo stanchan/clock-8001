@@ -18,6 +18,11 @@ type LayerState struct {
 	Time     float32
 }
 
+func (state LayerState) Remaining() float32 {
+	// TODO: sanity-check
+	return state.Duration - state.Time
+}
+
 func (state *LayerState) String() string {
 	return fmt.Sprintf("Layer %s updated %.2fs ago: playing=%v info={index=%v name=%v duration=%f} duration=%f paused=%v time=%f",
 		state.Layer, time.Now().Sub(state.Updated).Seconds(),
