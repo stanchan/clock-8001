@@ -71,6 +71,7 @@ func (state *LayerState) mediaStopped(mediaStopped MediaStopped) {
 
 func (state *LayerState) mediaTime(mediaTime MediaTime) {
 	state.Updated = time.Now()
+	state.Playing = true
 	state.Duration = mediaTime.Duration
 	state.Time = mediaTime.Value
 
