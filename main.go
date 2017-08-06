@@ -11,7 +11,7 @@ import (
 
 var Options struct {
 	ClockClientOptions      clock.ClientOptions `group:"qmsk/osc-tally clock client"`
-	ClockRemainingThreshold float32             `long:"clock-remaining-threshold"`
+	ClockRemainingThreshold float32             `long:"clock-remaining-threshold" default:"20"`
 
 	ListenAddr string `long:"osc-listen"`
 	Debug      bool   `long:"osc-debug"`
@@ -39,20 +39,20 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 		} else if layerState.Remaining() > Options.ClockRemainingThreshold {
 			clockCount = clock.CountMessage{
 				ColorRed:   0,
-				ColorGreen: 0,
-				ColorBlue:  255,
+				ColorGreen: 255,
+				ColorBlue:  0,
 				Symbol:     " ",
 			}
 		} else {
 			clockCount = clock.CountMessage{
-				ColorRed:   0,
+				ColorRed:   255,
 				ColorGreen: 0,
-				ColorBlue:  255,
+				ColorBlue:  0,
 				Symbol:     " ",
 			}
 		}
 
-		clockCount.Count = int32(layerState.Remaining() + 0.5)
+		clockCount.SetTimeRemaining(layerState.Remaining())
 
 		break
 	}
