@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/SpComb/osc-tally/clock"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
@@ -13,10 +14,18 @@ var Options struct {
 
 var parser = flags.NewParser(&Options, flags.Default)
 
+func listener(listenChan chan clock.CountMessage) {
+	for countMessage := range listenChan {
+		fmt.Printf("%#v\n", countMessage)
+	}
+}
+
 func run(oscServer *osc.Server) error {
 	var clockServer = clock.MakeServer(oscServer)
 
-	log.Printf("osc server: listen %v, clock server %v", oscServer.Addr, clockServer)
+	go listener(clockServer.Listen())
+
+	log.Printf("osc server: listen %v", oscServer.Addr)
 
 	return oscServer.ListenAndServe()
 }
