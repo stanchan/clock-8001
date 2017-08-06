@@ -11,13 +11,13 @@ type MediaInfo struct {
 }
 
 func (i *MediaInfo) UnmarshalOSC(msg *osc.Message) error {
-	if err := unmarshalArgument(msg, 0, &i.Index); err != nil {
+	if err := msg.UnmarshalArgument(0, &i.Index); err != nil {
 		return err
 	}
-	if err := unmarshalArgument(msg, 1, &i.Name); err != nil {
+	if err := msg.UnmarshalArgument(1, &i.Name); err != nil {
 		return err
 	}
-	if err := unmarshalArgument(msg, 2, &i.Duration); err != nil {
+	if err := msg.UnmarshalArgument(2, &i.Duration); err != nil {
 		return err
 	}
 
@@ -31,10 +31,10 @@ type MediaTime struct {
 }
 
 func (mt *MediaTime) UnmarshalOSC(msg *osc.Message) error {
-	if err := unmarshalArgument(msg, 0, &mt.Value); err != nil {
+	if err := msg.UnmarshalArgument(0, &mt.Value); err != nil {
 		return err
 	}
-	if err := unmarshalArgument(msg, 1, &mt.Duration); err != nil {
+	if err := msg.UnmarshalArgument(1, &mt.Duration); err != nil {
 		return err
 	}
 

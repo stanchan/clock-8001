@@ -1,4 +1,4 @@
 [submodule "vendor/github.com/hypebeast/go-osc"]
 	path = vendor/github.com/hypebeast/go-osc
 	url = https://github.com/SpComb/go-osc.git
-	branch = fix-handle-pattern
+    branch = master
