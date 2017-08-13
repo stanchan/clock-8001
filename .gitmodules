@@ -2,3 +2,6 @@
 	path = vendor/github.com/hypebeast/go-osc
 	url = https://github.com/SpComb/go-osc.git
     branch = master
+[submodule "vendor/github.com/depili/go-rgb-led-matrix"]
+	path = vendor/github.com/depili/go-rgb-led-matrix
+	url = https://github.com/depili/go-rgb-led-matrix
