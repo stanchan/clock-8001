@@ -177,7 +177,7 @@ func main() {
 			m.Scroll(hourBitmap, textColor, 10, 0, 0, 14)
 			m.Scroll(minuteBitmap, textColor, 10, 17, 0, 14)
 			m.Scroll(secondBitmap, textColor, 21, 8, 0, 14)
-			m.Scroll(tallyBitmap, tallyColor, 1, 3, 0, 25)
+			m.Scroll(tallyBitmap, tallyColor, 0, 2, 0, 30)
 
 			// Update the led ring via serial
 			send[0] = byte(seconds)
