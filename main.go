@@ -34,21 +34,21 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 				ColorRed:   0,
 				ColorGreen: 0,
 				ColorBlue:  255,
-				Symbol:     "~",
+				Symbol:     "Ⅱ",
 			}
 		} else if layerState.Remaining() > Options.ClockRemainingThreshold {
 			clockCount = clock.CountMessage{
 				ColorRed:   0,
 				ColorGreen: 255,
 				ColorBlue:  0,
-				Symbol:     " ",
+				Symbol:     "▶",
 			}
 		} else {
 			clockCount = clock.CountMessage{
 				ColorRed:   255,
 				ColorGreen: 0,
 				ColorBlue:  0,
-				Symbol:     " ",
+				Symbol:     "▶",
 			}
 		}
 

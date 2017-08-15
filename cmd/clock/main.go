@@ -131,7 +131,7 @@ func main() {
 			// New OSC message received
 			fmt.Printf("Got new osc data.\n")
 			tallyColor = [3]byte{byte(msg.ColorRed), byte(msg.ColorGreen), byte(msg.ColorBlue)}
-			tallyBitmap = font.TextBitmap(fmt.Sprintf("%2d", msg.Count))
+			tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			m.Close()
@@ -177,7 +177,7 @@ func main() {
 			m.Scroll(hourBitmap, textColor, 10, 0, 0, 14)
 			m.Scroll(minuteBitmap, textColor, 10, 17, 0, 14)
 			m.Scroll(secondBitmap, textColor, 21, 8, 0, 14)
-			m.Scroll(tallyBitmap, tallyColor, 0, 8, 0, 14)
+			m.Scroll(tallyBitmap, tallyColor, 1, 3, 0, 25)
 
 			// Update the led ring via serial
 			send[0] = byte(seconds)
