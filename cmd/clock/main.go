@@ -17,7 +17,7 @@ import (
 )
 
 var Options struct {
-	Font        string `short:"F" long:"font" description:"Font for event name" default:"fonts/6x12.bdf"`
+	Font        string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
 	Matrix      string `short:"m" long:"matrix" description:"Matrix to connect to" required:"true"`
 	SerialName  string `long:"serial-name" description:"Serial device for arduino" default:"/dev/ttyUSB0"`
 	SerialBaud  int    `long:"serial-baud" value-name:"BAUD" default:"57600"`
