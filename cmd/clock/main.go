@@ -5,6 +5,7 @@ import (
 	"github.com/SpComb/osc-tally/clock"
 	"github.com/depili/go-rgb-led-matrix/bdf"
 	"github.com/depili/go-rgb-led-matrix/matrix"
+	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"github.com/kidoman/embd"
@@ -28,6 +29,7 @@ var Options struct {
 	ForeignTime string `short:"T" long:"foreign-time" description:"Foreign timezone" default:"Europe/Moscow"`
 	TimePin     int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
 	ListenAddr  string `long:"osc-listen" description:"Address to listen for incoming osc messages" required:"true"`
+	Timeout     int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
@@ -125,6 +127,8 @@ func main() {
 	send := make([]byte, 1)
 	oscChan := clockServer.Listen()
 
+	timeout := timer.NewTimer(time.Duration(Options.Timeout) * time.Millisecond)
+
 	for {
 		select {
 		case msg := <-oscChan:
@@ -132,6 +136,10 @@ func main() {
 			fmt.Printf("Got new osc data.\n")
 			tallyColor = [3]byte{byte(msg.ColorRed), byte(msg.ColorGreen), byte(msg.ColorBlue)}
 			tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
+			timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
+		case <-timeout.C:
+			// OSC message timeout
+			tallyBitmap = font.TextBitmap("")
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			m.Close()
