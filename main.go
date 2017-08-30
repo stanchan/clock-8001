@@ -8,14 +8,16 @@ import (
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"log"
+	"regexp"
 )
 
 var Options struct {
 	ClockClientOptions      clock.ClientOptions `group:"qmsk/osc-tally clock client"`
 	ClockRemainingThreshold float32             `long:"clock-remaining-threshold" default:"20"`
-
-	ListenAddr string `long:"osc-listen"`
-	Debug      bool   `long:"osc-debug"`
+	Ignore                  string              `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
+	ignoreRegexp            *regexp.Regexp
+	ListenAddr              string `long:"osc-listen"`
+	Debug                   bool   `long:"osc-debug"`
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
@@ -27,6 +29,8 @@ func updateMilluminClock(clockClient *clock.Client, state millumin.State) error 
 	// XXX: select named layer, not first playing?
 	for _, layerState := range state {
 		if !layerState.Playing {
+			continue
+		} else if Options.ignoreRegexp.MatchString(layerState.Layer) {
 			continue
 		}
 
@@ -156,6 +160,12 @@ func main() {
 	} else {
 		log.Printf("options: %#v", Options)
 	}
+
+	regexp, err := regexp.Compile("(?i)" + Options.Ignore)
+	if err != nil {
+		log.Fatalf("Invalid --millumin-ignore-layer=%v: %v", Options.Ignore, err)
+	}
+	Options.ignoreRegexp = regexp
 
 	var oscServer = osc.Server{
 		Addr: Options.ListenAddr,
