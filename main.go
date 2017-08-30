@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/SpComb/osc-tally/clock"
 	"github.com/SpComb/osc-tally/millumin"
+	"github.com/SpComb/osc-tally/mitti"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"log"
@@ -19,7 +20,7 @@ var Options struct {
 
 var parser = flags.NewParser(&Options, flags.Default)
 
-func updateClock(clockClient *clock.Client, state millumin.State) error {
+func updateMilluminClock(clockClient *clock.Client, state millumin.State) error {
 	// default is empty state when nothing is playing
 	var clockCount = clock.CountMessage{}
 
@@ -46,8 +47,8 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 		} else {
 			clockCount = clock.CountMessage{
 				ColorRed:   255,
-				ColorGreen: 0,
-				ColorBlue:  0,
+				ColorGreen: 255,
+				ColorBlue:  255,
 				Symbol:     "▶",
 			}
 		}
@@ -60,10 +61,10 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 	return clockClient.SendCount(clockCount)
 }
 
-func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
+func runMilluminClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
 	for state := range listenChan {
 		// TODO: also refresh on tick
-		if err := updateClock(clockClient, state); err != nil {
+		if err := updateMilluminClock(clockClient, state); err != nil {
 			log.Fatalf("update clock: %v", err)
 		} else {
 			log.Printf("update clock")
@@ -71,7 +72,50 @@ func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
 	}
 }
 
-func startClockClient(milluminListener *millumin.Listener) error {
+func updateMittiClock(clockClient *clock.Client, state mitti.State) error {
+	// default is empty state when nothing is playing
+	var clockCount = clock.CountMessage{}
+
+	// Set the color and symbol
+	if !state.Playing {
+		clockCount = clock.CountMessage{
+			ColorRed:   0,
+			ColorGreen: 0,
+			ColorBlue:  255,
+			Symbol:     "Ⅱ",
+		}
+	} else if state.Remaining > Options.ClockRemainingThreshold {
+		clockCount = clock.CountMessage{
+			ColorRed:   0,
+			ColorGreen: 255,
+			ColorBlue:  0,
+			Symbol:     "▶",
+		}
+	} else {
+		clockCount = clock.CountMessage{
+			ColorRed:   255,
+			ColorGreen: 255,
+			ColorBlue:  255,
+			Symbol:     "▶",
+		}
+	}
+
+	clockCount.SetTimeRemaining(state.Remaining)
+	return clockClient.SendCount(clockCount)
+}
+
+func runMittiClockClient(clockClient *clock.Client, listenChan chan mitti.State) {
+	for state := range listenChan {
+		// TODO: also refresh on tick
+		if err := updateMittiClock(clockClient, state); err != nil {
+			log.Fatalf("update clock: %v", err)
+		} else {
+			log.Printf("update clock")
+		}
+	}
+}
+
+func startClockClient(milluminListener *millumin.Listener, mittiListener *mitti.Listener) error {
 	client, err := Options.ClockClientOptions.MakeClient()
 	if err != nil {
 		return err
@@ -79,7 +123,8 @@ func startClockClient(milluminListener *millumin.Listener) error {
 
 	}
 
-	go runClockClient(client, milluminListener.Listen())
+	go runMilluminClockClient(client, milluminListener.Listen())
+	go runMittiClockClient(client, mittiListener.Listen())
 
 	return nil
 }
@@ -92,10 +137,11 @@ func run(oscServer *osc.Server) error {
 	}
 
 	var milluminListener = millumin.MakeListener(oscServer)
+	var mittiListener = mitti.MakeListener(oscServer)
 
 	if Options.ClockClientOptions.Connect == "" {
 
-	} else if err := startClockClient(milluminListener); err != nil {
+	} else if err := startClockClient(milluminListener, mittiListener); err != nil {
 		return fmt.Errorf("start clock client: %v", err)
 	}
 
