@@ -3,6 +3,8 @@ package mitti
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,6 +21,33 @@ func (state *State) String() string {
 		state.Playing,
 		state.Remaining, state.Paused,
 	)
+}
+
+func (state *State) CueTimeLeft(cueTimeLeft string) {
+	s := strings.Split(strings.Trim(cueTimeLeft, "-"), ":")
+	hours, err := strconv.Atoi(s[0])
+	if err != nil {
+		log.Printf("cueTimeLeft time conversion: %v\n", err)
+	}
+	min, err := strconv.Atoi(s[1])
+	if err != nil {
+		log.Printf("cueTimeLeft time conversion: %v\n", err)
+	}
+	sec, err := strconv.Atoi(s[2])
+	if err != nil {
+		log.Printf("cueTimeLeft time conversion: %v\n", err)
+	}
+	cs, err := strconv.Atoi(s[3])
+	if err != nil {
+		log.Printf("cueTimeLeft time conversion: %v\n", err)
+	}
+
+	min += hours * 60
+	sec += min * 60
+	cs += sec * 100
+
+	state.Updated = time.Now()
+	state.Remaining = float32(cs) / 100
 }
 
 func (state *State) TogglePlay(i int32) {

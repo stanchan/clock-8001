@@ -3,8 +3,6 @@ package mitti
 import (
 	"github.com/hypebeast/go-osc/osc"
 	"log"
-	"strconv"
-	"strings"
 )
 
 func MakeListener(oscServer *osc.Server) *Listener {
@@ -57,37 +55,13 @@ func (listener *Listener) handleTogglePlay(msg *osc.Message) {
 }
 
 func (listener *Listener) handleCueTimeLeft(msg *osc.Message) {
-	var remaining float32
 	var cueTimeLeft string
 
 	if err := msg.UnmarshalArgument(0, &cueTimeLeft); err != nil {
 		log.Printf("mitti cueTimeLeft unmarshal %v: %v\n", msg, err)
 	}
-	s := strings.Split(strings.Trim(cueTimeLeft, "-"), ":")
-	hours, err := strconv.Atoi(s[0])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
-	min, err := strconv.Atoi(s[1])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
-	sec, err := strconv.Atoi(s[2])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
-	cs, err := strconv.Atoi(s[3])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
 
-	min += hours * 60
-	sec += min * 60
-	cs += sec * 100
-
-	remaining = float32(cs) / 100
-
-	listener.state.Remaining = remaining
+	listener.state.CueTimeLeft(cueTimeLeft)
 	listener.update()
 }
 
