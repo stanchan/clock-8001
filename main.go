@@ -22,73 +22,17 @@ var Options struct {
 
 var parser = flags.NewParser(&Options, flags.Default)
 
-func updateMilluminClock(clockClient *clock.Client, state millumin.State) error {
-	// default is empty state when nothing is playing
+func sendClockMessage(clockClient *clock.Client, remaining float32, playing bool) error {
 	var clockCount = clock.CountMessage{}
 
-	// XXX: select named layer, not first playing?
-	for _, layerState := range state {
-		if !layerState.Playing {
-			continue
-		} else if Options.ignoreRegexp.MatchString(layerState.Layer) {
-			continue
-		}
-
-		if layerState.Paused {
-			clockCount = clock.CountMessage{
-				ColorRed:   0,
-				ColorGreen: 0,
-				ColorBlue:  255,
-				Symbol:     "Ⅱ",
-			}
-		} else if layerState.Remaining() > Options.ClockRemainingThreshold {
-			clockCount = clock.CountMessage{
-				ColorRed:   0,
-				ColorGreen: 255,
-				ColorBlue:  0,
-				Symbol:     "▶",
-			}
-		} else {
-			clockCount = clock.CountMessage{
-				ColorRed:   255,
-				ColorGreen: 255,
-				ColorBlue:  255,
-				Symbol:     "▶",
-			}
-		}
-
-		clockCount.SetTimeRemaining(layerState.Remaining())
-
-		break
-	}
-
-	return clockClient.SendCount(clockCount)
-}
-
-func runMilluminClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
-	for state := range listenChan {
-		// TODO: also refresh on tick
-		if err := updateMilluminClock(clockClient, state); err != nil {
-			log.Fatalf("update clock: %v", err)
-		} else {
-			log.Printf("update clock")
-		}
-	}
-}
-
-func updateMittiClock(clockClient *clock.Client, state mitti.State) error {
-	// default is empty state when nothing is playing
-	var clockCount = clock.CountMessage{}
-
-	// Set the color and symbol
-	if !state.Playing {
+	if !playing {
 		clockCount = clock.CountMessage{
 			ColorRed:   0,
 			ColorGreen: 0,
 			ColorBlue:  255,
 			Symbol:     "Ⅱ",
 		}
-	} else if state.Remaining > Options.ClockRemainingThreshold {
+	} else if remaining > Options.ClockRemainingThreshold {
 		clockCount = clock.CountMessage{
 			ColorRed:   0,
 			ColorGreen: 255,
@@ -103,9 +47,40 @@ func updateMittiClock(clockClient *clock.Client, state mitti.State) error {
 			Symbol:     "▶",
 		}
 	}
-
-	clockCount.SetTimeRemaining(state.Remaining)
+	clockCount.SetTimeRemaining(remaining)
 	return clockClient.SendCount(clockCount)
+}
+
+func updateMilluminClock(clockClient *clock.Client, state millumin.State) error {
+	var err error
+
+	// XXX: select named layer, not first playing?
+	for _, layerState := range state {
+		if !layerState.Playing {
+			continue
+		} else if Options.ignoreRegexp.MatchString(layerState.Layer) {
+			continue
+		}
+
+		err = sendClockMessage(clockClient, layerState.Remaining(), !layerState.Paused)
+		break
+	}
+	return err
+}
+
+func runMilluminClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
+	for state := range listenChan {
+		// TODO: also refresh on tick
+		if err := updateMilluminClock(clockClient, state); err != nil {
+			log.Fatalf("update clock: %v", err)
+		} else {
+			log.Printf("update clock")
+		}
+	}
+}
+
+func updateMittiClock(clockClient *clock.Client, state mitti.State) error {
+	return sendClockMessage(clockClient, state.Remaining, state.Playing)
 }
 
 func runMittiClockClient(clockClient *clock.Client, listenChan chan mitti.State) {
