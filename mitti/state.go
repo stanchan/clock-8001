@@ -3,8 +3,6 @@ package mitti
 import (
 	"fmt"
 	"log"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -24,22 +22,11 @@ func (state *State) String() string {
 }
 
 func (state *State) CueTimeLeft(cueTimeLeft string) {
-	s := strings.Split(strings.Trim(cueTimeLeft, "-"), ":")
-	hours, err := strconv.Atoi(s[0])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
-	min, err := strconv.Atoi(s[1])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
-	sec, err := strconv.Atoi(s[2])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
-	}
-	cs, err := strconv.Atoi(s[3])
-	if err != nil {
-		log.Printf("cueTimeLeft time conversion: %v\n", err)
+	var hours, min, sec, cs int
+
+	n, err := fmt.Sscanf(cueTimeLeft, "-%2d:%2d:%2d:%2d", &hours, &min, &sec, &cs)
+	if err != nil || n != 4 {
+		log.Printf("Error parsing cueTimeLeft string: %v, error: %v", cueTimeLeft, err)
 	}
 
 	min += hours * 60
