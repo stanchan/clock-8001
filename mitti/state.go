@@ -27,6 +27,7 @@ func (state *State) CueTimeLeft(cueTimeLeft string) {
 	n, err := fmt.Sscanf(cueTimeLeft, "-%2d:%2d:%2d:%2d", &hours, &min, &sec, &cs)
 	if err != nil || n != 4 {
 		log.Printf("Error parsing cueTimeLeft string: %v, error: %v", cueTimeLeft, err)
+		return
 	}
 
 	min += hours * 60
