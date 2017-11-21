@@ -10,14 +10,15 @@ type State struct {
 	Remaining float32
 	Playing   bool
 	Paused    bool
+	Loop      bool
 	Updated   time.Time
 }
 
 func (state *State) String() string {
-	return fmt.Sprintf("Mitti state updated %.2fs ago: playing=%v left=%f paused=%v",
+	return fmt.Sprintf("Mitti state updated %.2fs ago: playing=%v left=%f paused=%v loop=%v",
 		time.Now().Sub(state.Updated).Seconds(),
 		state.Playing,
-		state.Remaining, state.Paused,
+		state.Remaining, state.Paused, state.Loop,
 	)
 }
 
@@ -51,12 +52,24 @@ func (state *State) TogglePlay(i int32) {
 	log.Printf("togglePlay: %d", i)
 }
 
+func (state *State) ToggleLoop(i int32) {
+	state.Updated = time.Now()
+	if i == 0 {
+		state.Loop = false
+	} else {
+		state.Loop = true
+	}
+
+	log.Printf("toggleLoop: %d", i)
+}
+
 func (state *State) Copy() State {
 	s := State{
 		Remaining: state.Remaining,
 		Playing:   state.Playing,
 		Paused:    state.Paused,
 		Updated:   state.Updated,
+		Loop:      state.Loop,
 	}
 
 	return s

@@ -54,6 +54,17 @@ func (listener *Listener) handleTogglePlay(msg *osc.Message) {
 	listener.update()
 }
 
+func (listener *Listener) handleToggleLoop(msg *osc.Message) {
+	var loop int32
+
+	if err := msg.UnmarshalArgument(0, &loop); err != nil {
+		log.Printf("mitti toggleLoop unmarshal %v: %v\n", msg, err)
+	}
+
+	listener.state.ToggleLoop(loop)
+	listener.update()
+}
+
 func (listener *Listener) handleCueTimeLeft(msg *osc.Message) {
 	var cueTimeLeft string
 
@@ -74,4 +85,6 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 func (listener *Listener) setup(server *osc.Server) {
 	registerHandler(server, "/mitti/cueTimeLeft", listener.handleCueTimeLeft)
 	registerHandler(server, "/mitti/togglePlay", listener.handleTogglePlay)
+	registerHandler(server, "/mitti/toggleLoop", listener.handleToggleLoop)
+	registerHandler(server, "/mitti/current/toggleLoop", listener.handleToggleLoop)
 }

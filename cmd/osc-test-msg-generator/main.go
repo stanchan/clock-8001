@@ -63,16 +63,16 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 }
 
 func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
-	t := time.Tick(1 * time.Second)
+	t := time.Tick(15 * time.Millisecond)
 	for range t {
 		var clockCount = clock.CountMessage{}
 		clockCount = clock.CountMessage{
-			ColorRed:   0,
-			ColorGreen: 0,
-			ColorBlue:  255,
-			Symbol:     "~",
+			ColorRed:   (rand.Float32() * 255),
+			ColorGreen: (rand.Float32() * 255),
+			ColorBlue:  (rand.Float32() * 255),
+			Symbol:     "▶",
 		}
-		clockCount.SetTimeRemaining(rand.Float32() * 99)
+		clockCount.SetTimeRemaining(rand.Float32() * 99 * 100)
 		if err := clockClient.SendCount(clockCount); err != nil {
 			log.Fatalf("update clock: %v", err)
 		} else {

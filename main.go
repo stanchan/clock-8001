@@ -80,7 +80,18 @@ func runMilluminClockClient(clockClient *clock.Client, listenChan chan millumin.
 }
 
 func updateMittiClock(clockClient *clock.Client, state mitti.State) error {
-	return sendClockMessage(clockClient, state.Remaining, state.Playing)
+	if !state.Loop {
+		return sendClockMessage(clockClient, state.Remaining, state.Playing)
+	} else {
+		clockCount := clock.CountMessage{
+			ColorRed:   0,
+			ColorGreen: 255,
+			ColorBlue:  0,
+			Symbol:     "⇄",
+		}
+		clockCount.SetTimeRemaining(state.Remaining)
+		return clockClient.SendCount(clockCount)
+	}
 }
 
 func runMittiClockClient(clockClient *clock.Client, listenChan chan mitti.State) {
