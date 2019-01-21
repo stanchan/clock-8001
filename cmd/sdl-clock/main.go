@@ -65,17 +65,19 @@ func main() {
 
 	fmt.Printf("GPIO initialized.\n")
 
-	// Load timezones
-	local, err := time.LoadLocation(Options.LocalTime)
-	if err != nil {
-		panic(err)
-	}
+	/*
+		// Load timezones
+		local, err := time.LoadLocation(Options.LocalTime)
+		if err != nil {
+			panic(err)
+		}
 
-	foreign, err := time.LoadLocation(Options.ForeignTime)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Timezones loaded.\n")
+		foreign, err := time.LoadLocation(Options.ForeignTime)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Timezones loaded.\n")
+	*/
 
 	// Parse font for clock text
 	font, err := bdf.Parse(Options.Font)
@@ -169,11 +171,10 @@ func main() {
 
 	timeout := timer.NewTimer(time.Duration(Options.Timeout) * time.Millisecond)
 
-	// Countdown mode stuff
-	var countdownMode bool = false
-	var countdownLeds bool = false
-	var countdownTarget time.Time
-	countdownFlash := time.NewTicker(time.Duration(Options.Flash) * time.Millisecond)
+	engine, err := clock.MakeEngine(Options.LocalTime, time.Duration(Options.Flash)*time.Millisecond)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("Entering main loop\n")
 
@@ -189,8 +190,7 @@ func main() {
 				timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
 			} else if message.Type == "start" {
 				msg := message.StartMessage
-				countdownMode = true
-				countdownTarget = time.Now().Add(time.Duration(msg.Seconds) * time.Second)
+				engine.StartCountdown(time.Duration(msg.Seconds) * time.Second)
 			}
 		case <-timeout.C:
 			// OSC message timeout
@@ -198,59 +198,13 @@ func main() {
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)
-		case <-countdownFlash.C:
-			countdownLeds = !countdownLeds
 		case <-updateTicker.C:
-			var seconds int
-			if countdownMode {
-				t := time.Now()
-				diff := countdownTarget.Sub(t)
-				display := time.Time{}.Add(diff)
-				secondBitmap = font.TextBitmap("  ")
+			engine.Update()
+			seconds := engine.Leds
+			hourBitmap = font.TextBitmap(engine.Hours)
+			minuteBitmap = font.TextBitmap(engine.Minutes)
+			secondBitmap = font.TextBitmap(engine.Seconds)
 
-				if t.Before(countdownTarget) {
-					hourBitmap = font.TextBitmap(display.Format("04"))
-					minuteBitmap = font.TextBitmap(display.Format("05"))
-					if display.Minute() > 0 {
-						seconds = 59
-					} else {
-						seconds = display.Second()
-					}
-				} else {
-					if countdownLeds {
-						hourBitmap = font.TextBitmap("00")
-						minuteBitmap = font.TextBitmap("00")
-						seconds = 59
-					} else {
-						hourBitmap = font.TextBitmap("  ")
-						minuteBitmap = font.TextBitmap("  ")
-						seconds = 0
-					}
-				}
-			} else {
-				// Update the time shown on the screen
-				var t time.Time
-				if i, _ := timePin.Read(); err != nil {
-					panic(err)
-				} else if i == 1 {
-					t = time.Now().In(local)
-				} else {
-					t = time.Now().In(foreign)
-				}
-
-				// Check that the rpi has valid time
-				if t.Year() > 2000 {
-					hourBitmap = font.TextBitmap(t.Format("15"))
-					minuteBitmap = font.TextBitmap(t.Format("04"))
-					secondBitmap = font.TextBitmap(t.Format("05"))
-				} else {
-					// No valid time, indicate it with "XX" as the time
-					hourBitmap = font.TextBitmap("XX")
-					minuteBitmap = font.TextBitmap("XX")
-					secondBitmap = font.TextBitmap("")
-				}
-				seconds = t.Second()
-			}
 			// Clear SDL canvas
 			renderer.SetDrawColor(0, 0, 0, 255) // Black
 			renderer.Clear()                    // Clear screen
@@ -259,7 +213,9 @@ func main() {
 			// renderer.DrawRect(&sdl.Rect{0, 0, 176, 175})
 
 			// Dots between hours and minutes
-			drawDots()
+			if engine.Mode != clock.Off {
+				drawDots()
+			}
 
 			// Draw the text
 			drawBitmask(hourBitmap, textSDLColor, 10, 0)
