@@ -7,7 +7,7 @@ import (
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"log"
-	"math/rand"
+	// "math/rand"
 	"time"
 )
 
@@ -63,21 +63,32 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 }
 
 func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
-	t := time.Tick(15 * time.Millisecond)
+	t := time.Tick(15 * time.Second)
 	for range t {
-		var clockCount = clock.CountMessage{}
-		clockCount = clock.CountMessage{
-			ColorRed:   (rand.Float32() * 255),
-			ColorGreen: (rand.Float32() * 255),
-			ColorBlue:  (rand.Float32() * 255),
-			Symbol:     "▶",
+		/*
+			var clockCount = clock.CountMessage{}
+			clockCount = clock.CountMessage{
+				ColorRed:   (rand.Float32() * 255),
+				ColorGreen: (rand.Float32() * 255),
+				ColorBlue:  (rand.Float32() * 255),
+				Symbol:     "▶",
+			}
+			clockCount.SetTimeRemaining(rand.Float32() * 99 * 100)
+			if err := clockClient.SendCount(clockCount); err != nil {
+				log.Fatalf("update clock: %v", err)
+			} else {
+				log.Printf("update clock")
+			}
+		*/
+		start := clock.StartMessage{
+			Seconds: 100,
 		}
-		clockCount.SetTimeRemaining(rand.Float32() * 99 * 100)
-		if err := clockClient.SendCount(clockCount); err != nil {
+		if err := clockClient.SendStart(start); err != nil {
 			log.Fatalf("update clock: %v", err)
 		} else {
 			log.Printf("update clock")
 		}
+
 	}
 
 	for state := range listenChan {

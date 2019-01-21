@@ -7,7 +7,7 @@ import (
 
 func MakeServer(oscServer *osc.Server) *Server {
 	var server = Server{
-		listeners: make(map[chan CountMessage]struct{}),
+		listeners: make(map[chan ClockMessage]struct{}),
 	}
 
 	server.setup(oscServer)
@@ -16,18 +16,18 @@ func MakeServer(oscServer *osc.Server) *Server {
 }
 
 type Server struct {
-	listeners map[chan CountMessage]struct{}
+	listeners map[chan ClockMessage]struct{}
 }
 
-func (server *Server) Listen() chan CountMessage {
-	var listenChan = make(chan CountMessage)
+func (server *Server) Listen() chan ClockMessage {
+	var listenChan = make(chan ClockMessage)
 
 	server.listeners[listenChan] = struct{}{}
 
 	return listenChan
 }
 
-func (server *Server) update(message CountMessage) {
+func (server *Server) update(message ClockMessage) {
 	log.Printf("update: %#v", message)
 
 	for listenChan, _ := range server.listeners {
@@ -41,8 +41,28 @@ func (server *Server) handleCount(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		server.update(message)
+		msg := ClockMessage{
+			Type:         "count",
+			CountMessage: &message,
+		}
+		server.update(msg)
 	}
+}
+
+func (server *Server) handleStart(msg *osc.Message) {
+	var message StartMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		log.Printf("countdown start: %#v", message)
+		msg := ClockMessage{
+			Type:         "start",
+			StartMessage: &message,
+		}
+		server.update(msg)
+	}
+
 }
 
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
@@ -53,4 +73,5 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 
 func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
+	registerHandler(oscServer, "/clock/countdown/start", server.handleStart)
 }

@@ -14,6 +14,13 @@ var clockUnits = []struct {
 	{"d", 24 * 60 * 60},
 }
 
+// Generic clock message
+type ClockMessage struct {
+	Type         string
+	CountMessage *CountMessage
+	StartMessage *StartMessage
+}
+
 // /qmsk/clock/count
 type CountMessage struct {
 	ColorRed   float32
@@ -22,6 +29,23 @@ type CountMessage struct {
 	Symbol     string
 	Count      int32
 	Unit       string
+}
+
+// /clock/countdown/start
+type StartMessage struct {
+	Seconds int32
+}
+
+func (message *StartMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.Seconds,
+	)
+}
+
+func (message StartMessage) MarshalOSC(addr string) *osc.Message {
+	return osc.NewMessage(addr,
+		message.Seconds,
+	)
 }
 
 func (message *CountMessage) SetTimeRemaining(seconds float32) {

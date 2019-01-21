@@ -130,8 +130,8 @@ func main() {
 		textureSize = 8
 		textureCoord = 3
 		textureRadius = 3
-		gridStartX = 32
-		gridStartY = 32
+		gridStartX = 24
+		gridStartY = 24
 		gridSize = 3
 		gridSpacing = 4
 		secCircles = smallSecCircles
@@ -169,49 +169,94 @@ func main() {
 
 	timeout := timer.NewTimer(time.Duration(Options.Timeout) * time.Millisecond)
 
+	// Countdown mode stuff
+	var countdownMode bool = false
+	var countdownLeds bool = false
+	var countdownTarget time.Time
+	countdownFlash := time.NewTicker(time.Duration(Options.Flash) * time.Millisecond)
+
 	fmt.Printf("Entering main loop\n")
 
 	for {
 		select {
-		case msg := <-oscChan:
+		case message := <-oscChan:
 			// New OSC message received
 			fmt.Printf("Got new osc data.\n")
-			tallyColor = sdl.Color{uint8(msg.ColorRed), uint8(msg.ColorGreen), uint8(msg.ColorBlue), 255}
-			tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
-			timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
+			if message.Type == "count" {
+				msg := message.CountMessage
+				tallyColor = sdl.Color{uint8(msg.ColorRed), uint8(msg.ColorGreen), uint8(msg.ColorBlue), 255}
+				tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
+				timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
+			} else if message.Type == "start" {
+				msg := message.StartMessage
+				countdownMode = true
+				countdownTarget = time.Now().Add(time.Duration(msg.Seconds) * time.Second)
+			}
 		case <-timeout.C:
 			// OSC message timeout
 			tallyBitmap = font.TextBitmap("")
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)
+		case <-countdownFlash.C:
+			countdownLeds = !countdownLeds
 		case <-updateTicker.C:
-			// Update the time shown on the screen
-			var t time.Time
-			if i, _ := timePin.Read(); err != nil {
-				panic(err)
-			} else if i == 1 {
-				t = time.Now().In(local)
-			} else {
-				t = time.Now().In(foreign)
-			}
+			var seconds int
+			if countdownMode {
+				t := time.Now()
+				diff := countdownTarget.Sub(t)
+				display := time.Time{}.Add(diff)
+				secondBitmap = font.TextBitmap("  ")
 
-			// Check that the rpi has valid time
-			if t.Year() > 2000 {
-				hourBitmap = font.TextBitmap(t.Format("15"))
-				minuteBitmap = font.TextBitmap(t.Format("04"))
-				secondBitmap = font.TextBitmap(t.Format("05"))
+				if t.Before(countdownTarget) {
+					hourBitmap = font.TextBitmap(display.Format("04"))
+					minuteBitmap = font.TextBitmap(display.Format("05"))
+					if display.Minute() > 0 {
+						seconds = 59
+					} else {
+						seconds = display.Second()
+					}
+				} else {
+					if countdownLeds {
+						hourBitmap = font.TextBitmap("00")
+						minuteBitmap = font.TextBitmap("00")
+						seconds = 59
+					} else {
+						hourBitmap = font.TextBitmap("  ")
+						minuteBitmap = font.TextBitmap("  ")
+						seconds = 0
+					}
+				}
 			} else {
-				// No valid time, indicate it with "XX" as the time
-				hourBitmap = font.TextBitmap("XX")
-				minuteBitmap = font.TextBitmap("XX")
-				secondBitmap = font.TextBitmap("")
-			}
-			seconds := t.Second()
+				// Update the time shown on the screen
+				var t time.Time
+				if i, _ := timePin.Read(); err != nil {
+					panic(err)
+				} else if i == 1 {
+					t = time.Now().In(local)
+				} else {
+					t = time.Now().In(foreign)
+				}
 
+				// Check that the rpi has valid time
+				if t.Year() > 2000 {
+					hourBitmap = font.TextBitmap(t.Format("15"))
+					minuteBitmap = font.TextBitmap(t.Format("04"))
+					secondBitmap = font.TextBitmap(t.Format("05"))
+				} else {
+					// No valid time, indicate it with "XX" as the time
+					hourBitmap = font.TextBitmap("XX")
+					minuteBitmap = font.TextBitmap("XX")
+					secondBitmap = font.TextBitmap("")
+				}
+				seconds = t.Second()
+			}
 			// Clear SDL canvas
 			renderer.SetDrawColor(0, 0, 0, 255) // Black
 			renderer.Clear()                    // Clear screen
+
+			// renderer.SetDrawColor(255, 0, 0, 255) // Black
+			// renderer.DrawRect(&sdl.Rect{0, 0, 176, 175})
 
 			// Dots between hours and minutes
 			drawDots()
