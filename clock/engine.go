@@ -1,6 +1,7 @@
 package clock
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -111,8 +112,7 @@ func (engine *Engine) countupUpdate() {
 	engine.Dots = true
 
 	if t.After(engine.countTarget) {
-		engine.Hours = display.Format("04")
-		engine.Minutes = display.Format("05")
+		engine.formatCount(display)
 		engine.Leds = display.Second()
 	} else {
 		engine.Hours = "00"
@@ -129,9 +129,7 @@ func (engine *Engine) countdownUpdate() {
 	engine.Dots = true
 
 	if t.Before(engine.countTarget) {
-		engine.Hours = display.Format("04")
-		engine.Minutes = display.Format("05")
-
+		engine.formatCount(display)
 		progress := (float64(diff) / float64(engine.countdownDuration))
 		engine.Leds = int(math.Floor(progress * 60))
 	} else {
@@ -144,6 +142,21 @@ func (engine *Engine) countdownUpdate() {
 			engine.Minutes = ""
 			engine.Leds = 59
 		}
+	}
+}
+
+func (engine *Engine) formatCount(display time.Time) {
+	if display.Hour() == 0 {
+		engine.Hours = display.Format("04")
+		engine.Minutes = display.Format("05")
+	} else if display.Hour() == 1 && display.Minute() < 40 {
+		min := 60 + display.Minute()
+		engine.Hours = fmt.Sprintf("%d", min)
+		engine.Minutes = display.Format("05")
+	} else {
+		// More than 99 minutes to display
+		engine.Hours = "99"
+		engine.Minutes = "99"
 	}
 }
 
