@@ -16,9 +16,9 @@ var clockUnits = []struct {
 
 // Generic clock message
 type ClockMessage struct {
-	Type         string
-	CountMessage *CountMessage
-	StartMessage *StartMessage
+	Type             string
+	CountMessage     *CountMessage
+	CountdownMessage *CountdownMessage
 }
 
 // /qmsk/clock/count
@@ -32,17 +32,17 @@ type CountMessage struct {
 }
 
 // /clock/countdown/start
-type StartMessage struct {
+type CountdownMessage struct {
 	Seconds int32
 }
 
-func (message *StartMessage) UnmarshalOSC(msg *osc.Message) error {
+func (message *CountdownMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(
 		&message.Seconds,
 	)
 }
 
-func (message StartMessage) MarshalOSC(addr string) *osc.Message {
+func (message CountdownMessage) MarshalOSC(addr string) *osc.Message {
 	return osc.NewMessage(addr,
 		message.Seconds,
 	)

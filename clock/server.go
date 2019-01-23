@@ -49,20 +49,59 @@ func (server *Server) handleCount(msg *osc.Message) {
 	}
 }
 
-func (server *Server) handleStart(msg *osc.Message) {
-	var message StartMessage
+func (server *Server) handleCountupStart(msg *osc.Message) {
+	log.Printf("countup start: %#v", msg)
+	message := ClockMessage{
+		Type: "countup",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleKill(msg *osc.Message) {
+	log.Printf("kill: %#v", msg)
+	message := ClockMessage{
+		Type: "kill",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleCountdownStart(msg *osc.Message) {
+	var message CountdownMessage
 
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
 		log.Printf("countdown start: %#v", message)
 		msg := ClockMessage{
-			Type:         "start",
-			StartMessage: &message,
+			Type:             "countdownStart",
+			CountdownMessage: &message,
 		}
 		server.update(msg)
 	}
 
+}
+
+func (server *Server) handleCountdownModify(msg *osc.Message) {
+	var message CountdownMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		log.Printf("countdown modify: %#v", message)
+		msg := ClockMessage{
+			Type:             "countdownModify",
+			CountdownMessage: &message,
+		}
+		server.update(msg)
+	}
+}
+
+func (server *Server) handleNormal(msg *osc.Message) {
+	log.Printf("normal: %#v", msg)
+	message := ClockMessage{
+		Type: "normal",
+	}
+	server.update(message)
 }
 
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
@@ -73,5 +112,9 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 
 func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
-	registerHandler(oscServer, "/clock/countdown/start", server.handleStart)
+	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
+	registerHandler(oscServer, "/clock/countdown/modify", server.handleCountdownModify)
+	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
+	registerHandler(oscServer, "/clock/kill", server.handleKill)
+	registerHandler(oscServer, "/clock/normal", server.handleNormal)
 }

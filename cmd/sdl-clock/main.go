@@ -183,14 +183,24 @@ func main() {
 		case message := <-oscChan:
 			// New OSC message received
 			fmt.Printf("Got new osc data.\n")
-			if message.Type == "count" {
+			switch message.Type {
+			case "count":
 				msg := message.CountMessage
 				tallyColor = sdl.Color{uint8(msg.ColorRed), uint8(msg.ColorGreen), uint8(msg.ColorBlue), 255}
 				tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
 				timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
-			} else if message.Type == "start" {
-				msg := message.StartMessage
+			case "countdownStart":
+				msg := message.CountdownMessage
 				engine.StartCountdown(time.Duration(msg.Seconds) * time.Second)
+			case "countdownModify":
+				msg := message.CountdownMessage
+				engine.ModifyCountdown(time.Duration(msg.Seconds) * time.Second)
+			case "countup":
+				engine.StartCountup()
+			case "kill":
+				engine.Kill()
+			case "normal":
+				engine.Normal()
 			}
 		case <-timeout.C:
 			// OSC message timeout
@@ -213,7 +223,7 @@ func main() {
 			// renderer.DrawRect(&sdl.Rect{0, 0, 176, 175})
 
 			// Dots between hours and minutes
-			if engine.Mode != clock.Off {
+			if engine.Dots {
 				drawDots()
 			}
 
