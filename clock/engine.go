@@ -113,7 +113,7 @@ func (engine *Engine) countupUpdate() {
 
 	if t.After(engine.countTarget) {
 		engine.formatCount(display)
-		engine.Leds = display.Second()
+		engine.Leds = display.Minute()
 	} else {
 		engine.Hours = "00"
 		engine.Minutes = "00"
@@ -131,6 +131,11 @@ func (engine *Engine) countdownUpdate() {
 	if t.Before(engine.countTarget) {
 		engine.formatCount(display)
 		progress := (float64(diff) / float64(engine.countdownDuration))
+		if progress >= 1 {
+			progress = 1
+		} else if progress < 0 {
+			progress = 0
+		}
 		engine.Leds = int(math.Floor(progress * 60))
 	} else {
 		if engine.flashLeds {
