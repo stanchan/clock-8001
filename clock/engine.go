@@ -2,6 +2,9 @@ package clock
 
 import (
 	"fmt"
+	"github.com/desertbit/timer"
+	"github.com/hypebeast/go-osc/osc"
+	"log"
 	"math"
 	"time"
 )
@@ -21,14 +24,28 @@ type Engine struct {
 	Hours             string
 	Minutes           string
 	Seconds           string
+	Tally             string
+	TallyRed          uint8
+	TallyGreen        uint8
+	TallyBlue         uint8
 	Leds              int
 	Dots              bool
 	flashLeds         bool
 	flasher           *time.Ticker
+	clockServer       *Server
+	oscServer         osc.Server
+	timeout           time.Duration
+}
+
+type EngineOptions struct {
+	Flash      int    `long:"flash" description:"Flashing interval when countdown reached zero (ms)" default:"500"`
+	Timezone   string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
+	ListenAddr string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
+	Timeout    int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
 }
 
 // Create a clock engine
-func MakeEngine(timezone string, flash time.Duration) (*Engine, error) {
+func MakeEngine(options *EngineOptions) (*Engine, error) {
 	var engine = Engine{
 		Mode:      Normal,
 		Hours:     "",
@@ -37,15 +54,79 @@ func MakeEngine(timezone string, flash time.Duration) (*Engine, error) {
 		Leds:      0,
 		flashLeds: true,
 		Dots:      true,
+		timeout:   time.Duration(options.Timeout) * time.Millisecond,
 	}
-	tz, err := time.LoadLocation(timezone)
+
+	// Setup the OSC listener
+	engine.oscServer = osc.Server{
+		Addr: options.ListenAddr,
+	}
+
+	engine.clockServer = MakeServer(&engine.oscServer)
+	log.Printf("osc server: listen %v", engine.oscServer.Addr)
+
+	go engine.runOSC()
+
+	// Timezones
+	tz, err := time.LoadLocation(options.Timezone)
 	if err != nil {
 		return nil, err
 	}
 	engine.Timezone = tz
-	engine.flasher = time.NewTicker(flash)
+	engine.flasher = time.NewTicker(time.Duration(options.Flash) * time.Millisecond)
+
+	// Led flash cycle
 	go engine.flash()
+
+	// OSC listen
+	go engine.listen()
+
 	return &engine, nil
+}
+
+func (engine *Engine) runOSC() {
+	err := engine.oscServer.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Listen for OSC messages
+func (engine *Engine) listen() {
+	oscChan := engine.clockServer.Listen()
+	tallyTimer := timer.NewTimer(engine.timeout)
+
+	for {
+		select {
+		case message := <-oscChan:
+			// New OSC message received
+			fmt.Printf("Got new osc data.\n")
+			switch message.Type {
+			case "count":
+				msg := message.CountMessage
+				engine.TallyRed = uint8(msg.ColorRed)
+				engine.TallyGreen = uint8(msg.ColorGreen)
+				engine.TallyBlue = uint8(msg.ColorBlue)
+				engine.Tally = fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit)
+				tallyTimer.Reset(engine.timeout)
+			case "countdownStart":
+				msg := message.CountdownMessage
+				engine.StartCountdown(time.Duration(msg.Seconds) * time.Second)
+			case "countdownModify":
+				msg := message.CountdownMessage
+				engine.ModifyCountdown(time.Duration(msg.Seconds) * time.Second)
+			case "countup":
+				engine.StartCountup()
+			case "kill":
+				engine.Kill()
+			case "normal":
+				engine.Normal()
+			}
+		case <-tallyTimer.C:
+			// OSC message timeout
+			engine.Tally = ""
+		}
+	}
 }
 
 func (engine *Engine) Kill() {

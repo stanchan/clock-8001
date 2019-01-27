@@ -1,5 +1,9 @@
 package main
 
+import (
+	"gitlab.com/Depili/clock-8001/clock"
+)
+
 var winTitle string = "SDL CLOCK"
 var winWidth, winHeight int32 = 1920, 1080
 var gridStartX int32 = 569
@@ -8,23 +12,19 @@ var gridSize int32 = 20
 var gridSpacing int = 25
 
 var Options struct {
-	Small       bool   `short:"s" description:"Scale to 192x192px"`
-	Font        string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
-	Flash       int    `long:"flash" description:"Flashing interval when countdown reached zero (ms)" default:"500"`
-	TextRed     uint8  `short:"r" long:"red" description:"Red component of text color" default:"255"`
-	TextGreen   uint8  `short:"g" long:"green" description:"Green component of text color" default:"128"`
-	TextBlue    uint8  `short:"b" long:"blue" description:"Blue component of text color" default:"0"`
-	StaticRed   uint8  `long:"static-red" description:"Red component of static color" default:"80"`
-	StaticGreen uint8  `long:"static-green" description:"Green component of static color" default:"80"`
-	StaticBlue  uint8  `long:"static-blue" description:"Blue component of static color" default:"0"`
-	SecRed      uint8  `long:"sec-red" description:"Red component of second color" default:"200"`
-	SecGreen    uint8  `long:"sec-green" description:"Green component of second color" default:"0"`
-	SecBlue     uint8  `long:"sec-blue" description:"Blue component of second color" default:"0"`
-	LocalTime   string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
-	ForeignTime string `short:"T" long:"foreign-time" description:"Foreign timezone" default:"Europe/Moscow"`
-	TimePin     int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
-	ListenAddr  string `long:"osc-listen" description:"Address to listen for incoming osc messages" required:"true"`
-	Timeout     int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
+	Small         bool   `short:"s" description:"Scale to 192x192px"`
+	Font          string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
+	TextRed       uint8  `short:"r" long:"red" description:"Red component of text color" default:"255"`
+	TextGreen     uint8  `short:"g" long:"green" description:"Green component of text color" default:"128"`
+	TextBlue      uint8  `short:"b" long:"blue" description:"Blue component of text color" default:"0"`
+	StaticRed     uint8  `long:"static-red" description:"Red component of static color" default:"80"`
+	StaticGreen   uint8  `long:"static-green" description:"Green component of static color" default:"80"`
+	StaticBlue    uint8  `long:"static-blue" description:"Blue component of static color" default:"0"`
+	SecRed        uint8  `long:"sec-red" description:"Red component of second color" default:"200"`
+	SecGreen      uint8  `long:"sec-green" description:"Green component of second color" default:"0"`
+	SecBlue       uint8  `long:"sec-blue" description:"Blue component of second color" default:"0"`
+	TimePin       int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
+	EngineOptions *clock.EngineOptions
 }
 
 // 12 "Hour" static circles

@@ -5,14 +5,11 @@ import (
 	"gitlab.com/Depili/clock-8001/clock"
 	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	// "github.com/depili/go-rgb-led-matrix/matrix"
-	"github.com/desertbit/timer"
-	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
-	"log"
 	"os"
 	"os/signal"
 	"time"
@@ -29,27 +26,10 @@ var textureSource sdl.Rect
 var staticTexture *sdl.Texture
 var secTexture *sdl.Texture
 
-func runOSC(oscServer *osc.Server) {
-	err := oscServer.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
 	if _, err := parser.Parse(); err != nil {
 		panic(err)
 	}
-
-	// Initialize osc listener
-	var oscServer = osc.Server{
-		Addr: Options.ListenAddr,
-	}
-
-	var clockServer = clock.MakeServer(&oscServer)
-	log.Printf("osc server: listen %v", oscServer.Addr)
-
-	go runOSC(&oscServer)
 
 	// GPIO pin for toggling between timezones
 	if err := embd.InitGPIO(); err != nil {
@@ -167,11 +147,8 @@ func main() {
 	tallyBitmap := font.TextBitmap("  ")
 
 	updateTicker := time.NewTicker(time.Millisecond * 30)
-	oscChan := clockServer.Listen()
 
-	timeout := timer.NewTimer(time.Duration(Options.Timeout) * time.Millisecond)
-
-	engine, err := clock.MakeEngine(Options.LocalTime, time.Duration(Options.Flash)*time.Millisecond)
+	engine, err := clock.MakeEngine(Options.EngineOptions)
 	if err != nil {
 		panic(err)
 	}
@@ -180,31 +157,6 @@ func main() {
 
 	for {
 		select {
-		case message := <-oscChan:
-			// New OSC message received
-			fmt.Printf("Got new osc data.\n")
-			switch message.Type {
-			case "count":
-				msg := message.CountMessage
-				tallyColor = sdl.Color{uint8(msg.ColorRed), uint8(msg.ColorGreen), uint8(msg.ColorBlue), 255}
-				tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
-				timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
-			case "countdownStart":
-				msg := message.CountdownMessage
-				engine.StartCountdown(time.Duration(msg.Seconds) * time.Second)
-			case "countdownModify":
-				msg := message.CountdownMessage
-				engine.ModifyCountdown(time.Duration(msg.Seconds) * time.Second)
-			case "countup":
-				engine.StartCountup()
-			case "kill":
-				engine.Kill()
-			case "normal":
-				engine.Normal()
-			}
-		case <-timeout.C:
-			// OSC message timeout
-			tallyBitmap = font.TextBitmap("")
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)
@@ -214,6 +166,9 @@ func main() {
 			hourBitmap = font.TextBitmap(engine.Hours)
 			minuteBitmap = font.TextBitmap(engine.Minutes)
 			secondBitmap = font.TextBitmap(engine.Seconds)
+
+			tallyColor = sdl.Color{engine.TallyRed, engine.TallyGreen, engine.TallyBlue, 255}
+			tallyBitmap = font.TextBitmap(engine.Tally)
 
 			// Clear SDL canvas
 			renderer.SetDrawColor(0, 0, 0, 255) // Black
