@@ -282,6 +282,12 @@ func (engine *Engine) formatCount2(diff time.Duration) {
 }
 
 func (engine *Engine) formatCount(display time.Time) {
+	if display.Month() != 1 || display.Year() != 1 {
+		engine.Hours = "++"
+		engine.Minutes = "++"
+		return
+	}
+
 	if display.Hour() == 0 {
 		engine.Hours = display.Format("04")
 		engine.Minutes = display.Format("05")
@@ -290,9 +296,14 @@ func (engine *Engine) formatCount(display time.Time) {
 		engine.Hours = fmt.Sprintf("%d", min)
 		engine.Minutes = display.Format("05")
 	} else {
-		// More than 99 minutes to display
-		engine.Hours = display.Format("15")   // hours
-		engine.Minutes = display.Format("04") // minutes
+		h := display.Hour() + (display.Day() * 24)
+		if h < 99 {
+			engine.Hours = fmt.Sprintf("%02d", h)
+			engine.Minutes = display.Format("04") // minutes}
+		} else {
+			engine.Hours = "++"
+			engine.Minutes = "++"
+		}
 	}
 }
 
