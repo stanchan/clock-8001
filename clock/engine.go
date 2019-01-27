@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	Normal    = iota
-	Countdown = iota
-	Countup   = iota
-	Off       = iota
+	Normal     = iota // Display current time
+	Countdown  = iota // Display countdown timer only
+	Countdown2 = iota // Display countdown timer and current time
+	Countup    = iota // Count time up
+	Off        = iota // (Mostly) blank screen
 )
 
 type Engine struct {
@@ -241,8 +242,8 @@ func (engine *Engine) formatCount(display time.Time) {
 		engine.Minutes = display.Format("05")
 	} else {
 		// More than 99 minutes to display
-		engine.Hours = "99"
-		engine.Minutes = "99"
+		engine.Hours = display.Format("15")   // hours
+		engine.Minutes = display.Format("04") // minutes
 	}
 }
 
