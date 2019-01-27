@@ -19,6 +19,7 @@ type ClockMessage struct {
 	Type             string
 	CountMessage     *CountMessage
 	CountdownMessage *CountdownMessage
+	DisplayMessage   *DisplayMessage
 }
 
 // /qmsk/clock/count
@@ -34,6 +35,32 @@ type CountMessage struct {
 // /clock/countdown/start
 type CountdownMessage struct {
 	Seconds int32
+}
+
+// /clock/display
+type DisplayMessage struct {
+	ColorRed   float32
+	ColorGreen float32
+	ColorBlue  float32
+	Text       string
+}
+
+func (message *DisplayMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.ColorRed,
+		&message.ColorGreen,
+		&message.ColorBlue,
+		&message.Text,
+	)
+}
+
+func (message DisplayMessage) MarshalOSC(addr string) *osc.Message {
+	return osc.NewMessage(addr,
+		message.ColorRed,
+		message.ColorGreen,
+		message.ColorBlue,
+		message.Text,
+	)
 }
 
 func (message *CountdownMessage) UnmarshalOSC(msg *osc.Message) error {

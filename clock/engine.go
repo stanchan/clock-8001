@@ -25,6 +25,7 @@ type Engine struct {
 	count2Target       time.Time
 	countdown2Duration time.Duration
 	countdown2         bool
+	showTime           bool
 	Hours              string
 	Minutes            string
 	Seconds            string
@@ -62,6 +63,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		oscTally:   false,
 		countdown:  false,
 		countdown2: false,
+		showTime:   true,
 		timeout:    time.Duration(options.Timeout) * time.Millisecond,
 	}
 
@@ -118,6 +120,14 @@ func (engine *Engine) listen() {
 				engine.Tally = fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit)
 				engine.oscTally = true
 				tallyTimer.Reset(engine.timeout)
+			case "display":
+				msg := message.DisplayMessage
+				engine.TallyRed = uint8(msg.ColorRed)
+				engine.TallyGreen = uint8(msg.ColorGreen)
+				engine.TallyBlue = uint8(msg.ColorBlue)
+				engine.Tally = fmt.Sprintf("%-4s", msg.Text)
+				engine.oscTally = true
+				tallyTimer.Reset(engine.timeout)
 			case "countdownStart":
 				msg := message.CountdownMessage
 				engine.StartCountdown(time.Duration(msg.Seconds) * time.Second)
@@ -168,6 +178,7 @@ func (engine *Engine) CountDownDone() bool {
 func (engine *Engine) StartCountdown(timer time.Duration) {
 	engine.Mode = Countdown
 	engine.countdown = true
+	engine.showTime = false
 	engine.countTarget = time.Now().Add(timer)
 	engine.countdownDuration = timer
 }
@@ -203,6 +214,7 @@ func (engine *Engine) Normal() {
 	engine.Mode = Normal
 	engine.countdown = false
 	engine.countdown2 = false
+	engine.showTime = true
 }
 
 // Update Hours, Minutes and Seconds
@@ -249,11 +261,28 @@ func (engine *Engine) countdownUpdate() {
 	diff2 := engine.count2Target.Sub(t)
 	engine.Seconds = ""
 	engine.Dots = true
-	engine.normalUpdate() // Baseline
+
+	// Baseline
+	if engine.showTime {
+		engine.normalUpdate()
+	} else {
+		engine.Hours = ""
+		engine.Minutes = ""
+		engine.Seconds = ""
+		engine.Leds = 0
+
+		// Hide dots if not showing the primary countdown
+		if !engine.countdown {
+			engine.Dots = false
+		}
+		// Hide the tally if not showing a tally message
+		if !engine.oscTally {
+			engine.Tally = ""
+		}
+	}
 
 	// Main countdown
 	if engine.countdown {
-		engine.Seconds = ""
 		if t.Before(engine.countTarget) {
 			engine.formatCount(diff)
 			progress := (float64(diff) / float64(engine.countdownDuration))
@@ -327,16 +356,10 @@ func (engine *Engine) formatCount(diff time.Duration) {
 
 func (engine *Engine) StopCountdown() {
 	engine.countdown = false
-	if !engine.countdown2 {
-		engine.Mode = Normal
-	}
 }
 
 func (engine *Engine) StopCountdown2() {
 	engine.countdown2 = false
-	if !engine.countdown {
-		engine.Mode = Normal
-	}
 }
 
 func (engine *Engine) normalUpdate() {

@@ -42,6 +42,10 @@ func (client *Client) send(packet osc.Packet) error {
 	}
 }
 
+func (client *Client) SendDisplay(message DisplayMessage) error {
+	return client.send(message.MarshalOSC("/clock/display"))
+}
+
 func (client *Client) SendCount(message CountMessage) error {
 	return client.send(message.MarshalOSC("/qmsk/clock/count"))
 }

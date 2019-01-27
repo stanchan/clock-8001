@@ -120,6 +120,21 @@ func (server *Server) handleNormal(msg *osc.Message) {
 	server.update(message)
 }
 
+func (server *Server) handleDisplay(msg *osc.Message) {
+	var message DisplayMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		log.Printf("display: %#v", message)
+		msg := ClockMessage{
+			Type:           "display",
+			DisplayMessage: &message,
+		}
+		server.update(msg)
+	}
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -129,6 +144,7 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
 	registerHandler(oscServer, "/clock/tally", server.handleCount)
+	registerHandler(oscServer, "/clock/display", server.handleDisplay)
 	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
 	registerHandler(oscServer, "/clock/countdown2/start", server.handleCountdownStart2)
 	registerHandler(oscServer, "/clock/countdown/modify", server.handleCountdownModify)

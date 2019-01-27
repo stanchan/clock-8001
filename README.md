@@ -37,41 +37,51 @@ Payload:
 5. int32 the time, 0-99, will be displayed as two characters
 6. string single character for the time unit (h, m, s)
 
-## /clock/countdown/start
+### /clock/display
+
+Displays up to 4 characters above the main time display for the time specified on the clock -d command line parameter (default 1000ms).
+
+Payload:
+1. float32 Red component of the text color
+2. float32 Green component of the text color
+3. float32 Blue component of the text color
+4. string up to 4 characters to display
+
+### /clock/countdown/start
 
 Starts a countdown timer with the duration from the payload.
 
 Payload:
 1. int32 timer duration in seconds
 
-## /clock/countdown2/start
+### /clock/countdown2/start
 
 Starts a secondary countdown above the main clock display. This is the same area as is used by the "tally" display. The countdown has lower priority than the tally.
 
 Payload:
 1. int32 timer duration in seconds
 
-## /clock/countdown/modify & /clock/countdown2/modify
+### /clock/countdown/modify & /clock/countdown2/modify
 
 Modifies the duration of running countdown.
 
 Payload:
 1. int32 time in seconds to add or substract from the running timer
 
-## /clock/countdown/stop & /clock/countdown2/stop
+### /clock/countdown/stop & /clock/countdown2/stop
 
-Stops the countdown.
+Stops the countdown. The killed countdown will vanish from the clock display. To restore time display issue /clock/normal command.
 
-## /clock/countup/start
+### /clock/countup/start
 
 Starts counting up time.
 
 Payload: none
 
-## /clock/kill
+### /clock/kill
 
 (Almost) blanks the display. Only the 12 static leds and one led on the ring will be on.
 
-## /clock/normal
+### /clock/normal
 
 Returns the clock to normal mode displaying current time.
