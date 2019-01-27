@@ -273,12 +273,15 @@ func (engine *Engine) countdownUpdate() {
 	}
 }
 
+// Secondary countdown, lower priority than Tally messages
 func (engine *Engine) countdown2Update() {
 	t := time.Now()
 	diff2 := engine.count2Target.Sub(t)
 
-	// Secundary countdown
-	if engine.countdown2 {
+	if !engine.oscTally && !engine.countdown2 {
+		// Clear the countdown display on stop
+		engine.Tally = ""
+	} else if engine.countdown2 {
 		if t.Before(engine.count2Target) {
 			engine.formatCount2(diff2)
 		} else {
@@ -289,12 +292,11 @@ func (engine *Engine) countdown2Update() {
 			}
 		}
 	}
-
 }
 
 func (engine *Engine) formatCount2(diff time.Duration) {
-	// osc tally messages take priority
 	if !engine.oscTally {
+		// osc tally messages take priority
 		secs := int64(diff.Round(time.Second).Seconds())
 
 		for _, unit := range clockUnits {
@@ -341,11 +343,6 @@ func (engine *Engine) StopCountdown2() {
 func (engine *Engine) normalUpdate() {
 	t := time.Now().In(engine.Timezone)
 	engine.Dots = true
-
-	if !engine.oscTally && !engine.countdown2 {
-		// Clear the countdown display on stop
-		engine.Tally = ""
-	}
 
 	// Check that the rpi has valid time
 	if t.Year() > 2000 {
