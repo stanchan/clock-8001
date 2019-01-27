@@ -35,7 +35,8 @@ type Engine struct {
 	flasher           *time.Ticker
 	clockServer       *Server
 	oscServer         osc.Server
-	timeout           time.Duration
+	timeout           time.Duration // Timeout for osc tally events
+	oscTally          bool          // Tally text was from osc event
 }
 
 type EngineOptions struct {
@@ -55,6 +56,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		Leds:      0,
 		flashLeds: true,
 		Dots:      true,
+		oscTally:  false,
 		timeout:   time.Duration(options.Timeout) * time.Millisecond,
 	}
 
@@ -109,10 +111,14 @@ func (engine *Engine) listen() {
 				engine.TallyGreen = uint8(msg.ColorGreen)
 				engine.TallyBlue = uint8(msg.ColorBlue)
 				engine.Tally = fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit)
+				engine.oscTally = true
 				tallyTimer.Reset(engine.timeout)
 			case "countdownStart":
 				msg := message.CountdownMessage
 				engine.StartCountdown(time.Duration(msg.Seconds) * time.Second)
+			case "countdownStart2":
+				msg := message.CountdownMessage
+				engine.StartCountdown2(time.Duration(msg.Seconds) * time.Second)
 			case "countdownModify":
 				msg := message.CountdownMessage
 				engine.ModifyCountdown(time.Duration(msg.Seconds) * time.Second)
@@ -126,6 +132,7 @@ func (engine *Engine) listen() {
 		case <-tallyTimer.C:
 			// OSC message timeout
 			engine.Tally = ""
+			engine.oscTally = false
 		}
 	}
 }
@@ -152,13 +159,20 @@ func (engine *Engine) StartCountdown(timer time.Duration) {
 	engine.countdownDuration = timer
 }
 
+// Start a countdown timer
+func (engine *Engine) StartCountdown2(timer time.Duration) {
+	engine.Mode = Countdown2
+	engine.countTarget = time.Now().Add(timer)
+	engine.countdownDuration = timer
+}
+
 func (engine *Engine) StartCountup() {
 	engine.Mode = Countup
 	engine.countTarget = time.Now()
 }
 
 func (engine *Engine) ModifyCountdown(delta time.Duration) {
-	if engine.Mode == Countdown {
+	if engine.Mode == Countdown || engine.Mode == Countdown2 {
 		engine.countTarget = engine.countTarget.Add(delta)
 		engine.countdownDuration += delta
 	}
@@ -170,10 +184,13 @@ func (engine *Engine) Normal() {
 
 // Update Hours, Minutes and Seconds
 func (engine *Engine) Update() {
+	if engine.Mode != Countdown2 && !engine.oscTally {
+		engine.Tally = ""
+	}
 	switch engine.Mode {
 	case Normal:
 		engine.normalUpdate()
-	case Countdown:
+	case Countdown, Countdown2:
 		engine.countdownUpdate()
 	case Countup:
 		engine.countupUpdate()
@@ -211,23 +228,55 @@ func (engine *Engine) countdownUpdate() {
 	engine.Dots = true
 
 	if t.Before(engine.countTarget) {
-		engine.formatCount(display)
-		progress := (float64(diff) / float64(engine.countdownDuration))
-		if progress >= 1 {
-			progress = 1
-		} else if progress < 0 {
-			progress = 0
-		}
-		engine.Leds = int(math.Floor(progress * 60))
-	} else {
-		if engine.flashLeds {
-			engine.Hours = "00"
-			engine.Minutes = "00"
-			engine.Leds = 59
+		if engine.Mode == Countdown {
+			engine.formatCount(display)
+			progress := (float64(diff) / float64(engine.countdownDuration))
+			if progress >= 1 {
+				progress = 1
+			} else if progress < 0 {
+				progress = 0
+			}
+			engine.Leds = int(math.Floor(progress * 60))
 		} else {
-			engine.Hours = ""
-			engine.Minutes = ""
-			engine.Leds = 59
+			engine.formatCount2(diff)
+			engine.normalUpdate()
+		}
+	} else {
+		if engine.Mode == Countdown {
+			if engine.flashLeds {
+				engine.Hours = "00"
+				engine.Minutes = "00"
+				engine.Leds = 59
+			} else {
+				engine.Hours = ""
+				engine.Minutes = ""
+				engine.Leds = 59
+			}
+		} else {
+			if engine.flashLeds {
+				engine.Tally = "↓00"
+			} else {
+				engine.Tally = ""
+			}
+		}
+	}
+}
+
+func (engine *Engine) formatCount2(diff time.Duration) {
+	// osc tally messages take priority
+	if !engine.oscTally {
+		secs := int64(diff.Round(time.Second).Seconds())
+
+		for _, unit := range clockUnits {
+			if secs/int64(unit.seconds) >= 100 {
+				continue
+			}
+			engine.TallyRed = 255
+			engine.TallyGreen = 0
+			engine.TallyBlue = 0
+			count := secs / int64(unit.seconds)
+			engine.Tally = fmt.Sprintf("↓%02d%1s", count, unit.unit)
+			return
 		}
 	}
 }

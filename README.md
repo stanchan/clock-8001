@@ -44,6 +44,13 @@ Starts a countdown timer with the duration from the payload.
 Payload:
 1. int32 timer duration in seconds
 
+## /clock/countdown2/start
+
+Starts a countdown and displays the time remaining together with the current time
+
+Payload:
+1. int32 timer duration in seconds
+
 ## /clock/countdown/modify
 
 Modifies the duration of running countdown.

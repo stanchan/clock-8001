@@ -78,7 +78,21 @@ func (server *Server) handleCountdownStart(msg *osc.Message) {
 		}
 		server.update(msg)
 	}
+}
 
+func (server *Server) handleCountdownStart2(msg *osc.Message) {
+	var message CountdownMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		log.Printf("countdown2 start: %#v", message)
+		msg := ClockMessage{
+			Type:             "countdownStart2",
+			CountdownMessage: &message,
+		}
+		server.update(msg)
+	}
 }
 
 func (server *Server) handleCountdownModify(msg *osc.Message) {
@@ -114,6 +128,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
 	registerHandler(oscServer, "/clock/tally", server.handleCount)
 	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
+	registerHandler(oscServer, "/clock/countdown2/start", server.handleCountdownStart2)
 	registerHandler(oscServer, "/clock/countdown/modify", server.handleCountdownModify)
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/kill", server.handleKill)
