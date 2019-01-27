@@ -20,3 +20,47 @@ Bill of materials:
 You need to compile https://gitlab.com/Depili/rpi-matrix for a small program that will listen on udp socket for the led matrix data and handle driving the led matrix.
 
 Compile the led matrix clock binary with `go get gitlab.com/Depili/clock-8001/cmd/clock`
+
+## Mitti and Millumin osc-converter
+
+To convert timecodes and video information sent by Mitti or Millumin to commands understood by the clock use `go get gitlab.com/Depili/clock-8001`. This can also be used to bridge the osc traffic across different networks.
+
+## OSC commands understood by the clock
+
+### /clock/tally and /qmsk/clock/count (legacy)
+
+Payload:
+1. float32 red component of the text color
+2. float32 green component of the text color
+3. float32 blue component of the text color
+4. string single character symbol to display before the time
+5. int32 the time, 0-99, will be displayed as two characters
+6. string single character for the time unit (h, m, s)
+
+## /clock/countdown/start
+
+Starts a countdown timer with the duration from the payload.
+
+Payload:
+1. int32 timer duration in seconds
+
+## /clock/countdown/modify
+
+Modifies the duration of running countdown.
+
+Payload:
+1. int32 time in seconds to add or substract from the running timer
+
+## /clock/countup/start
+
+Starts counting up time.
+
+Payload: none
+
+## /clock/kill
+
+(Almost) blanks the display. Only the 12 static leds and one led on the ring will be on.
+
+## /clock/normal
+
+Returns the clock to normal mode displaying current time.
