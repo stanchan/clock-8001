@@ -2,59 +2,36 @@ package main
 
 import (
 	"fmt"
-	"github.com/Depili/clock-8001/clock"
-	"github.com/desertbit/timer"
-	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/tarm/serial"
+	"gitlab.com/Depili/clock-8001/clock"
 	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	"gitlab.com/Depili/go-rgb-led-matrix/matrix"
-	"log"
 	"os"
 	"os/signal"
 	"time"
 )
 
 var Options struct {
-	Font        string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
-	Matrix      string `short:"m" long:"matrix" description:"Matrix to connect to" required:"true"`
-	SerialName  string `long:"serial-name" description:"Serial device for arduino" default:"/dev/ttyUSB0"`
-	SerialBaud  int    `long:"serial-baud" value-name:"BAUD" default:"57600"`
-	TextRed     int    `short:"r" long:"red" description:"Red component of text color" default:"128"`
-	TextGreen   int    `short:"g" long:"green" description:"Green component of text color" default:"128"`
-	TextBlue    int    `short:"b" long:"blue" description:"Blue component of text color" default:"0"`
-	LocalTime   string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
-	ForeignTime string `short:"T" long:"foreign-time" description:"Foreign timezone" default:"Europe/Moscow"`
-	TimePin     int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
-	ListenAddr  string `long:"osc-listen" description:"Address to listen for incoming osc messages" required:"true"`
-	Timeout     int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
+	Font          string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
+	Matrix        string `short:"m" long:"matrix" description:"Matrix to connect to" required:"true"`
+	SerialName    string `long:"serial-name" description:"Serial device for arduino" default:"/dev/ttyUSB0"`
+	SerialBaud    int    `long:"serial-baud" value-name:"BAUD" default:"57600"`
+	TextRed       int    `short:"r" long:"red" description:"Red component of text color" default:"128"`
+	TextGreen     int    `short:"g" long:"green" description:"Green component of text color" default:"128"`
+	TextBlue      int    `short:"b" long:"blue" description:"Blue component of text color" default:"0"`
+	TimePin       int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
+	EngineOptions *clock.EngineOptions
 }
 
 var parser = flags.NewParser(&Options, flags.Default)
-
-func runOSC(oscServer *osc.Server) {
-	err := oscServer.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
-}
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
 		panic(err)
 	}
-
-	// Initialize osc listener
-	var oscServer = osc.Server{
-		Addr: Options.ListenAddr,
-	}
-
-	var clockServer = clock.MakeServer(&oscServer)
-	log.Printf("osc server: listen %v", oscServer.Addr)
-
-	go runOSC(&oscServer)
 
 	// Serial connection for the led ring
 	serialConfig := serial.Config{
@@ -83,18 +60,6 @@ func main() {
 	}
 
 	fmt.Printf("GPIO initialized.\n")
-
-	// Load timezones
-	local, err := time.LoadLocation(Options.LocalTime)
-	if err != nil {
-		panic(err)
-	}
-
-	foreign, err := time.LoadLocation(Options.ForeignTime)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Timezones loaded.\n")
 
 	// Parse font for clock text
 	font, err := bdf.Parse(Options.Font)
@@ -125,62 +90,43 @@ func main() {
 
 	updateTicker := time.NewTicker(time.Millisecond * 10)
 	send := make([]byte, 1)
-	oscChan := clockServer.Listen()
 
-	timeout := timer.NewTimer(time.Duration(Options.Timeout) * time.Millisecond)
+	engine, err := clock.MakeEngine(Options.EngineOptions)
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 		select {
-		case msg := <-oscChan:
-			// New OSC message received
-			fmt.Printf("Got new osc data.\n")
-			tallyColor = [3]byte{byte(msg.ColorRed), byte(msg.ColorGreen), byte(msg.ColorBlue)}
-			tallyBitmap = font.TextBitmap(fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit))
-			timeout.Reset(time.Duration(Options.Timeout) * time.Millisecond)
-		case <-timeout.C:
-			// OSC message timeout
-			tallyBitmap = font.TextBitmap("")
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			m.Close()
 			os.Exit(1)
 		case <-updateTicker.C:
-			// Update the time shown on the matrix
-			var t time.Time
-			if i, _ := timePin.Read(); err != nil {
-				panic(err)
-			} else if i == 1 {
-				t = time.Now().In(local)
-			} else {
-				t = time.Now().In(foreign)
-			}
+			engine.Update()
+			seconds := engine.Leds
+			hourBitmap = font.TextBitmap(engine.Hours)
+			minuteBitmap = font.TextBitmap(engine.Minutes)
+			secondBitmap = font.TextBitmap(engine.Seconds)
 
-			// Check that the rpi has valid time
-			if t.Year() > 2000 {
-				hourBitmap = font.TextBitmap(t.Format("15"))
-				minuteBitmap = font.TextBitmap(t.Format("04"))
-				secondBitmap = font.TextBitmap(t.Format("05"))
-			} else {
-				// No valid time, indicate it with "XX" as the time
-				hourBitmap = font.TextBitmap("XX")
-				minuteBitmap = font.TextBitmap("XX")
-				secondBitmap = font.TextBitmap("")
-			}
-			seconds := t.Second()
+			tallyColor = [3]byte{byte(engine.TallyRed), byte(engine.TallyGreen), byte(engine.TallyBlue)}
+			tallyBitmap = font.TextBitmap(engine.Tally)
+
 			// Clear the matrix buffer
 			m.Fill(matrix.ColorBlack())
 
-			// Draw the dots between hours and minutes
-			m.SetPixel(14, 15, textColor)
-			m.SetPixel(14, 16, textColor)
-			m.SetPixel(15, 15, textColor)
-			m.SetPixel(15, 16, textColor)
+			if engine.Dots {
+				// Draw the dots between hours and minutes
+				m.SetPixel(14, 15, textColor)
+				m.SetPixel(14, 16, textColor)
+				m.SetPixel(15, 15, textColor)
+				m.SetPixel(15, 16, textColor)
 
-			m.SetPixel(18, 15, textColor)
-			m.SetPixel(18, 16, textColor)
-			m.SetPixel(19, 15, textColor)
-			m.SetPixel(19, 16, textColor)
-
+				m.SetPixel(18, 15, textColor)
+				m.SetPixel(18, 16, textColor)
+				m.SetPixel(19, 15, textColor)
+				m.SetPixel(19, 16, textColor)
+			}
 			// Draw the text
 			m.Scroll(hourBitmap, textColor, 10, 0, 0, 14)
 			m.Scroll(minuteBitmap, textColor, 10, 17, 0, 14)
