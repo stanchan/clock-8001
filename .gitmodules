@@ -5,3 +5,6 @@
 [submodule "vendor/github.com/depili/go-rgb-led-matrix"]
 	path = vendor/github.com/depili/go-rgb-led-matrix
 	url = https://github.com/depili/go-rgb-led-matrix
+[submodule "vendor/gitlab.com/Depili/go-rgb-led-matrix"]
+	path = vendor/gitlab.com/Depili/go-rgb-led-matrix
+	url = git@gitlab.com:Depili/go-rgb-led-matrix.git

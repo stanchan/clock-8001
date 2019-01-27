@@ -80,7 +80,7 @@ func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
 				log.Printf("update clock")
 			}
 		*/
-		start := clock.StartMessage{
+		start := clock.CountdownMessage{
 			Seconds: 100,
 		}
 		if err := clockClient.SendStart(start); err != nil {

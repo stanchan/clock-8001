@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/SpComb/osc-tally/clock"
-	"github.com/depili/go-rgb-led-matrix/bdf"
+	"gitlab.com/Depili/clock-8001/clock"
+	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	// "github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"

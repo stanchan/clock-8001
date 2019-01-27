@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/SpComb/osc-tally/clock"
-	"github.com/SpComb/osc-tally/millumin"
-	"github.com/SpComb/osc-tally/mitti"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
+	"gitlab.com/Depili/clock-8001/clock"
+	"gitlab.com/Depili/millumin"
+	"gitlab.com/Depili/mitti"
 	"log"
 	"regexp"
 )

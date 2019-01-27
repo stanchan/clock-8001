@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/SpComb/osc-tally/clock"
-	"github.com/depili/go-rgb-led-matrix/bdf"
-	"github.com/depili/go-rgb-led-matrix/matrix"
+	"github.com/Depili/clock-8001/clock"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/tarm/serial"
+	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
+	"gitlab.com/Depili/go-rgb-led-matrix/matrix"
 	"log"
 	"os"
 	"os/signal"
