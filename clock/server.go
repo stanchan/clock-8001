@@ -112,6 +112,7 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 
 func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
+	registerHandler(oscServer, "/clock/tally", server.handleCount)
 	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
 	registerHandler(oscServer, "/clock/countdown/modify", server.handleCountdownModify)
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
