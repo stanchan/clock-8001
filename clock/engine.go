@@ -329,7 +329,9 @@ func (engine *Engine) formatCount(diff time.Duration) {
 }
 
 func (engine *Engine) StopCountdown() {
-	engine.Mode = Off
+	if engine.Mode == Countdown {
+		engine.Mode = Off
+	}
 }
 
 func (engine *Engine) StopCountdown2() {
