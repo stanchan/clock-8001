@@ -66,44 +66,46 @@ func (server *Server) handleKill(msg *osc.Message) {
 }
 
 func (server *Server) handleCountdownStart(msg *osc.Message) {
-	var message CountdownMessage
-
-	if err := message.UnmarshalOSC(msg); err != nil {
-		log.Printf("Unmarshal %v: %v", msg, err)
-	} else {
-		log.Printf("countdown start: %#v", message)
-		msg := ClockMessage{
-			Type:             "countdownStart",
-			CountdownMessage: &message,
-		}
-		server.update(msg)
-	}
+	server.sendCountdownMessage("countdownStart", msg)
 }
 
 func (server *Server) handleCountdownStart2(msg *osc.Message) {
-	var message CountdownMessage
-
-	if err := message.UnmarshalOSC(msg); err != nil {
-		log.Printf("Unmarshal %v: %v", msg, err)
-	} else {
-		log.Printf("countdown2 start: %#v", message)
-		msg := ClockMessage{
-			Type:             "countdownStart2",
-			CountdownMessage: &message,
-		}
-		server.update(msg)
-	}
+	server.sendCountdownMessage("countdownStart2", msg)
 }
 
 func (server *Server) handleCountdownModify(msg *osc.Message) {
+	server.sendCountdownMessage("countdownModify", msg)
+}
+
+func (server *Server) handleCountdownModify2(msg *osc.Message) {
+	server.sendCountdownMessage("countdownModify2", msg)
+}
+
+func (server *Server) handleCountdownStop(msg *osc.Message) {
+	log.Printf("countdownStop: %#v", msg)
+	message := ClockMessage{
+		Type: "countdownStop",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleCountdownStop2(msg *osc.Message) {
+	log.Printf("countdownStop2: %#v", msg)
+	message := ClockMessage{
+		Type: "countdownStop2",
+	}
+	server.update(message)
+}
+
+func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
 	var message CountdownMessage
 
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		log.Printf("countdown modify: %#v", message)
+		log.Printf("%s: %#v", cmd, message)
 		msg := ClockMessage{
-			Type:             "countdownModify",
+			Type:             cmd,
 			CountdownMessage: &message,
 		}
 		server.update(msg)
@@ -130,6 +132,9 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
 	registerHandler(oscServer, "/clock/countdown2/start", server.handleCountdownStart2)
 	registerHandler(oscServer, "/clock/countdown/modify", server.handleCountdownModify)
+	registerHandler(oscServer, "/clock/countdown2/modify", server.handleCountdownModify2)
+	registerHandler(oscServer, "/clock/countdown/stop", server.handleCountdownStop)
+	registerHandler(oscServer, "/clock/countdown2/stop", server.handleCountdownStop2)
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/kill", server.handleKill)
 	registerHandler(oscServer, "/clock/normal", server.handleNormal)

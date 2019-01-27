@@ -46,17 +46,21 @@ Payload:
 
 ## /clock/countdown2/start
 
-Starts a countdown and displays the time remaining together with the current time
+Starts a secondary countdown above the main clock display. This is the same area as is used by the "tally" display. The countdown has lower priority than the tally.
 
 Payload:
 1. int32 timer duration in seconds
 
-## /clock/countdown/modify
+## /clock/countdown/modify & /clock/countdown2/modify
 
 Modifies the duration of running countdown.
 
 Payload:
 1. int32 time in seconds to add or substract from the running timer
+
+## /clock/countdown/stop & /clock/countdown2/stop
+
+Stops the countdown.
 
 ## /clock/countup/start
 
