@@ -15,7 +15,7 @@ type EngineOptions struct {
 	Timezone   string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
 	ListenAddr string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
 	Timeout    int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
-	Connect    string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to"`
+	Connect    string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
 }
 
 const (
@@ -291,12 +291,12 @@ func (engine *Engine) countdownUpdate() {
 // Secondary countdown, lower priority than Tally messages
 func (engine *Engine) countdown2Update() {
 	t := time.Now()
-	diff2 := engine.count2Target.Sub(t)
+	diff2 := engine.count2Target.Sub(t).Truncate(time.Second)
 
 	if !engine.oscTally && !engine.countdown2 {
 		// Clear the countdown display on stop
 		engine.Tally = ""
-	} else if engine.countdown2 {
+	} else if !engine.oscTally && engine.countdown2 {
 		if diff2 > 0 {
 			engine.formatCount2(diff2)
 		} else {
@@ -330,7 +330,7 @@ func (engine *Engine) formatCount(diff time.Duration) {
 func (engine *Engine) formatCount2(diff time.Duration) {
 	if !engine.oscTally {
 		// osc tally messages take priority
-		secs := int64(diff.Round(time.Second).Seconds())
+		secs := int64(diff.Truncate(time.Second).Seconds())
 
 		for _, unit := range clockUnits {
 			if secs/int64(unit.seconds) >= 100 {
@@ -353,21 +353,21 @@ func (engine *Engine) formatCount2(diff time.Duration) {
 // Start a countdown timer
 func (engine *Engine) StartCountdown(timer time.Duration) {
 	engine.mode = Countdown
-	engine.countTarget = time.Now().Add(timer)
+	engine.countTarget = time.Now().Add(timer).Truncate(time.Second)
 	engine.countdownDuration = timer
 }
 
 // Start a countdown timer
 func (engine *Engine) StartCountdown2(timer time.Duration) {
 	engine.countdown2 = true
-	engine.count2Target = time.Now().Add(timer)
+	engine.count2Target = time.Now().Add(timer).Truncate(time.Second)
 	engine.countdown2Duration = timer
 }
 
 // Start counting time up from this moment
 func (engine *Engine) StartCountup() {
 	engine.mode = Countup
-	engine.countTarget = time.Now()
+	engine.countTarget = time.Now().Truncate(time.Second)
 }
 
 // Return main display to normal clock
