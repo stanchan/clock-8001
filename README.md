@@ -85,3 +85,12 @@ Payload: none
 ### /clock/normal
 
 Returns the clock to normal mode displaying current time.
+
+## OSC feedback
+
+The clock sends it's state to the address specified with --osc-dest on `/clock/status` message. The payload is:
+1. int32 clock display mode
+2. string: hours display
+3. string: minutes display
+4. string: seconds display
+5. string: "tally" text
