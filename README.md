@@ -6,6 +6,24 @@ This is a simplistic clock written in go that can be used either as a video out 
 
 You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl_clock`. Compiling requires SDL 2 and SDL_GFX 2 libraries. On the raspberry pi the default libraries shipped with rasbian will only output data to X11 window, so for full screen dedicated clock you need to compile the SDL libraries from source. For compiling use `./configure --host=armv7l-raspberry-linux-gnueabihf --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl` for config flags.
 
+### Ready build raspberry pi images
+
+The images support raspberry pi 2B / 3B / 3B+ boards. They need at least 64Mb SD-cards. Write them to the card like any other raspberry pi sd-card image.
+
+https://kissa.depili.fi/clock-8001/sdl-clock_v2.1-clockworkadmin.img Is a image with root logins (ssh and local) enabled. The root password is `clockworkadmin`. Since this image uses a known hard coded password it should be for testing only and considered insecure.
+
+https://kissa.depili.fi/clock-8001/sdl-clock_v2.1-no_login.img This image has root logins disabled and is secure for production use.
+
+#### Customizing the images
+
+You can place the following files on the sd-card FAT partition to customize the installation:
+* `hostname` to change the hostname used by the clock, it is available with "hostname.local" for bonjour / mDNS requests
+* `sdl-clock` to update the clock binary with this file
+* `clock_cmd.sh` is the command line for the clock, it should start with `/root/sdl-clock ` and be followed by any command line parameters you wish to use
+* `interfaces` a replacement for /etc/network/interfaces for custom network configuration
+* `ntp.conf` for custom ntp server configuration
+* `config.sys` the normal raspberry pi boot configuration for changing video modes etc.
+
 ### Command line parameters
 ```
 Usage:
