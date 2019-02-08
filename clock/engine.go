@@ -11,11 +11,14 @@ import (
 )
 
 type EngineOptions struct {
-	Flash      int    `long:"flash" description:"Flashing interval when countdown reached zero (ms)" default:"500"`
-	Timezone   string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
-	ListenAddr string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
-	Timeout    int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
-	Connect    string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
+	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms)" default:"500"`
+	Timezone       string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
+	ListenAddr     string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
+	Timeout        int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
+	Connect        string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
+	CountdownRed   uint8  `long:"ct-red" description:"Red component of secondary countdown color" default:"255"`
+	CountdownGreen uint8  `long:"ct-green" description:"Green component of secondary countdown color" default:"0"`
+	CountdownBlue  uint8  `long:"ct-blue" description:"Blue component of secondary countdown color" default:"0"`
 }
 
 const (
@@ -40,6 +43,9 @@ type Engine struct {
 	TallyRed           uint8
 	TallyGreen         uint8
 	TallyBlue          uint8
+	cd2Red             uint8
+	cd2Green           uint8
+	cd2Blue            uint8
 	Leds               int
 	Dots               bool
 	flashLeds          bool
@@ -64,6 +70,9 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		oscTally:   false,
 		countdown2: false,
 		timeout:    time.Duration(options.Timeout) * time.Millisecond,
+		cd2Red:     options.CountdownRed,
+		cd2Green:   options.CountdownGreen,
+		cd2Blue:    options.CountdownBlue,
 	}
 
 	// Setup the OSC listener
@@ -336,9 +345,9 @@ func (engine *Engine) formatCount2(diff time.Duration) {
 			if secs/int64(unit.seconds) >= 100 {
 				continue
 			}
-			engine.TallyRed = 255
-			engine.TallyGreen = 0
-			engine.TallyBlue = 0
+			engine.TallyRed = engine.cd2Red
+			engine.TallyGreen = engine.cd2Green
+			engine.TallyBlue = engine.cd2Blue
 			count := secs / int64(unit.seconds)
 			engine.Tally = fmt.Sprintf("↓%02d%1s", count, unit.unit)
 			return
