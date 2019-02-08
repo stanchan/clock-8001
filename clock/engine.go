@@ -16,9 +16,9 @@ type EngineOptions struct {
 	ListenAddr     string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
 	Timeout        int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
 	Connect        string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
-	CountdownRed   uint8  `long:"ct-red" description:"Red component of secondary countdown color" default:"255"`
-	CountdownGreen uint8  `long:"ct-green" description:"Green component of secondary countdown color" default:"0"`
-	CountdownBlue  uint8  `long:"ct-blue" description:"Blue component of secondary countdown color" default:"0"`
+	CountdownRed   uint8  `long:"cd-red" description:"Red component of secondary countdown color" default:"255"`
+	CountdownGreen uint8  `long:"cd-green" description:"Green component of secondary countdown color" default:"0"`
+	CountdownBlue  uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
 }
 
 const (

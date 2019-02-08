@@ -6,6 +6,37 @@ This is a simplistic clock written in go that can be used either as a video out 
 
 You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl_clock`. Compiling requires SDL 2 and SDL_GFX 2 libraries. On the raspberry pi the default libraries shipped with rasbian will only output data to X11 window, so for full screen dedicated clock you need to compile the SDL libraries from source. For compiling use `./configure --host=armv7l-raspberry-linux-gnueabihf --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl` for config flags.
 
+### Command line parameters
+```
+Usage:
+  sdl-clock [OPTIONS]
+
+Application Options:
+  -s                  Scale to 192x192px
+  -F, --font=         Font for event name (default: fonts/7x13.bdf)
+  -r, --red=          Red component of text color (default: 255)
+  -g, --green=        Green component of text color (default: 128)
+  -b, --blue=         Blue component of text color (default: 0)
+      --static-red=   Red component of static color (default: 80)
+      --static-green= Green component of static color (default: 80)
+      --static-blue=  Blue component of static color (default: 0)
+      --sec-red=      Red component of second color (default: 200)
+      --sec-green=    Green component of second color (default: 0)
+      --sec-blue=     Blue component of second color (default: 0)
+  -p, --time-pin=     Pin to select foreign timezone, active low (default: 15)
+      --flash=        Flashing interval when countdown reached zero (ms) (default: 500)
+  -t, --local-time=   Local timezone (default: Europe/Helsinki)
+      --osc-listen=   Address to listen for incoming osc messages (default: 0.0.0.0:1245)
+  -d, --timeout=      Timeout for OSC message updates in milliseconds (default: 1000)
+  -o, --osc-dest=     Address to send OSC feedback to (default: 255.255.255.255:1245)
+      --cd-red=       Red component of secondary countdown color (default: 255)
+      --cd-green=     Green component of secondary countdown color (default: 0)
+      --cd-blue=      Blue component of secondary countdown color (default: 0)
+
+Help Options:
+  -h, --help          Show this help message
+```
+
 ## Dedicated led matrix clock
 
 Bill of materials:
