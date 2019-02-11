@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const Version = "2.1.0"
+const Version = "2.2.0"
 
 type EngineOptions struct {
 	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
@@ -35,9 +35,12 @@ type Engine struct {
 	mode               int            // Main display mode
 	countTarget        time.Time      // Target timestamp for main countdown
 	countdownDuration  time.Duration  // Total duration of main countdown, used to scale the leds
+	countdownLeft      time.Duration  // Duration left when paused
 	count2Target       time.Time
 	countdown2Duration time.Duration
+	countdown2Left     time.Duration
 	countdown2         bool
+	paused             bool
 	Hours              string
 	Minutes            string
 	Seconds            string
@@ -71,6 +74,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		Dots:       true,
 		oscTally:   false,
 		countdown2: false,
+		paused:     false,
 		timeout:    time.Duration(options.Timeout) * time.Millisecond,
 		cd2Red:     options.CountdownRed,
 		cd2Green:   options.CountdownGreen,
@@ -132,7 +136,7 @@ func (engine *Engine) listen() {
 		select {
 		case message := <-oscChan:
 			// New OSC message received
-			fmt.Printf("Got new osc data.\n")
+			log.Printf("Got new osc data.\n")
 			switch message.Type {
 			case "count":
 				msg := message.CountMessage
@@ -166,6 +170,10 @@ func (engine *Engine) listen() {
 				engine.StopCountdown()
 			case "countdownStop2":
 				engine.StopCountdown2()
+			case "pause":
+				engine.Pause()
+			case "resume":
+				engine.Resume()
 			case "countup":
 				engine.StartCountup()
 			case "kill":
@@ -278,10 +286,20 @@ func (engine *Engine) countupUpdate() {
 }
 
 func (engine *Engine) countdownUpdate() {
-	t := time.Now()
-	diff := engine.countTarget.Sub(t)
+	var diff time.Duration
+	if engine.paused {
+		diff = engine.countdownLeft
+		if engine.flashLeds {
+			engine.Dots = true
+		} else {
+			engine.Dots = false
+		}
+	} else {
+		t := time.Now()
+		diff = engine.countTarget.Sub(t)
+		engine.Dots = true
+	}
 	engine.Seconds = ""
-	engine.Dots = true
 
 	// Main countdown
 	if diff > 0 {
@@ -292,7 +310,7 @@ func (engine *Engine) countdownUpdate() {
 		} else if progress < 0 {
 			progress = 0
 		}
-		engine.Leds = int(math.Floor(progress * 60))
+		engine.Leds = int(math.Floor(progress * 59))
 	} else {
 		engine.Leds = 59
 		if engine.flashLeds {
@@ -307,9 +325,13 @@ func (engine *Engine) countdownUpdate() {
 
 // Secondary countdown, lower priority than Tally messages
 func (engine *Engine) countdown2Update() {
-	t := time.Now()
-	diff2 := engine.count2Target.Sub(t).Truncate(time.Second)
-
+	var diff2 time.Duration
+	if engine.paused {
+		diff2 = engine.countdown2Left
+	} else {
+		t := time.Now()
+		diff2 = engine.count2Target.Sub(t).Truncate(time.Second)
+	}
 	if !engine.oscTally && !engine.countdown2 {
 		// Clear the countdown display on stop
 		engine.Tally = ""
@@ -357,7 +379,11 @@ func (engine *Engine) formatCount2(diff time.Duration) {
 			engine.TallyGreen = engine.cd2Green
 			engine.TallyBlue = engine.cd2Blue
 			count := secs / int64(unit.seconds)
-			engine.Tally = fmt.Sprintf("↓%02d%1s", count, unit.unit)
+			if engine.paused {
+				engine.Tally = fmt.Sprintf(" %02d%1s", count, unit.unit)
+			} else {
+				engine.Tally = fmt.Sprintf("↓%02d%1s", count, unit.unit)
+			}
 			return
 		}
 	}
@@ -369,16 +395,18 @@ func (engine *Engine) formatCount2(diff time.Duration) {
 
 // Start a countdown timer
 func (engine *Engine) StartCountdown(timer time.Duration) {
-	engine.mode = Countdown
-	engine.countTarget = time.Now().Add(timer).Truncate(time.Second)
+	engine.countdownLeft = timer
 	engine.countdownDuration = timer
+	engine.countTarget = time.Now().Add(timer).Truncate(time.Second)
+	engine.mode = Countdown
 }
 
 // Start a countdown timer
 func (engine *Engine) StartCountdown2(timer time.Duration) {
-	engine.countdown2 = true
-	engine.count2Target = time.Now().Add(timer).Truncate(time.Second)
 	engine.countdown2Duration = timer
+	engine.countdown2Left = timer
+	engine.count2Target = time.Now().Add(timer).Truncate(time.Second)
+	engine.countdown2 = true
 }
 
 // Start counting time up from this moment
@@ -396,15 +424,17 @@ func (engine *Engine) Normal() {
 // Add or remove time from countdowns
 func (engine *Engine) ModifyCountdown(delta time.Duration) {
 	if engine.mode == Countdown {
-		engine.countTarget = engine.countTarget.Add(delta)
 		engine.countdownDuration += delta
+		engine.countdownLeft += delta
+		engine.countTarget = engine.countTarget.Add(delta)
 	}
 }
 
 func (engine *Engine) ModifyCountdown2(delta time.Duration) {
 	if engine.countdown2 {
-		engine.count2Target = engine.count2Target.Add(delta)
 		engine.countdown2Duration += delta
+		engine.countdown2Left += delta
+		engine.count2Target = engine.count2Target.Add(delta)
 	}
 }
 
@@ -421,4 +451,18 @@ func (engine *Engine) StopCountdown2() {
 func (engine *Engine) Kill() {
 	engine.mode = Off
 	engine.countdown2 = false
+}
+
+func (engine *Engine) Pause() {
+	t := time.Now()
+	engine.countdownLeft = engine.countTarget.Sub(t).Truncate(time.Second)
+	engine.countdown2Left = engine.count2Target.Sub(t).Truncate(time.Second)
+	engine.paused = true
+}
+
+func (engine *Engine) Resume() {
+	t := time.Now()
+	engine.countTarget = t.Add(engine.countdownLeft).Truncate(time.Second)
+	engine.count2Target = t.Add(engine.countdownLeft).Truncate(time.Second)
+	engine.paused = false
 }

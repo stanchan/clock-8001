@@ -120,6 +120,22 @@ func (server *Server) handleNormal(msg *osc.Message) {
 	server.update(message)
 }
 
+func (server *Server) handlePause(msg *osc.Message) {
+	log.Printf("normal: %#v", msg)
+	message := ClockMessage{
+		Type: "pause",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleResume(msg *osc.Message) {
+	log.Printf("normal: %#v", msg)
+	message := ClockMessage{
+		Type: "resume",
+	}
+	server.update(message)
+}
+
 func (server *Server) handleDisplay(msg *osc.Message) {
 	var message DisplayMessage
 
@@ -151,6 +167,8 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/countdown2/modify", server.handleCountdownModify2)
 	registerHandler(oscServer, "/clock/countdown/stop", server.handleCountdownStop)
 	registerHandler(oscServer, "/clock/countdown2/stop", server.handleCountdownStop2)
+	registerHandler(oscServer, "/clock/pause", server.handlePause)
+	registerHandler(oscServer, "/clock/resume", server.handleResume)
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/kill", server.handleKill)
 	registerHandler(oscServer, "/clock/normal", server.handleNormal)

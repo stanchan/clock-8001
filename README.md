@@ -125,6 +125,8 @@ Payload:
 
 Stops the countdown. The killed countdown will vanish from the clock display. To restore time display issue /clock/normal command.
 
+Payload: none
+
 ### /clock/countup/start
 
 Starts counting up time.
@@ -135,9 +137,25 @@ Payload: none
 
 (Almost) blanks the display. Only the 12 static leds and one led on the ring will be on.
 
+Payload: none
+
 ### /clock/normal
 
 Returns the clock to normal mode displaying current time.
+
+Payload: none
+
+### /clock/pause
+
+Pauses countdown timer(s).
+
+Payload: none
+
+### /clock/resume
+
+Resumes countdown timers()
+
+Payload: none
 
 ## OSC feedback
 
