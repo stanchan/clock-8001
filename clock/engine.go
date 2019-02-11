@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
+const Version = "2.1.0"
+
 type EngineOptions struct {
-	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms)" default:"500"`
+	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
 	Timezone       string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
 	ListenAddr     string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
 	Timeout        int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
@@ -75,6 +77,8 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		cd2Blue:    options.CountdownBlue,
 	}
 
+	log.Printf("Clock-8001 engine version %s\n", Version)
+
 	// Setup the OSC listener
 	engine.oscServer = osc.Server{
 		Addr: options.ListenAddr,
@@ -89,7 +93,6 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		return nil, err
 	}
 	engine.timeZone = tz
-	engine.flasher = time.NewTicker(time.Duration(options.Flash) * time.Millisecond)
 
 	// OSC feedback
 	if udpAddr, err := net.ResolveUDPAddr("udp", options.Connect); err != nil {
@@ -101,7 +104,12 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	}
 
 	// Led flash cycle
-	go engine.flash()
+	// Setting the interval to 0 disables
+	if options.Flash > 0 {
+		engine.flasher = time.NewTicker(time.Duration(options.Flash) * time.Millisecond)
+		go engine.flash()
+	}
+
 	// OSC listen
 	go engine.listen()
 

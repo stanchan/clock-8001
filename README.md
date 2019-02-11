@@ -46,7 +46,7 @@ Application Options:
       --sec-green=    Green component of second color (default: 0)
       --sec-blue=     Blue component of second color (default: 0)
   -p, --time-pin=     Pin to select foreign timezone, active low (default: 15)
-      --flash=        Flashing interval when countdown reached zero (ms) (default: 500)
+      --flash=        Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
   -t, --local-time=   Local timezone (default: Europe/Helsinki)
       --osc-listen=   Address to listen for incoming osc messages (default: 0.0.0.0:1245)
   -d, --timeout=      Timeout for OSC message updates in milliseconds (default: 1000)
