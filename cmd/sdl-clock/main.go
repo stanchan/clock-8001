@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"gitlab.com/Depili/clock-8001/clock"
 	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	// "github.com/depili/go-rgb-led-matrix/matrix"
@@ -10,6 +9,7 @@ import (
 	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
+	"log"
 	"os"
 	"os/signal"
 	"time"
@@ -47,7 +47,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("GPIO initialized.\n")
+	log.Printf("GPIO initialized.\n")
 
 	/*
 		// Load timezones
@@ -60,7 +60,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Timezones loaded.\n")
+		log.Printf("Timezones loaded.\n")
 	*/
 
 	// Parse font for clock text
@@ -69,25 +69,22 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("Fonts loaded.\n")
+	log.Printf("Fonts loaded.\n")
 
 	// Initialize SDL
 
 	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to initialize SDL: %s\n", err)
-		return
+		log.Fatalf("Failed to initialize SDL: %s\n", err)
 	}
 	defer sdl.Quit()
 
 	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_SHOWN); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to create window: %s\n", err)
-		return
+		log.Fatalf("Failed to create window: %s\n", err)
 	}
 	defer window.Destroy()
 
 	if renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
-		return // don't use os.Exit(3); otherwise, previous deferred calls will never run
+		log.Fatalf("Failed to create renderer: %s\n", err)
 	}
 
 	sdl.ShowCursor(0) // Hide mouse cursor
@@ -95,10 +92,10 @@ func main() {
 	renderer.Clear()
 	defer renderer.Destroy()
 
-	fmt.Printf("SDL init done\n")
+	log.Printf("SDL init done\n")
 
 	rendererInfo, _ := renderer.GetInfo()
-	fmt.Printf("Renderer: %v\n", rendererInfo.Name)
+	log.Printf("Renderer: %v\n", rendererInfo.Name)
 
 	// Clock colors from flags
 	textSDLColor = sdl.Color{Options.TextRed, Options.TextGreen, Options.TextBlue, 255}
@@ -157,7 +154,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("Entering main loop\n")
+	log.Printf("Entering main loop\n")
 
 	for {
 		select {
