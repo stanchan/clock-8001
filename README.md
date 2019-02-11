@@ -172,3 +172,5 @@ The clock sends it's state to the address specified with --osc-dest on `/clock/s
 4. string: seconds display
 5. string: "tally" text
 6. int32: pause state, 0 = running, 1 = paused
+
+The above fields can be considered as stable, but additional fields are possible, so if possible check that the field count is 6 or more in implementations.
