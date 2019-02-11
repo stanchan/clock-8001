@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const Version = "2.2.0"
+const Version = "3.0.0"
 
 type EngineOptions struct {
 	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
@@ -28,6 +28,7 @@ const (
 	Countdown = iota // Display countdown timer only
 	Countup   = iota // Count time up
 	Off       = iota // (Mostly) blank screen
+	Paused    = iota // Paused countdown timer(s)
 )
 
 type countdownData struct {
@@ -214,7 +215,14 @@ func (engine *Engine) sendState() error {
 		minutes = engine.Hours
 		seconds = engine.Minutes
 	}
-	packet := osc.NewMessage("/clock/state", int32(engine.mode), hours, minutes, seconds, engine.Tally)
+	mode := engine.mode
+	pause := int32(0)
+
+	if engine.paused {
+		pause = 1
+	}
+
+	packet := osc.NewMessage("/clock/state", int32(mode), hours, minutes, seconds, engine.Tally, pause)
 
 	if data, err := packet.MarshalBinary(); err != nil {
 		return err
@@ -405,34 +413,34 @@ func (engine *Engine) formatCount2(diff time.Duration) {
 
 // Start a countdown timer
 func (engine *Engine) StartCountdown(timer time.Duration) {
-	ct := countdownData{
+	cd := countdownData{
 		target:   time.Now().Add(timer).Truncate(time.Second),
 		duration: timer,
 		left:     timer,
 		active:   true,
 	}
-	engine.countdown = &ct
+	engine.countdown = &cd
 	engine.mode = Countdown
 }
 
 // Start a countdown timer
 func (engine *Engine) StartCountdown2(timer time.Duration) {
-	ct := countdownData{
+	cd := countdownData{
 		target:   time.Now().Add(timer).Truncate(time.Second),
 		duration: timer,
 		left:     timer,
 		active:   true,
 	}
-	engine.countdown2 = &ct
+	engine.countdown2 = &cd
 }
 
 // Start counting time up from this moment
 func (engine *Engine) StartCountup() {
-	ct := countdownData{
+	cd := countdownData{
 		target: time.Now().Truncate(time.Second),
 		active: true,
 	}
-	engine.countdown = &ct
+	engine.countdown = &cd
 	engine.mode = Countup
 }
 
@@ -445,35 +453,48 @@ func (engine *Engine) Normal() {
 // Add or remove time from countdowns
 func (engine *Engine) ModifyCountdown(delta time.Duration) {
 	if engine.mode == Countdown {
-		ct := countdownData{
+		cd := countdownData{
 			target:   engine.countdown.target.Add(delta),
 			duration: engine.countdown.duration + delta,
 			left:     engine.countdown.left + delta,
 		}
-		engine.countdown = &ct
+		engine.countdown = &cd
 	}
 }
 
 func (engine *Engine) ModifyCountdown2(delta time.Duration) {
 	if engine.countdown2.active {
-		ct := countdownData{
+		cd := countdownData{
 			target:   engine.countdown2.target.Add(delta),
 			duration: engine.countdown2.duration + delta,
 			left:     engine.countdown2.left + delta,
 			active:   engine.countdown2.active,
 		}
-		engine.countdown2 = &ct
+		engine.countdown2 = &cd
 	}
 }
 
 func (engine *Engine) StopCountdown() {
 	if engine.mode == Countdown {
+		cd := countdownData{
+			target:   time.Now(),
+			duration: time.Millisecond,
+			left:     time.Millisecond,
+			active:   false,
+		}
+		engine.countdown = &cd
 		engine.mode = Off
 	}
 }
 
 func (engine *Engine) StopCountdown2() {
-	engine.countdown2.active = false
+	cd := countdownData{
+		target:   time.Now(),
+		duration: time.Millisecond,
+		left:     time.Millisecond,
+		active:   false,
+	}
+	engine.countdown2 = &cd
 }
 
 func (engine *Engine) Kill() {
@@ -482,15 +503,19 @@ func (engine *Engine) Kill() {
 }
 
 func (engine *Engine) Pause() {
-	t := time.Now()
-	engine.countdown.left = engine.countdown.target.Sub(t).Truncate(time.Second)
-	engine.countdown2.left = engine.countdown2.target.Sub(t).Truncate(time.Second)
-	engine.paused = true
+	if !engine.paused {
+		t := time.Now()
+		engine.countdown.left = engine.countdown.target.Sub(t).Truncate(time.Second)
+		engine.countdown2.left = engine.countdown2.target.Sub(t).Truncate(time.Second)
+		engine.paused = true
+	}
 }
 
 func (engine *Engine) Resume() {
-	t := time.Now()
-	engine.countdown.target = t.Add(engine.countdown.left).Truncate(time.Second)
-	engine.countdown2.target = t.Add(engine.countdown2.left).Truncate(time.Second)
-	engine.paused = false
+	if engine.paused {
+		t := time.Now()
+		engine.countdown.target = t.Add(engine.countdown.left).Truncate(time.Second)
+		engine.countdown2.target = t.Add(engine.countdown2.left).Truncate(time.Second)
+		engine.paused = false
+	}
 }

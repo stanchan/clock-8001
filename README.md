@@ -14,6 +14,8 @@ You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl
 
 The images support raspberry pi 2B / 3B / 3B+ boards. They need at least 64Mb SD-cards. Write them to the card like any other raspberry pi sd-card image.
 
+The image tries to get a dhcp address on wired ethernet and also brings up a virtual interface eth0:1 with static ip (default 192.168.10.245 with 255.255.255.0 netmask).
+
 https://kissa.depili.fi/clock-8001/sdl-clock_v2.1-clockworkadmin.img Is a image with root logins (ssh and local) enabled. The root password is `clockworkadmin`. Since this image uses a known hard coded password it should be for testing only and considered insecure.
 
 https://kissa.depili.fi/clock-8001/sdl-clock_v2.1-no_login.img This image has root logins disabled and is secure for production use.
@@ -160,8 +162,9 @@ Payload: none
 ## OSC feedback
 
 The clock sends it's state to the address specified with --osc-dest on `/clock/status` message. The payload is:
-1. int32 clock display mode
+1. int32 clock display mode, 0 = time of day, 1 = countdown, 2 = count up, 3 = off
 2. string: hours display
 3. string: minutes display
 4. string: seconds display
 5. string: "tally" text
+6. int32: pause state, 0 = running, 1 = paused
