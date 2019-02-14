@@ -11,7 +11,7 @@ import (
 	"regexp"
 )
 
-var Options struct {
+var options struct {
 	ClockClientOptions      clock.ClientOptions `group:"qmsk/osc-tally clock client"`
 	ClockRemainingThreshold float32             `long:"clock-remaining-threshold" default:"20"`
 	Ignore                  string              `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
@@ -20,7 +20,7 @@ var Options struct {
 	Debug                   bool   `long:"osc-debug"`
 }
 
-var parser = flags.NewParser(&Options, flags.Default)
+var parser = flags.NewParser(&options, flags.Default)
 
 func sendClockMessage(clockClient *clock.Client, remaining float32, playing bool) error {
 	var clockCount = clock.CountMessage{}
@@ -32,7 +32,7 @@ func sendClockMessage(clockClient *clock.Client, remaining float32, playing bool
 			ColorBlue:  255,
 			Symbol:     "Ⅱ",
 		}
-	} else if remaining > Options.ClockRemainingThreshold {
+	} else if remaining > options.ClockRemainingThreshold {
 		clockCount = clock.CountMessage{
 			ColorRed:   0,
 			ColorGreen: 255,
@@ -58,7 +58,7 @@ func updateMilluminClock(clockClient *clock.Client, state millumin.State) error 
 	for _, layerState := range state {
 		if !layerState.Playing {
 			continue
-		} else if Options.ignoreRegexp.MatchString(layerState.Layer) {
+		} else if options.ignoreRegexp.MatchString(layerState.Layer) {
 			continue
 		}
 
@@ -82,16 +82,15 @@ func runMilluminClockClient(clockClient *clock.Client, listenChan chan millumin.
 func updateMittiClock(clockClient *clock.Client, state mitti.State) error {
 	if !state.Loop {
 		return sendClockMessage(clockClient, state.Remaining, state.Playing)
-	} else {
-		clockCount := clock.CountMessage{
-			ColorRed:   0,
-			ColorGreen: 255,
-			ColorBlue:  0,
-			Symbol:     "⇄",
-		}
-		clockCount.SetTimeRemaining(state.Remaining)
-		return clockClient.SendCount(clockCount)
 	}
+	clockCount := clock.CountMessage{
+		ColorRed:   0,
+		ColorGreen: 255,
+		ColorBlue:  0,
+		Symbol:     "⇄",
+	}
+	clockCount.SetTimeRemaining(state.Remaining)
+	return clockClient.SendCount(clockCount)
 }
 
 func runMittiClockClient(clockClient *clock.Client, listenChan chan mitti.State) {
@@ -106,11 +105,9 @@ func runMittiClockClient(clockClient *clock.Client, listenChan chan mitti.State)
 }
 
 func startClockClient(milluminListener *millumin.Listener, mittiListener *mitti.Listener) error {
-	client, err := Options.ClockClientOptions.MakeClient()
+	client, err := options.ClockClientOptions.MakeClient()
 	if err != nil {
 		return err
-	} else {
-
 	}
 
 	go runMilluminClockClient(client, milluminListener.Listen())
@@ -120,7 +117,7 @@ func startClockClient(milluminListener *millumin.Listener, mittiListener *mitti.
 }
 
 func run(oscServer *osc.Server) error {
-	if Options.Debug {
+	if options.Debug {
 		oscServer.Handle("*", func(msg *osc.Message) {
 			osc.PrintMessage(msg)
 		})
@@ -129,7 +126,7 @@ func run(oscServer *osc.Server) error {
 	var milluminListener = millumin.MakeListener(oscServer)
 	var mittiListener = mitti.MakeListener(oscServer)
 
-	if Options.ClockClientOptions.Connect == "" {
+	if options.ClockClientOptions.Connect == "" {
 
 	} else if err := startClockClient(milluminListener, mittiListener); err != nil {
 		return fmt.Errorf("start clock client: %v", err)
@@ -144,17 +141,17 @@ func main() {
 	if _, err := parser.Parse(); err != nil {
 		log.Fatalf("parse flags: %v", err)
 	} else {
-		log.Printf("options: %#v", Options)
+		log.Printf("options: %#v", options)
 	}
 
-	regexp, err := regexp.Compile("(?i)" + Options.Ignore)
+	regexp, err := regexp.Compile("(?i)" + options.Ignore)
 	if err != nil {
-		log.Fatalf("Invalid --millumin-ignore-layer=%v: %v", Options.Ignore, err)
+		log.Fatalf("Invalid --millumin-ignore-layer=%v: %v", options.Ignore, err)
 	}
-	Options.ignoreRegexp = regexp
+	options.ignoreRegexp = regexp
 
 	var oscServer = osc.Server{
-		Addr: Options.ListenAddr,
+		Addr: options.ListenAddr,
 	}
 
 	if err := run(&oscServer); err != nil {

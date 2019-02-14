@@ -20,7 +20,7 @@ var secSDLColor sdl.Color = sdl.Color{200, 0, 0, 255}
 var textSDLColor sdl.Color
 var window *sdl.Window
 var renderer *sdl.Renderer
-var parser = flags.NewParser(&Options, flags.Default)
+var parser = flags.NewParser(&options, flags.Default)
 
 var textureSource sdl.Rect
 var staticTexture *sdl.Texture
@@ -40,7 +40,7 @@ func main() {
 		panic(err)
 	}
 
-	timePin, err := embd.NewDigitalPin(Options.TimePin)
+	timePin, err := embd.NewDigitalPin(options.TimePin)
 	if err != nil {
 		panic(err)
 	} else if err := timePin.SetDirection(embd.In); err != nil {
@@ -51,12 +51,12 @@ func main() {
 
 	/*
 		// Load timezones
-		local, err := time.LoadLocation(Options.LocalTime)
+		local, err := time.LoadLocation(options.LocalTime)
 		if err != nil {
 			panic(err)
 		}
 
-		foreign, err := time.LoadLocation(Options.ForeignTime)
+		foreign, err := time.LoadLocation(options.ForeignTime)
 		if err != nil {
 			panic(err)
 		}
@@ -64,7 +64,7 @@ func main() {
 	*/
 
 	// Parse font for clock text
-	font, err := bdf.Parse(Options.Font)
+	font, err := bdf.Parse(options.Font)
 	if err != nil {
 		panic(err)
 	}
@@ -98,9 +98,9 @@ func main() {
 	log.Printf("Renderer: %v\n", rendererInfo.Name)
 
 	// Clock colors from flags
-	textSDLColor = sdl.Color{Options.TextRed, Options.TextGreen, Options.TextBlue, 255}
-	staticSDLColor = sdl.Color{Options.StaticRed, Options.StaticGreen, Options.StaticBlue, 255}
-	secSDLColor = sdl.Color{Options.SecRed, Options.SecGreen, Options.SecBlue, 255}
+	textSDLColor = sdl.Color{options.TextRed, options.TextGreen, options.TextBlue, 255}
+	staticSDLColor = sdl.Color{options.StaticRed, options.StaticGreen, options.StaticBlue, 255}
+	secSDLColor = sdl.Color{options.SecRed, options.SecGreen, options.SecBlue, 255}
 	// Default color for the OSC field (black)
 	tallyColor := sdl.Color{0, 0, 0, 255}
 
@@ -109,7 +109,7 @@ func main() {
 	var textureRadius int32 = 19
 
 	// Create a texture for circles
-	if Options.Small {
+	if options.Small {
 		textureSize = 8
 		textureCoord = 3
 		textureRadius = 3
@@ -123,14 +123,14 @@ func main() {
 	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	renderer.SetRenderTarget(staticTexture)
 	gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
-	if !Options.Small {
+	if !options.Small {
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 	}
 
 	secTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	renderer.SetRenderTarget(secTexture)
 	gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
-	if !Options.Small {
+	if !options.Small {
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	}
 
@@ -149,7 +149,7 @@ func main() {
 
 	updateTicker := time.NewTicker(time.Millisecond * 30)
 
-	engine, err := clock.MakeEngine(Options.EngineOptions)
+	engine, err := clock.MakeEngine(options.EngineOptions)
 	if err != nil {
 		panic(err)
 	}
@@ -203,7 +203,7 @@ func drawSecondCircles(seconds int) {
 	for i := 0; i <= int(seconds); i++ {
 		// gfx.FilledCircleColor(renderer, secCircles[i][0], secCircles[i][1], 20, secSDLColor)
 		dest := sdl.Rect{secCircles[i][0] - 20, secCircles[i][1] - 20, 40, 40}
-		if Options.Small {
+		if options.Small {
 			dest = sdl.Rect{secCircles[i][0] - 4, secCircles[i][1] - 4, 8, 8}
 		}
 		renderer.Copy(secTexture, &textureSource, &dest)
@@ -213,7 +213,7 @@ func drawSecondCircles(seconds int) {
 func drawStaticCircles() {
 	// Draw static indicator circles
 	for _, p := range staticCircles {
-		if Options.Small {
+		if options.Small {
 			dest := sdl.Rect{p[0] - 4, p[1] - 4, 8, 8}
 			renderer.Copy(staticTexture, &textureSource, &dest)
 		} else {

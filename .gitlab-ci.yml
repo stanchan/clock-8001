@@ -1,0 +1,70 @@
+image: registry.gitlab.com/depili/clock-8001:latest
+
+variables:
+  GIT_STRATEGY: fetch
+  GIT_SUBMODULE_STRATEGY: recursive
+
+
+cache:
+  paths:
+    - /apt-cache
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+
+stages:
+  - test
+  - build
+
+before_script:
+  - mkdir -p /go/src/gitlab.com/Depili /go/src/_/builds
+  - cp -r $CI_PROJECT_DIR /go/src/gitlab.com/Depili/clock-8001
+  - ln -s /go/src/gitlab.com/Depili /go/src/_/builds/clock-8001
+  - make dep
+
+unit_tests:
+  stage: test
+  script:
+    - make test
+
+race_detector:
+  stage: test
+  script:
+    - make race
+
+memory_sanitizer:
+  stage: test
+  variables:
+    CC: clang-7
+  script:
+    - make msan
+
+code_coverage:
+  stage: test
+  script:
+    - make coverage
+
+code_coverage_report:
+  stage: test
+  script:
+    - make coverhtml
+  only:
+  - master
+
+lint_code:
+  stage: test
+  script:
+    - make lint
+
+build:
+  image: registry.gitlab.com/depili/clock-8001-build:master
+  stage: build
+  script:
+    - make build
+  artifacts:
+     paths:
+     - matrix-clock
+     - sdl-clock
+     - clock-8001
+

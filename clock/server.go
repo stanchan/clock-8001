@@ -5,9 +5,10 @@ import (
 	"log"
 )
 
+// MakeServer creates a clock.Server instance from osc.Server instance
 func MakeServer(oscServer *osc.Server) *Server {
 	var server = Server{
-		listeners: make(map[chan ClockMessage]struct{}),
+		listeners: make(map[chan Message]struct{}),
 	}
 
 	server.setup(oscServer)
@@ -15,22 +16,22 @@ func MakeServer(oscServer *osc.Server) *Server {
 	return &server
 }
 
+// Server is a clock osc server and listens for incoming osc messages
 type Server struct {
-	listeners map[chan ClockMessage]struct{}
+	listeners map[chan Message]struct{}
 }
 
-func (server *Server) Listen() chan ClockMessage {
-	var listenChan = make(chan ClockMessage)
-
+// Listen adds a new listener for the decoded incoming osc messages
+func (server *Server) Listen() chan Message {
+	var listenChan = make(chan Message)
 	server.listeners[listenChan] = struct{}{}
-
 	return listenChan
 }
 
-func (server *Server) update(message ClockMessage) {
+func (server *Server) update(message Message) {
 	log.Printf("update: %#v", message)
 
-	for listenChan, _ := range server.listeners {
+	for listenChan := range server.listeners {
 		listenChan <- message
 	}
 }
@@ -41,7 +42,7 @@ func (server *Server) handleCount(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		msg := ClockMessage{
+		msg := Message{
 			Type:         "count",
 			CountMessage: &message,
 		}
@@ -51,7 +52,7 @@ func (server *Server) handleCount(msg *osc.Message) {
 
 func (server *Server) handleCountupStart(msg *osc.Message) {
 	log.Printf("countup start: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "countup",
 	}
 	server.update(message)
@@ -59,7 +60,7 @@ func (server *Server) handleCountupStart(msg *osc.Message) {
 
 func (server *Server) handleKill(msg *osc.Message) {
 	log.Printf("kill: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "kill",
 	}
 	server.update(message)
@@ -83,7 +84,7 @@ func (server *Server) handleCountdownModify2(msg *osc.Message) {
 
 func (server *Server) handleCountdownStop(msg *osc.Message) {
 	log.Printf("countdownStop: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "countdownStop",
 	}
 	server.update(message)
@@ -91,7 +92,7 @@ func (server *Server) handleCountdownStop(msg *osc.Message) {
 
 func (server *Server) handleCountdownStop2(msg *osc.Message) {
 	log.Printf("countdownStop2: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "countdownStop2",
 	}
 	server.update(message)
@@ -104,7 +105,7 @@ func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
 		log.Printf("%s: %#v", cmd, message)
-		msg := ClockMessage{
+		msg := Message{
 			Type:             cmd,
 			CountdownMessage: &message,
 		}
@@ -114,7 +115,7 @@ func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
 
 func (server *Server) handleNormal(msg *osc.Message) {
 	log.Printf("normal: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "normal",
 	}
 	server.update(message)
@@ -122,7 +123,7 @@ func (server *Server) handleNormal(msg *osc.Message) {
 
 func (server *Server) handlePause(msg *osc.Message) {
 	log.Printf("normal: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "pause",
 	}
 	server.update(message)
@@ -130,7 +131,7 @@ func (server *Server) handlePause(msg *osc.Message) {
 
 func (server *Server) handleResume(msg *osc.Message) {
 	log.Printf("normal: %#v", msg)
-	message := ClockMessage{
+	message := Message{
 		Type: "resume",
 	}
 	server.update(message)
@@ -143,7 +144,7 @@ func (server *Server) handleDisplay(msg *osc.Message) {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
 		log.Printf("display: %#v", message)
-		msg := ClockMessage{
+		msg := Message{
 			Type:           "display",
 			DisplayMessage: &message,
 		}

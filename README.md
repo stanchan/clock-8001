@@ -6,12 +6,13 @@ The clock can be controlled with the depili-clock-8001 companion module: https:/
 
 Developed in co-operation with [SVV](http://svv.fi/).
 
-## SDL clock
+## sdl-clock - Output the clock to hdmi on the raspberry pi
 
 You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl_clock`. Compiling requires SDL 2 and SDL_GFX 2 libraries. On the raspberry pi the default libraries shipped with rasbian will only output data to X11 window, so for full screen dedicated clock you need to compile the SDL libraries from source. For compiling use `./configure --host=armv7l-raspberry-linux-gnueabihf --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl` for config flags.
 
 ### Precompiled binaries
 
+* Latest from git master: [sdl-clock](https://gitlab.com/Depili/clock-8001/-/jobs/artifacts/master/raw/sdl-clock?job=build)
 * Version 3.0.0: https://kissa.depili.fi/clock-8001/sdl-clock_v3.0.0 (Needs companion module version 3.0.0 or later)
 
 ### Ready made raspberry pi images (version 2.1.0)
@@ -65,7 +66,7 @@ Help Options:
   -h, --help          Show this help message
 ```
 
-## Dedicated led matrix clock
+## matrix-clock - Dedicated led matrix clock
 
 Bill of materials:
 * Raspberry pi
@@ -79,6 +80,10 @@ Bill of materials:
 You need to compile https://gitlab.com/Depili/rpi-matrix for a small program that will listen on udp socket for the led matrix data and handle driving the led matrix.
 
 Compile the led matrix clock binary with `go get gitlab.com/Depili/clock-8001/cmd/clock`
+
+### Precompiled binaries
+
+* Latest from git master: [matrix-clock](https://gitlab.com/Depili/clock-8001/-/jobs/artifacts/master/raw/matrix-clock?job=build)
 
 ## Mitti and Millumin osc-converter
 

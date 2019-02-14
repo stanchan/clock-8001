@@ -4,14 +4,14 @@ import (
 	"gitlab.com/Depili/clock-8001/clock"
 )
 
-var winTitle string = "SDL CLOCK"
+var winTitle = "SDL CLOCK"
 var winWidth, winHeight int32 = 1920, 1080
 var gridStartX int32 = 569
 var gridStartY int32 = 149
 var gridSize int32 = 20
-var gridSpacing int = 25
+var gridSpacing = 25
 
-var Options struct {
+var options struct {
 	Small         bool   `short:"s" description:"Scale to 192x192px"`
 	Font          string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
 	TextRed       uint8  `short:"r" long:"red" description:"Red component of text color" default:"255"`
@@ -28,7 +28,7 @@ var Options struct {
 }
 
 // 12 "Hour" static circles
-var staticCircles [12][2]int32 = [12][2]int32{
+var staticCircles = [12][2]int32{
 	{1393, 790},
 	{1210, 973},
 	{960, 1040},
@@ -44,7 +44,7 @@ var staticCircles [12][2]int32 = [12][2]int32{
 }
 
 // radius 500 * 192 / 1080
-var smallStaticCircles [12][2]int32 = [12][2]int32{
+var smallStaticCircles = [12][2]int32{
 	{90, 169},
 	{49, 158},
 	{18, 128},
@@ -60,7 +60,7 @@ var smallStaticCircles [12][2]int32 = [12][2]int32{
 }
 
 // Second circles
-var secCircles [60][2]int32 = [60][2]int32{
+var secCircles = [60][2]int32{
 	{959, 90},
 	{1007, 92},
 	{1053, 99},
@@ -124,7 +124,7 @@ var secCircles [60][2]int32 = [60][2]int32{
 }
 
 // n = 60, center = 192 / 2, radius = 450 * 192 / 1080
-var smallSecCircles [60][2]int32 = [60][2]int32{
+var smallSecCircles = [60][2]int32{
 	{86, 15},
 	{93, 15},
 	{101, 16},

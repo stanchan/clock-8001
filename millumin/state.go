@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
+// State is complete Millumin playback state for all layers
 type State map[string]LayerState
 
+// LayerState is the state of individual Millumin playback layer
 type LayerState struct {
 	Layer    string
 	Updated  time.Time
@@ -18,11 +20,13 @@ type LayerState struct {
 	Time     float32
 }
 
+// Remaining returns the time remaining on the given layer
 func (state LayerState) Remaining() float32 {
 	// TODO: sanity-check
 	return state.Duration - state.Time
 }
 
+// String prints the layer information
 func (state *LayerState) String() string {
 	return fmt.Sprintf("Layer %s updated %.2fs ago: playing=%v info={index=%v name=%v duration=%f} duration=%f paused=%v time=%f",
 		state.Layer, time.Now().Sub(state.Updated).Seconds(),

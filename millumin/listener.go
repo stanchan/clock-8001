@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// MakeListener creates a osc listener for messages sent by Millumin
 func MakeListener(oscServer *osc.Server) *Listener {
 	var listener = Listener{
 		layers:    make(map[string]*LayerState),
@@ -16,11 +17,14 @@ func MakeListener(oscServer *osc.Server) *Listener {
 	return &listener
 }
 
+// Listener is a osc receiver for messages sent by Millumin
+// Use MakeListener to create
 type Listener struct {
 	layers    map[string]*LayerState
 	listeners map[chan State]struct{}
 }
 
+// Listen is used to register new listeners for the decoded millumin playback state
 func (listener *Listener) Listen() chan State {
 	var listenChan = make(chan State)
 
@@ -36,21 +40,18 @@ func (listener *Listener) update() {
 		state[layer] = *layerState
 	}
 
-	for listenChan, _ := range listener.listeners {
+	for listenChan := range listener.listeners {
 		listenChan <- state
 	}
 }
 
 func (listener *Listener) layer(layer string) *LayerState {
-	if state := listener.layers[layer]; state == nil {
+	state := listener.layers[layer]
+	if state == nil {
 		state = &LayerState{Layer: layer}
-
 		listener.layers[layer] = state
-
-		return state
-	} else {
-		return state
 	}
+	return state
 }
 
 func (listener *Listener) handleMediaStarted(msg *osc.Message) {

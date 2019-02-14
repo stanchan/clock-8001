@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var Options struct {
+var options struct {
 	Font          string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
 	Matrix        string `short:"m" long:"matrix" description:"Matrix to connect to" required:"true"`
 	SerialName    string `long:"serial-name" description:"Serial device for arduino" default:"/dev/ttyUSB0"`
@@ -26,7 +26,7 @@ var Options struct {
 	EngineOptions *clock.EngineOptions
 }
 
-var parser = flags.NewParser(&Options, flags.Default)
+var parser = flags.NewParser(&options, flags.Default)
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
@@ -35,8 +35,8 @@ func main() {
 
 	// Serial connection for the led ring
 	serialConfig := serial.Config{
-		Name: Options.SerialName,
-		Baud: Options.SerialBaud,
+		Name: options.SerialName,
+		Baud: options.SerialBaud,
 		// ReadTimeout:    options.SerialTimeout,
 	}
 
@@ -52,7 +52,7 @@ func main() {
 		panic(err)
 	}
 
-	timePin, err := embd.NewDigitalPin(Options.TimePin)
+	timePin, err := embd.NewDigitalPin(options.TimePin)
 	if err != nil {
 		panic(err)
 	} else if err := timePin.SetDirection(embd.In); err != nil {
@@ -62,7 +62,7 @@ func main() {
 	fmt.Printf("GPIO initialized.\n")
 
 	// Parse font for clock text
-	font, err := bdf.Parse(Options.Font)
+	font, err := bdf.Parse(options.Font)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +70,7 @@ func main() {
 	fmt.Printf("Fonts loaded.\n")
 
 	// Initialize the led matrix library
-	m := matrix.Init(Options.Matrix, 32, 32)
+	m := matrix.Init(options.Matrix, 32, 32)
 	defer m.Close()
 
 	// Trap SIGINT aka Ctrl-C
@@ -78,7 +78,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	// Clock text color from flags
-	textColor := [3]byte{byte(Options.TextRed), byte(Options.TextGreen), byte(Options.TextBlue)}
+	textColor := [3]byte{byte(options.TextRed), byte(options.TextGreen), byte(options.TextBlue)}
 	// Default color for the OSC field (black)
 	tallyColor := [3]byte{0x00, 0x00, 0x00}
 
@@ -91,7 +91,7 @@ func main() {
 	updateTicker := time.NewTicker(time.Millisecond * 10)
 	send := make([]byte, 1)
 
-	engine, err := clock.MakeEngine(Options.EngineOptions)
+	engine, err := clock.MakeEngine(options.EngineOptions)
 	if err != nil {
 		panic(err)
 	}

@@ -14,15 +14,15 @@ var clockUnits = []struct {
 	{"d", 24 * 60 * 60},
 }
 
-// Generic clock message
-type ClockMessage struct {
+// Message is a generic clock message for decoded osc data
+type Message struct {
 	Type             string
 	CountMessage     *CountMessage
 	CountdownMessage *CountdownMessage
 	DisplayMessage   *DisplayMessage
 }
 
-// /qmsk/clock/count
+// CountMessage is a legacy message format for /qmsk/clock/count
 type CountMessage struct {
 	ColorRed   float32
 	ColorGreen float32
@@ -32,12 +32,12 @@ type CountMessage struct {
 	Unit       string
 }
 
-// /clock/countdown/start
+// CountdownMessage is for /clock/countdown/start
 type CountdownMessage struct {
 	Seconds int32
 }
 
-// /clock/display
+// DisplayMessage is for /clock/display
 type DisplayMessage struct {
 	ColorRed   float32
 	ColorGreen float32
@@ -45,6 +45,7 @@ type DisplayMessage struct {
 	Text       string
 }
 
+// UnmarshalOSC converts a osc.Message to DisplayMessage
 func (message *DisplayMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(
 		&message.ColorRed,
@@ -54,6 +55,7 @@ func (message *DisplayMessage) UnmarshalOSC(msg *osc.Message) error {
 	)
 }
 
+// MarshalOSC converts a DisplayMessage to osc.Message
 func (message DisplayMessage) MarshalOSC(addr string) *osc.Message {
 	return osc.NewMessage(addr,
 		message.ColorRed,
@@ -63,18 +65,21 @@ func (message DisplayMessage) MarshalOSC(addr string) *osc.Message {
 	)
 }
 
+// UnmarshalOSC converts a osc.Message to CountdownMessage
 func (message *CountdownMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(
 		&message.Seconds,
 	)
 }
 
+// MarshalOSC converts a CountdownMessage to osc.Message
 func (message CountdownMessage) MarshalOSC(addr string) *osc.Message {
 	return osc.NewMessage(addr,
 		message.Seconds,
 	)
 }
 
+// SetTimeRemaining sets the remaining time for CountMessage and formats the unit
 func (message *CountMessage) SetTimeRemaining(seconds float32) {
 	for _, unit := range clockUnits {
 		if seconds/unit.seconds >= 100 {
@@ -83,7 +88,6 @@ func (message *CountMessage) SetTimeRemaining(seconds float32) {
 
 		message.Unit = unit.unit
 		message.Count = int32(seconds/unit.seconds + 0.5) // round
-
 		return
 	}
 
@@ -91,6 +95,7 @@ func (message *CountMessage) SetTimeRemaining(seconds float32) {
 	message.Count = 0
 }
 
+// UnmarshalOSC converts a osc.Message to CountMessage
 func (message *CountMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(
 		&message.ColorRed,
@@ -102,6 +107,7 @@ func (message *CountMessage) UnmarshalOSC(msg *osc.Message) error {
 	)
 }
 
+// MarshalOSC converts a CountMessage to osc.Message
 func (message CountMessage) MarshalOSC(addr string) *osc.Message {
 	return osc.NewMessage(addr,
 		message.ColorRed,

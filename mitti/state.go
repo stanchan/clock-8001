@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// State is the Mitti playback state from osc messages
 type State struct {
 	Remaining float32
 	Playing   bool
@@ -22,6 +23,7 @@ func (state *State) String() string {
 	)
 }
 
+// CueTimeLeft gets the time left on current Mitti cue
 func (state *State) CueTimeLeft(cueTimeLeft string) {
 	var hours, min, sec, cs int
 
@@ -39,6 +41,7 @@ func (state *State) CueTimeLeft(cueTimeLeft string) {
 	state.Remaining = float32(cs) / 100
 }
 
+// TogglePlay toggles the play/pause state
 func (state *State) TogglePlay(i int32) {
 	state.Updated = time.Now()
 	if i == 0 {
@@ -52,6 +55,7 @@ func (state *State) TogglePlay(i int32) {
 	log.Printf("togglePlay: %d", i)
 }
 
+// ToggleLoop toggles the loop state
 func (state *State) ToggleLoop(i int32) {
 	state.Updated = time.Now()
 	if i == 0 {
@@ -63,6 +67,7 @@ func (state *State) ToggleLoop(i int32) {
 	log.Printf("toggleLoop: %d", i)
 }
 
+// Copy creates a new copy of the Mitti state
 func (state *State) Copy() State {
 	s := State{
 		Remaining: state.Remaining,

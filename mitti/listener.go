@@ -5,27 +5,27 @@ import (
 	"log"
 )
 
+// MakeListener creates a Mitti OSC message listener
 func MakeListener(oscServer *osc.Server) *Listener {
 	var listener = Listener{
 		listeners: make(map[chan State]struct{}),
 	}
-
 	var state State
 	state.Playing = false
 	state.Paused = true
 	state.Remaining = 0
 	listener.state = &state
-
 	listener.setup(oscServer)
-
 	return &listener
 }
 
+// Listener is a Mitti OSC message receiver
 type Listener struct {
 	state     *State
 	listeners map[chan State]struct{}
 }
 
+// Listen registers a new listener for the decoded Mitti messages
 func (listener *Listener) Listen() chan State {
 	var listenChan = make(chan State)
 
@@ -37,7 +37,7 @@ func (listener *Listener) Listen() chan State {
 func (listener *Listener) update() {
 	state := listener.state.Copy()
 
-	for listenChan, _ := range listener.listeners {
+	for listenChan := range listener.listeners {
 		listenChan <- state
 	}
 	log.Printf("mitti state update: %v\n", listener.state)

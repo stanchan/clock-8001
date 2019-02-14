@@ -6,10 +6,12 @@ import (
 	"net"
 )
 
+// ClientOptions common options for client instances
 type ClientOptions struct {
-	Connect string `long:"clock-client-connect"`
+	Connect string `long:"clock-client-connect"` // Address to connect to with OSC
 }
 
+// MakeClient Create a clock OSC client
 func (options ClientOptions) MakeClient() (*Client, error) {
 	var client = Client{}
 
@@ -24,10 +26,12 @@ func (options ClientOptions) MakeClient() (*Client, error) {
 	return &client, nil
 }
 
+// Client A clock osc client
 type Client struct {
 	udpConn *net.UDPConn
 }
 
+// Print the connection info of a Client
 func (client *Client) String() string {
 	return fmt.Sprintf("%v", client.udpConn.RemoteAddr())
 }
@@ -42,14 +46,17 @@ func (client *Client) send(packet osc.Packet) error {
 	}
 }
 
+// SendDisplay Send a /clock/display message
 func (client *Client) SendDisplay(message DisplayMessage) error {
 	return client.send(message.MarshalOSC("/clock/display"))
 }
 
+// SendCount Send a /clock/count message
 func (client *Client) SendCount(message CountMessage) error {
 	return client.send(message.MarshalOSC("/qmsk/clock/count"))
 }
 
+// SendStart Send a /clock/countdown/start message
 func (client *Client) SendStart(message CountdownMessage) error {
 	return client.send(message.MarshalOSC("/clock/countdown/start"))
 }

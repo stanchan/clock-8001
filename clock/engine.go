@@ -10,8 +10,14 @@ import (
 	"time"
 )
 
+// Version is the current clock engine version
 const Version = "3.0.0"
 
+// Will get overridden by ldflags in Makefile
+var gitCommit string
+var gitTag string
+
+// EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
 	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
 	Timezone       string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
@@ -23,6 +29,7 @@ type EngineOptions struct {
 	CountdownBlue  uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
 }
 
+// Clock engine state constants
 const (
 	Normal    = iota // Display current time
 	Countdown = iota // Display countdown timer only
@@ -38,6 +45,7 @@ type countdownData struct {
 	active   bool
 }
 
+// Engine contains the state machine for clock-8001
 type Engine struct {
 	timeZone    *time.Location // Time zone, initialized from options
 	mode        int            // Main display mode
@@ -65,7 +73,7 @@ type Engine struct {
 	oscConn     *net.UDPConn  // Connection for sending feedback
 }
 
-// Create a clock engine
+// MakeEngine creates a clock engine
 func MakeEngine(options *EngineOptions) (*Engine, error) {
 	var engine = Engine{
 		mode:      Normal,
@@ -83,6 +91,8 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		cd2Blue:   options.CountdownBlue,
 	}
 
+	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
+
 	countdown := countdownData{
 		active: false,
 	}
@@ -91,8 +101,6 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		active: false,
 	}
 	engine.countdown2 = &countdown2
-
-	log.Printf("Clock-8001 engine version %s\n", Version)
 
 	// Setup the OSC listener
 	engine.oscServer = osc.Server{
@@ -411,7 +419,7 @@ func (engine *Engine) formatCount2(diff time.Duration) {
  * OSC Message handlers
  */
 
-// Start a countdown timer
+// StartCountdown starts a primary countdown timer
 func (engine *Engine) StartCountdown(timer time.Duration) {
 	cd := countdownData{
 		target:   time.Now().Add(timer).Truncate(time.Second),
@@ -423,7 +431,7 @@ func (engine *Engine) StartCountdown(timer time.Duration) {
 	engine.mode = Countdown
 }
 
-// Start a countdown timer
+// StartCountdown2 starts a secondary countdown timer
 func (engine *Engine) StartCountdown2(timer time.Duration) {
 	cd := countdownData{
 		target:   time.Now().Add(timer).Truncate(time.Second),
@@ -434,7 +442,7 @@ func (engine *Engine) StartCountdown2(timer time.Duration) {
 	engine.countdown2 = &cd
 }
 
-// Start counting time up from this moment
+// StartCountup starts counting time up from this moment
 func (engine *Engine) StartCountup() {
 	cd := countdownData{
 		target: time.Now().Truncate(time.Second),
@@ -444,13 +452,13 @@ func (engine *Engine) StartCountup() {
 	engine.mode = Countup
 }
 
-// Return main display to normal clock
+// Normal returns main display to normal clock
 func (engine *Engine) Normal() {
 	engine.mode = Normal
 	// engine.countdown2.active = false
 }
 
-// Add or remove time from countdowns
+// ModifyCountdown adds or removes time from primary countdown
 func (engine *Engine) ModifyCountdown(delta time.Duration) {
 	if engine.mode == Countdown {
 		cd := countdownData{
@@ -462,6 +470,7 @@ func (engine *Engine) ModifyCountdown(delta time.Duration) {
 	}
 }
 
+// ModifyCountdown2 adds or removes time from primary countdown
 func (engine *Engine) ModifyCountdown2(delta time.Duration) {
 	if engine.countdown2.active {
 		cd := countdownData{
@@ -474,6 +483,7 @@ func (engine *Engine) ModifyCountdown2(delta time.Duration) {
 	}
 }
 
+// StopCountdown stops the primary countdown
 func (engine *Engine) StopCountdown() {
 	if engine.mode == Countdown {
 		cd := countdownData{
@@ -487,6 +497,7 @@ func (engine *Engine) StopCountdown() {
 	}
 }
 
+// StopCountdown2 stops the secondary countdown
 func (engine *Engine) StopCountdown2() {
 	cd := countdownData{
 		target:   time.Now(),
@@ -497,11 +508,13 @@ func (engine *Engine) StopCountdown2() {
 	engine.countdown2 = &cd
 }
 
+// Kill blanks the clock display
 func (engine *Engine) Kill() {
 	engine.mode = Off
 	engine.countdown2.active = false
 }
 
+// Pause pauses both countdowns
 func (engine *Engine) Pause() {
 	if !engine.paused {
 		t := time.Now()
@@ -511,6 +524,7 @@ func (engine *Engine) Pause() {
 	}
 }
 
+// Resume resumes both countdowns if they have been paused
 func (engine *Engine) Resume() {
 	if engine.paused {
 		t := time.Now()

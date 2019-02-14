@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/SpComb/osc-tally/clock"
-	"github.com/SpComb/osc-tally/millumin"
 	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
+	"gitlab.com/Depili/clock-8001/clock"
+	"gitlab.com/Depili/clock-8001/millumin"
 	"log"
-	// "math/rand"
+	"math/rand"
 	"time"
 )
 
-var Options struct {
+var options struct {
 	ClockClientOptions      clock.ClientOptions `group:"qmsk/osc-tally clock client"`
 	ClockRemainingThreshold float32             `long:"clock-remaining-threshold" default:"20"`
 
@@ -19,7 +19,7 @@ var Options struct {
 	Debug      bool   `long:"osc-debug"`
 }
 
-var parser = flags.NewParser(&Options, flags.Default)
+var parser = flags.NewParser(&options, flags.Default)
 
 func updateClock(clockClient *clock.Client, state millumin.State) error {
 	// default is empty state when nothing is playing
@@ -38,7 +38,7 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 				ColorBlue:  255,
 				Symbol:     "~",
 			}
-		} else if layerState.Remaining() > Options.ClockRemainingThreshold {
+		} else if layerState.Remaining() > options.ClockRemainingThreshold {
 			clockCount = clock.CountMessage{
 				ColorRed:   0,
 				ColorGreen: 255,
@@ -63,8 +63,20 @@ func updateClock(clockClient *clock.Client, state millumin.State) error {
 }
 
 func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
-	t := time.Tick(15 * time.Second)
+	t := time.Tick(1 * time.Second)
 	for range t {
+		var display = clock.DisplayMessage{
+			ColorRed:   (rand.Float32() * 255),
+			ColorGreen: (rand.Float32() * 255),
+			ColorBlue:  (rand.Float32() * 255),
+			Text:       "stop",
+		}
+		if err := clockClient.SendDisplay(display); err != nil {
+			log.Fatalf("update clock: %v", err)
+		} else {
+			log.Printf("update clock")
+		}
+
 		/*
 			var clockCount = clock.CountMessage{}
 			clockCount = clock.CountMessage{
@@ -80,15 +92,16 @@ func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
 				log.Printf("update clock")
 			}
 		*/
-		start := clock.CountdownMessage{
-			Seconds: 100,
-		}
-		if err := clockClient.SendStart(start); err != nil {
-			log.Fatalf("update clock: %v", err)
-		} else {
-			log.Printf("update clock")
-		}
-
+		/*
+			start := clock.CountdownMessage{
+				Seconds: 100,
+			}
+			if err := clockClient.SendStart(start); err != nil {
+				log.Fatalf("update clock: %v", err)
+			} else {
+				log.Printf("update clock")
+			}
+		*/
 	}
 
 	for state := range listenChan {
@@ -102,20 +115,17 @@ func runClockClient(clockClient *clock.Client, listenChan chan millumin.State) {
 }
 
 func startClockClient(milluminListener *millumin.Listener) error {
-	client, err := Options.ClockClientOptions.MakeClient()
+	client, err := options.ClockClientOptions.MakeClient()
 	if err != nil {
 		return err
-	} else {
-
 	}
 
 	go runClockClient(client, milluminListener.Listen())
-
 	return nil
 }
 
 func run(oscServer *osc.Server) error {
-	if Options.Debug {
+	if options.Debug {
 		oscServer.Handle("*", func(msg *osc.Message) {
 			osc.PrintMessage(msg)
 		})
@@ -123,7 +133,7 @@ func run(oscServer *osc.Server) error {
 
 	var milluminListener = millumin.MakeListener(oscServer)
 
-	if Options.ClockClientOptions.Connect == "" {
+	if options.ClockClientOptions.Connect == "" {
 
 	} else if err := startClockClient(milluminListener); err != nil {
 		return fmt.Errorf("start clock client: %v", err)
@@ -138,11 +148,11 @@ func main() {
 	if _, err := parser.Parse(); err != nil {
 		log.Fatalf("parse flags: %v", err)
 	} else {
-		log.Printf("options: %#v", Options)
+		log.Printf("options: %#v", options)
 	}
 
 	var oscServer = osc.Server{
-		Addr: Options.ListenAddr,
+		Addr: options.ListenAddr,
 	}
 
 	if err := run(&oscServer); err != nil {
