@@ -170,7 +170,7 @@ func (engine *Engine) listen() {
 				engine.TallyRed = uint8(msg.ColorRed)
 				engine.TallyGreen = uint8(msg.ColorGreen)
 				engine.TallyBlue = uint8(msg.ColorBlue)
-				engine.Tally = fmt.Sprintf("%-4s", msg.Text)
+				engine.Tally = fmt.Sprintf("%-.4s", msg.Text)
 				engine.oscTally = true
 				tallyTimer.Reset(engine.timeout)
 			case "countdownStart":
