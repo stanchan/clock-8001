@@ -82,3 +82,17 @@ deploy_latest:
         - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/matrix-clock-$TS
     only:
         - master
+
+deploy_latest:
+    stage: deploy
+    environment: Stable
+    script:
+        - apt-get update -qq && apt-get install -y -qq sshpass
+        - ls
+        - sshpass -V
+        - export SSHPASS=$USER_PASS
+        - export TS=$(date +%Y-%m-%d-%H%M%S)
+        - sshpass -e scp -o stricthostkeychecking=no sdl-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/sdl-clock-$CI_COMMIT_TAG
+        - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/matrix-clock-$CI_COMMIT_TAG
+    only:
+        - tags
