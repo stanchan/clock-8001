@@ -162,7 +162,7 @@ func (engine *Engine) listen() {
 				engine.TallyRed = uint8(msg.ColorRed)
 				engine.TallyGreen = uint8(msg.ColorGreen)
 				engine.TallyBlue = uint8(msg.ColorBlue)
-				engine.Tally = fmt.Sprintf("%1s%02d%1s", msg.Symbol, msg.Count, msg.Unit)
+				engine.Tally = fmt.Sprintf("%.1s%02d%.1s", msg.Symbol, msg.Count, msg.Unit)
 				engine.oscTally = true
 				tallyTimer.Reset(engine.timeout)
 			case "display":
