@@ -14,6 +14,7 @@ You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl
 ### Precompiled binaries
 
 * Latest from git master: [sdl-clock](https://gitlab.com/Depili/clock-8001/-/jobs/artifacts/master/raw/sdl-clock?job=build)
+* Testing builds: https://kissa.depili.fi/clock-8001/testing/
 * Tagged releases: https://kissa.depili.fi/clock-8001/releases/
 * SD-card images for raspberry pi: https://kissa.depili.fi/clock-8001/images
   * Images with `no_login` in filename are secure without login password
