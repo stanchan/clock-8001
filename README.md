@@ -14,17 +14,16 @@ You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl
 ### Precompiled binaries
 
 * Latest from git master: [sdl-clock](https://gitlab.com/Depili/clock-8001/-/jobs/artifacts/master/raw/sdl-clock?job=build)
-* Version 3.0.0: https://kissa.depili.fi/clock-8001/sdl-clock_v3.0.0 (Needs companion module version 3.0.0 or later)
+* Tagged releases: https://kissa.depili.fi/clock-8001/releases/
+* SD-card images for raspberry pi: https://kissa.depili.fi/clock-8001/images
+  * Images with `no_login` in filename are secure without login password
+  * Images with `clockworkadmin` have root login enabled with password `clockworkadmin`. They should be considered insecure.
 
-### Ready made raspberry pi images (version 2.1.0)
+### Ready made raspberry pi images
 
 The images support raspberry pi 2B / 3B / 3B+ boards. They need at least 64Mb SD-cards. Write them to the card like any other raspberry pi sd-card image.
 
 The image tries to get a dhcp address on wired ethernet and also brings up a virtual interface eth0:1 with static ip (default 192.168.10.245 with 255.255.255.0 netmask).
-
-https://kissa.depili.fi/clock-8001/sdl-clock_v2.1-clockworkadmin.img Is a image with root logins (ssh and local) enabled. The root password is `clockworkadmin`. Since this image uses a known hard coded password it should be for testing only and considered insecure.
-
-https://kissa.depili.fi/clock-8001/sdl-clock_v2.1-no_login.img This image has root logins disabled and is secure for production use.
 
 #### Customizing the images
 
