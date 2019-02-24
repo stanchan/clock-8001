@@ -72,7 +72,7 @@ build:
 deploy_latest:
     stage: deploy
     environment: Testing
-    before_script: {}
+    before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
         - ls
@@ -87,7 +87,7 @@ deploy_latest:
 deploy_release:
     stage: deploy
     environment: Stable
-    before_script: {}
+    before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
         - ls
