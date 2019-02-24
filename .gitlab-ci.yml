@@ -24,34 +24,34 @@ before_script:
   - ln -s /go/src/gitlab.com/Depili /go/src/_/builds/clock-8001
   - make dep
 
-unit_tests:
-  stage: test
-  script:
-    - make test
-
-race_detector:
-  stage: test
-  script:
-    - make race
-
-memory_sanitizer:
-  stage: test
-  variables:
-    CC: clang-7
-  script:
-    - make msan
-
-code_coverage:
-  stage: test
-  script:
-    - make coverage
-
+# unit_tests:
+#   stage: test
+#   script:
+#     - make test
+#
+# race_detector:
+#   stage: test
+#   script:
+#     - make race
+#
+# memory_sanitizer:
+#   stage: test
+#   variables:
+#     CC: clang-7
+#   script:
+#     - make msan
+#
+# code_coverage:
+#   stage: test
+#   script:
+#     - make coverage
+#
 # code_coverage_report:
-#  stage: test
-#  script:
-#    - make coverhtml
-#  only:
-#  - master
+#   stage: test
+#   script:
+#     - make coverhtml
+#   only:
+#   - master
 
 lint_code:
   stage: test
@@ -71,7 +71,6 @@ build:
 
 deploy_latest:
     stage: deploy
-    environment: Testing
     before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
@@ -86,7 +85,6 @@ deploy_latest:
 
 deploy_release:
     stage: deploy
-    environment: Stable
     before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
