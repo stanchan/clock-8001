@@ -285,11 +285,20 @@ func (engine *Engine) normalUpdate() {
 		engine.Minutes = t.Format("04")
 		engine.Seconds = t.Format("05")
 	} else {
-		// No valid time, indicate it with "XX" as the time
-		engine.Hours = "XX"
-		engine.Minutes = "XX"
-		engine.Seconds = ""
-		engine.Leds = 59
+		// No valid time, display version number instead
+		var major, minor, bugfix int
+		_, err := fmt.Sscanf(gitTag, "v%d.%d.%d", &major, &minor, &bugfix)
+		if err != nil {
+			panic(err)
+		}
+		engine.Tally = "ver"
+		engine.TallyRed = 255
+		engine.TallyGreen = 255
+		engine.TallyBlue = 255
+		engine.Hours = fmt.Sprintf("%2d", major)
+		engine.Minutes = fmt.Sprintf("%2d", minor)
+		engine.Seconds = fmt.Sprintf("%2d", bugfix)
+		engine.Dots = false
 	}
 	engine.Leds = t.Second()
 }
@@ -358,7 +367,7 @@ func (engine *Engine) countdown2Update() {
 		t := time.Now()
 		diff2 = engine.countdown2.target.Sub(t).Truncate(time.Second)
 	}
-	if !engine.oscTally && !engine.countdown2.active {
+	if !engine.oscTally && !engine.countdown2.active && time.Now().Year() > 2000 {
 		// Clear the countdown display on stop
 		engine.Tally = ""
 	} else if !engine.oscTally && engine.countdown2.active {
