@@ -78,12 +78,14 @@ deploy_latest:
         - sshpass -V
         - export SSHPASS=$USER_PASS
         - export TS=$(date +%Y-%m-%d-%H%M%S)
-        - sshpass -e scp -o stricthostkeychecking=no sdl-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/sdl-clock-$TS
-        - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/matrix-clock-$TS
+        - sshpass -e scp -o stricthostkeychecking=no sdl-clock \
+            clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/sdl-clock-$TS
+        - sshpass -e scp -o stricthostkeychecking=no matrix-clock \
+            clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/matrix-clock-$TS
     only:
         - master
 
-deploy_latest:
+deploy_release:
     stage: deploy
     environment: Stable
     script:
@@ -92,8 +94,10 @@ deploy_latest:
         - sshpass -V
         - export SSHPASS=$USER_PASS
         - export TS=$(date +%Y-%m-%d-%H%M%S)
-        - sshpass -e scp -o stricthostkeychecking=no sdl-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/sdl-clock-$CI_COMMIT_TAG
-        - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/matrix-clock-$CI_COMMIT_TAG
+        - sshpass -e scp -o stricthostkeychecking=no sdl-clock \
+             clock8001@kissa.depili.fi:/var/www/html/clock-8001/releases/sdl-clock-$CI_COMMIT_TAG
+        - sshpass -e scp -o stricthostkeychecking=no matrix-clock \
+             clock8001@kissa.depili.fi:/var/www/html/clock-8001/releases/matrix-clock-$CI_COMMIT_TAG
         - curl -X POST \
              -F token=$BR_TOKEN \
              -F "ref=master" \
