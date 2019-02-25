@@ -82,6 +82,7 @@ deploy_latest:
         - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/matrix-clock-$TS
     only:
         - master
+        - tags
 
 deploy_release:
     stage: deploy
