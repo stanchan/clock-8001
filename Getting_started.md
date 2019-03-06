@@ -35,7 +35,7 @@ isconnected if needed.
 Pi doesn't remember the time or any other parameter after a power cycle. This is because the program runs on RAM. The card is read on the start, 
 but nothing is never written to it. This is for reliability. 1. The clock will start as new every time 2. The memory card does not corrupt if not
 hing is written to it.
-You could even remove the memory card after the boot ????
+You could even remove the memory card after the boot.
 Because of this, you need to provide a connection to the internet on every power-up if you need ToD.
 
 If you don't have wired internet, you can share your wifi from your mac.
@@ -81,7 +81,7 @@ Copy the files to the memory card and If you want to go back to defaults delete 
 
 Companion Version 1.3.0 (Build 1277)  or later has Depili Clock module v.3.0.0 for control and monitoring.
 
-There are button presets for 8001 in top right ???presets??? tab of Companion. Drag and drop them to your button grid and edit if needed.
+There are button presets for 8001 in top right ```presets``` tab of Companion. Drag and drop them to your button grid and edit if needed.
 
 Message function is not in presets and needs to be done manually.
 
