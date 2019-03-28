@@ -113,8 +113,8 @@ func main() {
 		textureSize = 8
 		textureCoord = 3
 		textureRadius = 3
-		gridStartX = 24
-		gridStartY = 24
+		gridStartX = 32
+		gridStartY = 32
 		gridSize = 3
 		gridSpacing = 4
 		secCircles = smallSecCircles
