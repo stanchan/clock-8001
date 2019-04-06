@@ -110,7 +110,7 @@ func main() {
 
 	// Create a texture for circles
 	if options.Small {
-		textureSize = 8
+		textureSize = 5
 		textureCoord = 3
 		textureRadius = 3
 		gridStartX = 32
@@ -130,8 +130,28 @@ func main() {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 	} else {
-		gfx.RoundedBoxColor(renderer, 1, 1, 5, 5, 3, staticSDLColor)
-		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
+		renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
+		renderer.DrawPoint(0, 1)
+		renderer.DrawPoint(0, 2)
+		renderer.DrawPoint(0, 3)
+		renderer.DrawPoint(1, 0)
+		renderer.DrawPoint(1, 1)
+		renderer.DrawPoint(1, 2)
+		renderer.DrawPoint(1, 3)
+		renderer.DrawPoint(1, 4)
+		renderer.DrawPoint(2, 0)
+		renderer.DrawPoint(2, 1)
+		renderer.DrawPoint(2, 2)
+		renderer.DrawPoint(2, 3)
+		renderer.DrawPoint(2, 4)
+		renderer.DrawPoint(3, 0)
+		renderer.DrawPoint(3, 1)
+		renderer.DrawPoint(3, 2)
+		renderer.DrawPoint(3, 3)
+		renderer.DrawPoint(3, 4)
+		renderer.DrawPoint(4, 1)
+		renderer.DrawPoint(4, 2)
+		renderer.DrawPoint(4, 3)
 	}
 
 	secTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
@@ -140,8 +160,28 @@ func main() {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	} else {
-		gfx.RoundedBoxColor(renderer, 1, 1, 5, 5, 3, secSDLColor)
-		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
+		renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
+		renderer.DrawPoint(0, 1)
+		renderer.DrawPoint(0, 2)
+		renderer.DrawPoint(0, 3)
+		renderer.DrawPoint(1, 0)
+		renderer.DrawPoint(1, 1)
+		renderer.DrawPoint(1, 2)
+		renderer.DrawPoint(1, 3)
+		renderer.DrawPoint(1, 4)
+		renderer.DrawPoint(2, 0)
+		renderer.DrawPoint(2, 1)
+		renderer.DrawPoint(2, 2)
+		renderer.DrawPoint(2, 3)
+		renderer.DrawPoint(2, 4)
+		renderer.DrawPoint(3, 0)
+		renderer.DrawPoint(3, 1)
+		renderer.DrawPoint(3, 2)
+		renderer.DrawPoint(3, 3)
+		renderer.DrawPoint(3, 4)
+		renderer.DrawPoint(4, 1)
+		renderer.DrawPoint(4, 2)
+		renderer.DrawPoint(4, 3)
 	}
 
 	renderer.SetRenderTarget(nil)
@@ -209,7 +249,7 @@ func drawSecondCircles(seconds int) {
 	for i := 0; i <= int(seconds); i++ {
 		dest := sdl.Rect{secCircles[i][0] - 20, secCircles[i][1] - 20, 40, 40}
 		if options.Small {
-			dest = sdl.Rect{secCircles[i][0] - 4, secCircles[i][1] - 4, 8, 8}
+			dest = sdl.Rect{secCircles[i][0] - 3, secCircles[i][1] - 3, 5, 5}
 		}
 		renderer.Copy(secTexture, &textureSource, &dest)
 	}
@@ -219,7 +259,7 @@ func drawStaticCircles() {
 	// Draw static indicator circles
 	for _, p := range staticCircles {
 		if options.Small {
-			dest := sdl.Rect{p[0] - 4, p[1] - 4, 8, 8}
+			dest := sdl.Rect{p[0] - 3, p[1] - 3, 5, 5}
 			renderer.Copy(staticTexture, &textureSource, &dest)
 		} else {
 			dest := sdl.Rect{p[0] - 20, p[1] - 20, 40, 40}
