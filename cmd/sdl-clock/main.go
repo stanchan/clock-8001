@@ -122,18 +122,23 @@ func main() {
 	}
 	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	renderer.SetRenderTarget(staticTexture)
-	gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 	if !options.Small {
+		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
+		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
+	} else {
+		gfx.RoundedBoxColor(renderer, 1, 1, 5, 5, 3, staticSDLColor)
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 	}
 
 	secTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	renderer.SetRenderTarget(secTexture)
-	gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	if !options.Small {
+		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
+		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
+	} else {
+		gfx.RoundedBoxColor(renderer, 1, 1, 5, 5, 3, secSDLColor)
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	}
-
 	renderer.SetRenderTarget(nil)
 	textureSource = sdl.Rect{0, 0, textureSize, textureSize}
 
