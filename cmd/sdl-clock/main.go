@@ -119,7 +119,11 @@ func main() {
 		gridSpacing = 4
 		secCircles = smallSecCircles
 		staticCircles = smallStaticCircles
+	} else {
+		// Scale down if needed
+		renderer.SetLogicalSize(1920, 1080)
 	}
+
 	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	renderer.SetRenderTarget(staticTexture)
 	if !options.Small {
@@ -139,6 +143,7 @@ func main() {
 		gfx.RoundedBoxColor(renderer, 1, 1, 5, 5, 3, secSDLColor)
 		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	}
+
 	renderer.SetRenderTarget(nil)
 	textureSource = sdl.Rect{0, 0, textureSize, textureSize}
 
@@ -160,7 +165,6 @@ func main() {
 	}
 
 	log.Printf("Entering main loop\n")
-
 	for {
 		select {
 		case <-sigChan:
@@ -179,9 +183,6 @@ func main() {
 			// Clear SDL canvas
 			renderer.SetDrawColor(0, 0, 0, 255) // Black
 			renderer.Clear()                    // Clear screen
-
-			// renderer.SetDrawColor(255, 0, 0, 255) // Black
-			// renderer.DrawRect(&sdl.Rect{0, 0, 176, 175})
 
 			// Dots between hours and minutes
 			if engine.Dots {
@@ -206,7 +207,6 @@ func main() {
 func drawSecondCircles(seconds int) {
 	// Draw second circles
 	for i := 0; i <= int(seconds); i++ {
-		// gfx.FilledCircleColor(renderer, secCircles[i][0], secCircles[i][1], 20, secSDLColor)
 		dest := sdl.Rect{secCircles[i][0] - 20, secCircles[i][1] - 20, 40, 40}
 		if options.Small {
 			dest = sdl.Rect{secCircles[i][0] - 4, secCircles[i][1] - 4, 8, 8}
