@@ -51,6 +51,7 @@ type Engine struct {
 	mode        int            // Main display mode
 	countdown   *countdownData
 	countdown2  *countdownData
+	countup     *countdownData
 	paused      bool
 	Hours       string
 	Minutes     string
@@ -101,6 +102,10 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		active: false,
 	}
 	engine.countdown2 = &countdown2
+	countup := countdownData{
+		active: false,
+	}
+	engine.countup = &countup
 
 	// Setup the OSC listener
 	engine.oscServer = osc.Server{
@@ -305,10 +310,21 @@ func (engine *Engine) normalUpdate() {
 
 func (engine *Engine) countupUpdate() {
 	t := time.Now()
-	diff := t.Sub(engine.countdown.target)
+	var diff time.Duration
+	if engine.paused {
+		diff = engine.countup.left
+		if engine.flashLeds {
+			engine.Dots = true
+		} else {
+			engine.Dots = false
+		}
+	} else {
+		diff = t.Sub(engine.countup.target)
+		engine.Dots = true
+	}
+
 	display := time.Time{}.Add(diff)
 	engine.Seconds = ""
-	engine.Dots = true
 
 	if diff > 0 {
 		engine.formatCount(diff)
@@ -457,7 +473,7 @@ func (engine *Engine) StartCountup() {
 		target: time.Now().Truncate(time.Second),
 		active: true,
 	}
-	engine.countdown = &cd
+	engine.countup = &cd
 	engine.mode = Countup
 }
 
@@ -529,6 +545,7 @@ func (engine *Engine) Pause() {
 		t := time.Now()
 		engine.countdown.left = engine.countdown.target.Sub(t).Truncate(time.Second)
 		engine.countdown2.left = engine.countdown2.target.Sub(t).Truncate(time.Second)
+		engine.countup.left = t.Sub(engine.countup.target).Truncate(time.Second)
 		engine.paused = true
 	}
 }
@@ -539,6 +556,7 @@ func (engine *Engine) Resume() {
 		t := time.Now()
 		engine.countdown.target = t.Add(engine.countdown.left).Truncate(time.Second)
 		engine.countdown2.target = t.Add(engine.countdown2.left).Truncate(time.Second)
+		engine.countup.target = t.Add(-engine.countup.left).Truncate(time.Second)
 		engine.paused = false
 	}
 }
