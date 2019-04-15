@@ -27,6 +27,7 @@ type EngineOptions struct {
 	CountdownRed   uint8  `long:"cd-red" description:"Red component of secondary countdown color" default:"255"`
 	CountdownGreen uint8  `long:"cd-green" description:"Green component of secondary countdown color" default:"0"`
 	CountdownBlue  uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
+	DisableOSC     bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
 }
 
 // Clock engine state constants
@@ -107,13 +108,30 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	}
 	engine.countup = &countup
 
-	// Setup the OSC listener
-	engine.oscServer = osc.Server{
-		Addr: options.ListenAddr,
+	// Setup the OSC listener and feedback
+	if !options.DisableOSC {
+		engine.oscServer = osc.Server{
+			Addr: options.ListenAddr,
+		}
+		engine.clockServer = MakeServer(&engine.oscServer)
+		log.Printf("OSC control: listening on %v", engine.oscServer.Addr)
+		go engine.runOSC()
+
+		// OSC feedback
+		if udpAddr, err := net.ResolveUDPAddr("udp", options.Connect); err != nil {
+			log.Fatalf("Failed to resolve OSC feedback address: %v", err)
+		} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
+			log.Fatalf("Failed to open OSC feedback address: %v", err)
+		} else {
+			log.Printf("OSC feedback: sending to %v", options.Connect)
+			engine.oscConn = udpConn
+		}
+
+		// OSC listen
+		go engine.listen()
+	} else {
+		log.Printf("OSC control and feedback disabled.\n")
 	}
-	engine.clockServer = MakeServer(&engine.oscServer)
-	log.Printf("osc server: listen %v", engine.oscServer.Addr)
-	go engine.runOSC()
 
 	// Time zones
 	tz, err := time.LoadLocation(options.Timezone)
@@ -122,24 +140,12 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	}
 	engine.timeZone = tz
 
-	// OSC feedback
-	if udpAddr, err := net.ResolveUDPAddr("udp", options.Connect); err != nil {
-		log.Printf("Failed to resolve OSC feedback address: %v", err)
-	} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
-		log.Printf("Failed to open OSC feedback address: %v", err)
-	} else {
-		engine.oscConn = udpConn
-	}
-
 	// Led flash cycle
 	// Setting the interval to 0 disables
 	if options.Flash > 0 {
 		engine.flasher = time.NewTicker(time.Duration(options.Flash) * time.Millisecond)
 		go engine.flash()
 	}
-
-	// OSC listen
-	go engine.listen()
 
 	return &engine, nil
 }

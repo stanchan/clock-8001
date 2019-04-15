@@ -63,6 +63,7 @@ Application Options:
       --cd-red=       Red component of secondary countdown color (default: 255)
       --cd-green=     Green component of secondary countdown color (default: 0)
       --cd-blue=      Blue component of secondary countdown color (default: 0)
+      --disable-osc   Disable OSC control and feedback
 
 Help Options:
   -h, --help          Show this help message
