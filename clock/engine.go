@@ -14,8 +14,8 @@ import (
 const Version = "3.0.0"
 
 // Will get overridden by ldflags in Makefile
-var gitCommit string
-var gitTag string
+var gitCommit = "Unknown"
+var gitTag = "v0.0.0"
 
 // EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
@@ -73,24 +73,26 @@ type Engine struct {
 	timeout     time.Duration // Timeout for osc tally events
 	oscTally    bool          // Tally text was from osc event
 	oscConn     *net.UDPConn  // Connection for sending feedback
+	initialized bool          // Show version on startup until ntp synced or receiving OSC control
 }
 
 // MakeEngine creates a clock engine
 func MakeEngine(options *EngineOptions) (*Engine, error) {
 	var engine = Engine{
-		mode:      Normal,
-		Hours:     "",
-		Minutes:   "",
-		Seconds:   "",
-		Leds:      0,
-		flashLeds: true,
-		Dots:      true,
-		oscTally:  false,
-		paused:    false,
-		timeout:   time.Duration(options.Timeout) * time.Millisecond,
-		cd2Red:    options.CountdownRed,
-		cd2Green:  options.CountdownGreen,
-		cd2Blue:   options.CountdownBlue,
+		mode:        Normal,
+		Hours:       "",
+		Minutes:     "",
+		Seconds:     "",
+		Leds:        0,
+		flashLeds:   true,
+		Dots:        true,
+		oscTally:    false,
+		paused:      false,
+		timeout:     time.Duration(options.Timeout) * time.Millisecond,
+		cd2Red:      options.CountdownRed,
+		cd2Green:    options.CountdownGreen,
+		cd2Blue:     options.CountdownBlue,
+		initialized: false,
 	}
 
 	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
@@ -211,6 +213,8 @@ func (engine *Engine) listen() {
 			case "normal":
 				engine.Normal()
 			}
+			// We have received a osc command, so stop the version display
+			engine.initialized = true
 		case <-tallyTimer.C:
 			// OSC message timeout
 			engine.Tally = ""
@@ -292,11 +296,14 @@ func (engine *Engine) normalUpdate() {
 
 	// Check that the rpi has valid time
 	if t.Year() > 2000 {
+		// We have ntp synced time, so display it
+		engine.initialized = true
 		engine.Hours = t.Format("15")
 		engine.Minutes = t.Format("04")
 		engine.Seconds = t.Format("05")
-	} else {
-		// No valid time, display version number instead
+		engine.Leds = t.Second()
+	} else if !engine.initialized {
+		// No valid time, display version number instead of Time of day
 		var major, minor, bugfix int
 		_, err := fmt.Sscanf(gitTag, "v%d.%d.%d", &major, &minor, &bugfix)
 		if err != nil {
@@ -310,8 +317,15 @@ func (engine *Engine) normalUpdate() {
 		engine.Minutes = fmt.Sprintf("%2d", minor)
 		engine.Seconds = fmt.Sprintf("%2d", bugfix)
 		engine.Dots = false
+		engine.Leds = t.Second()
+	} else {
+		// We have received a osc command but no valid time, black the fields
+		engine.Hours = ""
+		engine.Minutes = ""
+		engine.Seconds = ""
+		engine.Dots = false
+		engine.Leds = 0
 	}
-	engine.Leds = t.Second()
 }
 
 func (engine *Engine) countupUpdate() {
@@ -382,6 +396,11 @@ func (engine *Engine) countdownUpdate() {
 
 // Secondary countdown, lower priority than Tally messages
 func (engine *Engine) countdown2Update() {
+	if !engine.initialized {
+		// No valid time and no osc messages received
+		return
+	}
+
 	var diff2 time.Duration
 	if engine.paused {
 		diff2 = engine.countdown2.left
@@ -389,7 +408,7 @@ func (engine *Engine) countdown2Update() {
 		t := time.Now()
 		diff2 = engine.countdown2.target.Sub(t).Truncate(time.Second)
 	}
-	if !engine.oscTally && !engine.countdown2.active && time.Now().Year() > 2000 {
+	if !engine.oscTally && !engine.countdown2.active {
 		// Clear the countdown display on stop
 		engine.Tally = ""
 	} else if !engine.oscTally && engine.countdown2.active {
