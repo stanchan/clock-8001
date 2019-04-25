@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -39,11 +40,17 @@ const (
 	Paused    = iota // Paused countdown timer(s)
 )
 
+const interfacePollTime = 5 * time.Second
+
 type countdownData struct {
 	target   time.Time     // Target timestamp for main countdown
 	duration time.Duration // Total duration of main countdown, used to scale the leds
 	left     time.Duration // Duration left when paused
 	active   bool
+}
+
+type feedbackDestinations struct {
+	udpConns []*net.UDPConn
 }
 
 // Engine contains the state machine for clock-8001
@@ -70,10 +77,11 @@ type Engine struct {
 	flasher     *time.Ticker
 	clockServer *Server
 	oscServer   osc.Server
-	timeout     time.Duration // Timeout for osc tally events
-	oscTally    bool          // Tally text was from osc event
-	oscConn     *net.UDPConn  // Connection for sending feedback
-	initialized bool          // Show version on startup until ntp synced or receiving OSC control
+	timeout     time.Duration         // Timeout for osc tally events
+	oscTally    bool                  // Tally text was from osc event
+	oscDest     string                // String from options
+	oscDests    *feedbackDestinations // udp connections to send osc feedback to
+	initialized bool                  // Show version on startup until ntp synced or receiving OSC control
 }
 
 // MakeEngine creates a clock engine
@@ -93,6 +101,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		cd2Green:    options.CountdownGreen,
 		cd2Blue:     options.CountdownBlue,
 		initialized: false,
+		oscDests:    nil,
 	}
 
 	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
@@ -119,18 +128,14 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		log.Printf("OSC control: listening on %v", engine.oscServer.Addr)
 		go engine.runOSC()
 
-		// OSC feedback
-		if udpAddr, err := net.ResolveUDPAddr("udp", options.Connect); err != nil {
-			log.Fatalf("Failed to resolve OSC feedback address: %v", err)
-		} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
-			log.Fatalf("Failed to open OSC feedback address: %v", err)
-		} else {
-			log.Printf("OSC feedback: sending to %v", options.Connect)
-			engine.oscConn = udpConn
-		}
-
-		// OSC listen
+		// process osc commands
 		go engine.listen()
+
+		// OSC feedback
+		engine.oscDest = options.Connect
+		// Poll for network interface changes
+		go engine.interfaceMonitor()
+
 	} else {
 		log.Printf("OSC control and feedback disabled.\n")
 	}
@@ -150,6 +155,67 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	}
 
 	return &engine, nil
+}
+
+// Update the udp connections for OSC feedback
+func (engine *Engine) interfaceMonitor() {
+	log.Printf("Monitoring network interface changes\n")
+	port := strings.Join(strings.Split(engine.oscDest, ":")[1:], "")
+	log.Printf("OSC feedback port: %v", port)
+
+	for {
+		time.Sleep(interfacePollTime)
+		log.Printf("Updating feedback connections\n")
+
+		conns := feedbackDestinations{
+			udpConns: make([]*net.UDPConn, 0),
+		}
+
+		if !strings.Contains(engine.oscDest, "255.255.255.255") {
+			log.Printf(" -> Trying single address: %v\n", engine.oscDest)
+			if udpAddr, err := net.ResolveUDPAddr("udp", engine.oscDest); err != nil {
+				log.Printf(" -> Failed to resolve OSC feedback address: %v", err)
+			} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
+				log.Printf("   -> Failed to open OSC feedback address: %v", err)
+			} else {
+				log.Printf("OSC feedback: sending to %v", engine.oscDest)
+				conns.udpConns = append(conns.udpConns, udpConn)
+			}
+			continue
+		}
+
+		addrs, _ := net.InterfaceAddrs()
+		for _, addr := range addrs {
+			ip, n, err := net.ParseCIDR(addr.String())
+			if err != nil {
+				log.Printf(" -> error parsing network\n")
+			} else {
+				if ip.IsLoopback() {
+					// Ignore loopback interfaces
+					continue
+				} else if ip.To4() != nil {
+					broadcast := net.IP(make([]byte, 4))
+					for i := range n.IP {
+						broadcast[i] = n.IP[i] | (^n.Mask[i])
+					}
+					log.Printf(" -> using broadcast address %v", broadcast)
+
+					dest := fmt.Sprintf("%v:%v", broadcast, port)
+
+					if udpAddr, err := net.ResolveUDPAddr("udp", dest); err != nil {
+						log.Printf(" -> Failed to resolve OSC broadcast address %v: %v", dest, err)
+					} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
+						log.Printf("   -> Failed to open OSC broadcast address %v: %v", dest, err)
+					} else {
+						log.Printf("OSC feedback: sending to %v", dest)
+						conns.udpConns = append(conns.udpConns, udpConn)
+					}
+				}
+			}
+		}
+
+		engine.oscDests = &conns
+	}
 }
 
 func (engine *Engine) runOSC() {
@@ -225,7 +291,7 @@ func (engine *Engine) listen() {
 
 // Send the clock state as /clock/state
 func (engine *Engine) sendState() error {
-	if engine.oscConn == nil {
+	if engine.oscDests == nil {
 		// No osc connection
 		return nil
 	}
@@ -247,13 +313,16 @@ func (engine *Engine) sendState() error {
 
 	packet := osc.NewMessage("/clock/state", int32(mode), hours, minutes, seconds, engine.Tally, pause)
 
-	if data, err := packet.MarshalBinary(); err != nil {
+	data, err := packet.MarshalBinary()
+	if err != nil {
 		return err
-	} else if _, err := engine.oscConn.Write(data); err != nil {
-		return err
-	} else {
-		return nil
 	}
+	for _, conn := range engine.oscDests.udpConns {
+		if _, err := conn.Write(data); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (engine *Engine) flash() {
