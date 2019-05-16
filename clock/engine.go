@@ -20,15 +20,16 @@ var gitTag = "v0.0.0"
 
 // EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
-	Flash          int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
-	Timezone       string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
-	ListenAddr     string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
-	Timeout        int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
-	Connect        string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
-	CountdownRed   uint8  `long:"cd-red" description:"Red component of secondary countdown color" default:"255"`
-	CountdownGreen uint8  `long:"cd-green" description:"Green component of secondary countdown color" default:"0"`
-	CountdownBlue  uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
-	DisableOSC     bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
+	Flash           int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
+	Timezone        string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
+	ListenAddr      string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
+	Timeout         int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
+	Connect         string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
+	CountdownRed    uint8  `long:"cd-red" description:"Red component of secondary countdown color" default:"255"`
+	CountdownGreen  uint8  `long:"cd-green" description:"Green component of secondary countdown color" default:"0"`
+	CountdownBlue   uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
+	DisableOSC      bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
+	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC control and feedback"`
 }
 
 // Clock engine state constants
@@ -131,11 +132,15 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		// process osc commands
 		go engine.listen()
 
-		// OSC feedback
-		engine.oscDest = options.Connect
-		// Poll for network interface changes
-		go engine.interfaceMonitor()
-
+		if options.DisableFeedback {
+			engine.oscDest = nil
+			log.Printf("OSC feedback disabled")
+		} else {
+			// OSC feedback
+			engine.oscDest = options.Connect
+			// Poll for network interface changes
+			go engine.interfaceMonitor()
+		}
 	} else {
 		log.Printf("OSC control and feedback disabled.\n")
 	}
