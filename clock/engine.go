@@ -133,7 +133,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		go engine.listen()
 
 		if options.DisableFeedback {
-			engine.oscDest = nil
+			engine.oscDests = nil
 			log.Printf("OSC feedback disabled")
 		} else {
 			// OSC feedback
