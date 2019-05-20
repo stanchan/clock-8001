@@ -29,7 +29,7 @@ type EngineOptions struct {
 	CountdownGreen  uint8  `long:"cd-green" description:"Green component of secondary countdown color" default:"0"`
 	CountdownBlue   uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
 	DisableOSC      bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
-	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC control and feedback"`
+	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC feedback"`
 }
 
 // Clock engine state constants
