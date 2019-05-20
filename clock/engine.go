@@ -239,7 +239,10 @@ func (engine *Engine) listen() {
 		select {
 		case message := <-oscChan:
 			// New OSC message received
-			log.Printf("Got new osc data.\n")
+			// TODO: add a debug flag to enable verbose output
+			// If we print to the console for each mitti/millum message
+			// The writes will end up blocking
+			// log.Printf("Got new osc data.\n")
 			switch message.Type {
 			case "count":
 				msg := message.CountMessage
