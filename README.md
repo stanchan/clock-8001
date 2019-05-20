@@ -43,30 +43,31 @@ Usage:
   sdl-clock [OPTIONS]
 
 Application Options:
-  -s                  Scale to 192x192px
-  -F, --font=         Font for event name (default: fonts/7x13.bdf)
-  -r, --red=          Red component of text color (default: 255)
-  -g, --green=        Green component of text color (default: 128)
-  -b, --blue=         Blue component of text color (default: 0)
-      --static-red=   Red component of static color (default: 80)
-      --static-green= Green component of static color (default: 80)
-      --static-blue=  Blue component of static color (default: 0)
-      --sec-red=      Red component of second color (default: 200)
-      --sec-green=    Green component of second color (default: 0)
-      --sec-blue=     Blue component of second color (default: 0)
-  -p, --time-pin=     Pin to select foreign timezone, active low (default: 15)
-      --flash=        Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
-  -t, --local-time=   Local timezone (default: Europe/Helsinki)
-      --osc-listen=   Address to listen for incoming osc messages (default: 0.0.0.0:1245)
-  -d, --timeout=      Timeout for OSC message updates in milliseconds (default: 1000)
-  -o, --osc-dest=     Address to send OSC feedback to (default: 255.255.255.255:1245)
-      --cd-red=       Red component of secondary countdown color (default: 255)
-      --cd-green=     Green component of secondary countdown color (default: 0)
-      --cd-blue=      Blue component of secondary countdown color (default: 0)
-      --disable-osc   Disable OSC control and feedback
+  -s                      Scale to 192x192px
+  -F, --font=             Font for event name (default: fonts/7x13.bdf)
+  -r, --red=              Red component of text color (default: 255)
+  -g, --green=            Green component of text color (default: 128)
+  -b, --blue=             Blue component of text color (default: 0)
+      --static-red=       Red component of static color (default: 80)
+      --static-green=     Green component of static color (default: 80)
+      --static-blue=      Blue component of static color (default: 0)
+      --sec-red=          Red component of second color (default: 200)
+      --sec-green=        Green component of second color (default: 0)
+      --sec-blue=         Blue component of second color (default: 0)
+  -p, --time-pin=         Pin to select foreign timezone, active low (default: 15)
+      --flash=            Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
+  -t, --local-time=       Local timezone (default: Europe/Helsinki)
+      --osc-listen=       Address to listen for incoming osc messages (default: 0.0.0.0:1245)
+  -d, --timeout=          Timeout for OSC message updates in milliseconds (default: 1000)
+  -o, --osc-dest=         Address to send OSC feedback to (default: 255.255.255.255:1245)
+      --cd-red=           Red component of secondary countdown color (default: 255)
+      --cd-green=         Green component of secondary countdown color (default: 0)
+      --cd-blue=          Blue component of secondary countdown color (default: 0)
+      --disable-osc       Disable OSC control and feedback
+      --disable-feedback  Disable OSC feedback
 
 Help Options:
-  -h, --help          Show this help message
+  -h, --help              Show this help message
 ```
 
 ## matrix-clock - Dedicated led matrix clock
@@ -88,9 +89,27 @@ Compile the led matrix clock binary with `go get gitlab.com/Depili/clock-8001/cm
 
 * Latest from git master: [matrix-clock](https://gitlab.com/Depili/clock-8001/-/jobs/artifacts/master/raw/matrix-clock?job=build)
 
-## Mitti and Millumin osc-converter
+## clock-bridge: Mitti and Millumin osc-converter
 
-To convert timecodes and video information sent by Mitti or Millumin to commands understood by the clock use `go get gitlab.com/Depili/clock-8001`. This can also be used to bridge the osc traffic across different networks.
+To convert timecodes and video information sent by Mitti or Millumin to commands understood by the clock use `go get gitlab.com/Depili/cmd/clock-bridge`. This can also be used to bridge the osc traffic across different networks.
+
+### Command line parameters
+```
+Usage:
+  clock-clock [OPTIONS]
+
+Application Options:
+      --clock-remaining-threshold=      Remaining time highlight threshold (default: 20)
+      --millumin-ignore-layer=REGEXP    Ignore matching millumin layers (case-insensitive regexp) (default: ignore)
+      --osc-listen=                     Address to listen for mitti/millumin osc messages (default: 0.0.0.0:1234)
+      --osc-debug
+
+qmsk/osc-tally clock client:
+      --clock-client-connect=           Address to send clock osc messages to (default: 255.255.255.255:1245)
+
+Help Options:
+  -h, --help                            Show this help message
+```
 
 ## OSC commands understood by the clock
 
