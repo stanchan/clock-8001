@@ -2,7 +2,7 @@ PROJECT_NAME := "clock-8001"
 PKG := "gitlab.com/Depili/$(PROJECT_NAME)"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
-BINARIES := clock-8001 matrix-clock sdl-clock
+BINARIES := clock-bridge matrix-clock sdl-clock
 GOLINT := "$(GOPATH)/bin/golint"
 GIT_TAG := $(shell git describe --tags --abbrev=0)
 GIT_COMMIT := $(shell git rev-list -1 HEAD)
@@ -36,7 +36,7 @@ dep: ## Get the dependencies
 	@go get -v -d ./...
 
 build: dep ## Build the binary file
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/cmd/clock-bridge
 	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/cmd/matrix-clock
 	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/cmd/sdl-clock
 

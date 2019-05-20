@@ -8,15 +8,16 @@ import (
 	"gitlab.com/Depili/clock-8001/millumin"
 	"gitlab.com/Depili/clock-8001/mitti"
 	"log"
+	"os"
 	"regexp"
 )
 
 var options struct {
 	ClockClientOptions      clock.ClientOptions `group:"qmsk/osc-tally clock client"`
-	ClockRemainingThreshold float32             `long:"clock-remaining-threshold" default:"20"`
+	ClockRemainingThreshold float32             `long:"clock-remaining-threshold" description:"Remaining time highlight threshold" default:"20"`
 	Ignore                  string              `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
 	ignoreRegexp            *regexp.Regexp
-	ListenAddr              string `long:"osc-listen"`
+	ListenAddr              string `long:"osc-listen" description:"Address to listen for mitti/millumin osc messages" default:"0.0.0.0:1234"`
 	Debug                   bool   `long:"osc-debug"`
 }
 
@@ -139,10 +140,14 @@ func run(oscServer *osc.Server) error {
 
 func main() {
 	if _, err := parser.Parse(); err != nil {
-		log.Fatalf("parse flags: %v", err)
-	} else {
-		log.Printf("options: %#v", options)
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			os.Exit(0)
+		} else {
+			panic(err)
+		}
 	}
+
+	fmt.Printf("fooo")
 
 	regexp, err := regexp.Compile("(?i)" + options.Ignore)
 	if err != nil {
