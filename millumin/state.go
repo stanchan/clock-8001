@@ -2,7 +2,7 @@ package millumin
 
 import (
 	"fmt"
-	"log"
+	// "log"
 	"time"
 )
 
@@ -44,7 +44,7 @@ func (state *LayerState) mediaStarted(mediaStarted MediaStarted) {
 	state.Paused = false
 	state.Time = 0.0
 
-	log.Printf("Media started: %v", state)
+	// log.Printf("Media started: %v", state)
 }
 
 func (state *LayerState) mediaPaused(mediaPaused MediaPaused) {
@@ -53,14 +53,14 @@ func (state *LayerState) mediaPaused(mediaPaused MediaPaused) {
 	state.Info = mediaPaused.MediaInfo
 	state.Duration = mediaPaused.MediaInfo.Duration
 
-	log.Printf("Media paused: %v", state)
+	// log.Printf("Media paused: %v", state)
 }
 
 func (state *LayerState) mediaStopped(mediaStopped MediaStopped) {
 	// millumin sends mediaStarted -> mediaStopped when switching medias
 	// ignore the following mediaStopped if we have already started a different media
 	if state.Info.Index > 0 && mediaStopped.MediaInfo.Index != state.Info.Index {
-		log.Printf("Media stopped (ignore): %v", state)
+		// log.Printf("Media stopped (ignore): %v", state)
 
 		return
 	}
@@ -70,7 +70,7 @@ func (state *LayerState) mediaStopped(mediaStopped MediaStopped) {
 	state.Info = mediaStopped.MediaInfo
 	state.Duration = mediaStopped.MediaInfo.Duration
 
-	log.Printf("Media stopped: %v", state)
+	// log.Printf("Media stopped: %v", state)
 }
 
 func (state *LayerState) mediaTime(mediaTime MediaTime) {
@@ -79,5 +79,5 @@ func (state *LayerState) mediaTime(mediaTime MediaTime) {
 	state.Duration = mediaTime.Duration
 	state.Time = mediaTime.Value
 
-	log.Printf("Media time: %v", state)
+	// log.Printf("Media time: %v", state)
 }

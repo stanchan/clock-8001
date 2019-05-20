@@ -74,7 +74,7 @@ func runMilluminClockClient(clockClient *clock.Client, listenChan chan millumin.
 		// TODO: also refresh on tick
 		if err := updateMilluminClock(clockClient, state); err != nil {
 			log.Fatalf("update clock: %v", err)
-		} else {
+		} else if options.Debug {
 			log.Printf("update clock")
 		}
 	}
@@ -99,7 +99,7 @@ func runMittiClockClient(clockClient *clock.Client, listenChan chan mitti.State)
 		// TODO: also refresh on tick
 		if err := updateMittiClock(clockClient, state); err != nil {
 			log.Fatalf("update clock: %v", err)
-		} else {
+		} else if options.Debug {
 			log.Printf("update clock")
 		}
 	}
@@ -146,8 +146,6 @@ func main() {
 			panic(err)
 		}
 	}
-
-	fmt.Printf("fooo")
 
 	regexp, err := regexp.Compile("(?i)" + options.Ignore)
 	if err != nil {

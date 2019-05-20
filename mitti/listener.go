@@ -40,7 +40,7 @@ func (listener *Listener) update() {
 	for listenChan := range listener.listeners {
 		listenChan <- state
 	}
-	log.Printf("mitti state update: %v\n", listener.state)
+	// log.Printf("mitti state update: %v\n", listener.state)
 }
 
 func (listener *Listener) handleTogglePlay(msg *osc.Message) {
