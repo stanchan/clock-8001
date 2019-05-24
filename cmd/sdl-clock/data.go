@@ -24,6 +24,7 @@ var options struct {
 	SecGreen      uint8  `long:"sec-green" description:"Green component of second color" default:"0"`
 	SecBlue       uint8  `long:"sec-blue" description:"Blue component of second color" default:"0"`
 	TimePin       int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
+	Debug         bool   `long:"debug" description:"Enable debug output"`
 	EngineOptions *clock.EngineOptions
 }
 

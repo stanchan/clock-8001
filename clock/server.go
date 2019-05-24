@@ -2,6 +2,7 @@ package clock
 
 import (
 	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 )
 
@@ -31,7 +32,7 @@ func (server *Server) Listen() chan Message {
 }
 
 func (server *Server) update(message Message) {
-	server.debugf("update: %#v", message)
+	debug.Printf("update: %#v", message)
 
 	for listenChan := range server.listeners {
 		listenChan <- message
@@ -53,7 +54,7 @@ func (server *Server) handleCount(msg *osc.Message) {
 }
 
 func (server *Server) handleCountupStart(msg *osc.Message) {
-	server.debugf("countup start: %#v", msg)
+	debug.Printf("countup start: %#v", msg)
 
 	message := Message{
 		Type: "countup",
@@ -62,7 +63,7 @@ func (server *Server) handleCountupStart(msg *osc.Message) {
 }
 
 func (server *Server) handleKill(msg *osc.Message) {
-	server.debugf("kill: %#v", msg)
+	debug.Printf("kill: %#v", msg)
 
 	message := Message{
 		Type: "kill",
@@ -87,7 +88,7 @@ func (server *Server) handleCountdownModify2(msg *osc.Message) {
 }
 
 func (server *Server) handleCountdownStop(msg *osc.Message) {
-	server.debugf("countdownStop: %#v", msg)
+	debug.Printf("countdownStop: %#v", msg)
 	message := Message{
 		Type: "countdownStop",
 	}
@@ -95,7 +96,7 @@ func (server *Server) handleCountdownStop(msg *osc.Message) {
 }
 
 func (server *Server) handleCountdownStop2(msg *osc.Message) {
-	server.debugf("countdownStop2: %#v", msg)
+	debug.Printf("countdownStop2: %#v", msg)
 	message := Message{
 		Type: "countdownStop2",
 	}
@@ -108,7 +109,7 @@ func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		server.debugf("%s: %#v", cmd, message)
+		debug.Printf("%s: %#v", cmd, message)
 		msg := Message{
 			Type:             cmd,
 			CountdownMessage: &message,
@@ -118,7 +119,7 @@ func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
 }
 
 func (server *Server) handleNormal(msg *osc.Message) {
-	server.debugf("normal: %#v", msg)
+	debug.Printf("normal: %#v", msg)
 	message := Message{
 		Type: "normal",
 	}
@@ -126,7 +127,7 @@ func (server *Server) handleNormal(msg *osc.Message) {
 }
 
 func (server *Server) handlePause(msg *osc.Message) {
-	server.debugf("pause: %#v", msg)
+	debug.Printf("pause: %#v", msg)
 	message := Message{
 		Type: "pause",
 	}
@@ -134,7 +135,7 @@ func (server *Server) handlePause(msg *osc.Message) {
 }
 
 func (server *Server) handleResume(msg *osc.Message) {
-	server.debugf("resume: %#v", msg)
+	debug.Printf("resume: %#v", msg)
 	message := Message{
 		Type: "resume",
 	}
@@ -147,18 +148,12 @@ func (server *Server) handleDisplay(msg *osc.Message) {
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		server.debugf("display: %#v", message)
+		debug.Printf("display: %#v", message)
 		msg := Message{
 			Type:           "display",
 			DisplayMessage: &message,
 		}
 		server.update(msg)
-	}
-}
-
-func (server *Server) debugf(format string, v ...interface{}) {
-	if server.Debug {
-		log.Printf(format, v...)
 	}
 }
 

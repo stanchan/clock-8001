@@ -8,6 +8,33 @@ The clock can be controlled with the depili-clock-8001 companion module: https:/
 
 Developed in co-operation with [SVV](http://svv.fi/).
 
+## Ready made raspberry pi images
+
+SD-card images for raspberry pi can be found at https://kissa.depili.fi/clock-8001/images
+
+* Images with `no_login` in filename are secure without login password
+* Images with `clockworkadmin` have root login enabled with password `clockworkadmin`. They should be considered insecure.
+* All image flavors except "bridge-only" contain the hdmi clock.
+  * By default the clock listens for osc messages on port 1245 and broadcasts osc feedback on the same port
+* Images with "bridge" in their name also contain the mitti+millumin translator bridge.
+  * By default the bridge listens on port 1234 and broadcasts the translated messages to port 1245
+
+The images support raspberry pi 2B / 3B / 3B+ boards. They need at least 64Mb SD-cards. Write them to the card like any other raspberry pi sd-card image.
+
+The image tries to get a dhcp address on wired ethernet and also brings up a virtual interface eth0:1 with static ip (default 192.168.10.245 with 255.255.255.0 netmask).
+
+### Customizing the images
+
+You can place the following files on the sd-card FAT partition to customize the installation:
+* `hostname` to change the hostname used by the clock, it is available with "hostname.local" for bonjour / mDNS requests
+* `interfaces` a replacement for /etc/network/interfaces for custom network configuration
+* `ntp.conf` for custom ntp server configuration
+* `config.sys` the normal raspberry pi boot configuration for changing video modes etc.
+* `sdl-clock` to update the clock binary with this file
+* `clock_cmd.sh` is the command line for the clock, it should start with `/root/sdl-clock ` and be followed by any command line parameters you wish to use for the clock.
+* `clock_bridge` to update the clock bridge binary file
+* `clock_bridge_cmd.sh` to update the clock bridge command line. It should start with `/root/clock-bridge` and be followed by any command line paramaters for the bridge.
+
 ## sdl-clock - Output the clock to hdmi on the raspberry pi
 
 You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl_clock`. Compiling requires SDL 2 and SDL_GFX 2 libraries. On the raspberry pi the default libraries shipped with rasbian will only output data to X11 window, so for full screen dedicated clock you need to compile the SDL libraries from source. For compiling use `./configure --host=armv7l-raspberry-linux-gnueabihf --disable-pulseaudio --disable-esd --disable-video-mir --disable-video-wayland --disable-video-x11 --disable-video-opengl` for config flags.
@@ -17,25 +44,6 @@ You can build the clock binary with `go get gitlab.com/Depili/clock-8001/cmd/sdl
 * Latest from git master: [sdl-clock](https://gitlab.com/Depili/clock-8001/-/jobs/artifacts/master/raw/sdl-clock?job=build)
 * Testing builds: https://kissa.depili.fi/clock-8001/testing/
 * Tagged releases: https://kissa.depili.fi/clock-8001/releases/
-* SD-card images for raspberry pi: https://kissa.depili.fi/clock-8001/images
-  * Images with `no_login` in filename are secure without login password
-  * Images with `clockworkadmin` have root login enabled with password `clockworkadmin`. They should be considered insecure.
-
-### Ready made raspberry pi images
-
-The images support raspberry pi 2B / 3B / 3B+ boards. They need at least 64Mb SD-cards. Write them to the card like any other raspberry pi sd-card image.
-
-The image tries to get a dhcp address on wired ethernet and also brings up a virtual interface eth0:1 with static ip (default 192.168.10.245 with 255.255.255.0 netmask).
-
-#### Customizing the images
-
-You can place the following files on the sd-card FAT partition to customize the installation:
-* `hostname` to change the hostname used by the clock, it is available with "hostname.local" for bonjour / mDNS requests
-* `sdl-clock` to update the clock binary with this file
-* `clock_cmd.sh` is the command line for the clock, it should start with `/root/sdl-clock ` and be followed by any command line parameters you wish to use
-* `interfaces` a replacement for /etc/network/interfaces for custom network configuration
-* `ntp.conf` for custom ntp server configuration
-* `config.sys` the normal raspberry pi boot configuration for changing video modes etc.
 
 ### Command line parameters
 ```
@@ -55,6 +63,7 @@ Application Options:
       --sec-green=        Green component of second color (default: 0)
       --sec-blue=         Blue component of second color (default: 0)
   -p, --time-pin=         Pin to select foreign timezone, active low (default: 15)
+      --debug             Enable debug output
       --flash=            Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
   -t, --local-time=       Local timezone (default: Europe/Helsinki)
       --osc-listen=       Address to listen for incoming osc messages (default: 0.0.0.0:1245)

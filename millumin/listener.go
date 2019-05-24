@@ -2,6 +2,7 @@ package millumin
 
 import (
 	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 )
 
@@ -35,7 +36,7 @@ func (listener *Listener) Listen() chan State {
 
 func (listener *Listener) update() {
 	var state = make(State)
-
+	debug.Printf("Millumin listener, update state\n")
 	for layer, layerState := range listener.layers {
 		state[layer] = *layerState
 	}

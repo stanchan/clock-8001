@@ -2,6 +2,7 @@ package mitti
 
 import (
 	"fmt"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"time"
 )
@@ -52,7 +53,7 @@ func (state *State) TogglePlay(i int32) {
 		state.Paused = false
 	}
 
-	log.Printf("togglePlay: %d", i)
+	debug.Printf("Mitti: togglePlay: %d", i)
 }
 
 // ToggleLoop toggles the loop state
@@ -64,7 +65,7 @@ func (state *State) ToggleLoop(i int32) {
 		state.Loop = true
 	}
 
-	log.Printf("toggleLoop: %d", i)
+	debug.Printf("Mitti: toggleLoop: %d", i)
 }
 
 // Copy creates a new copy of the Mitti state

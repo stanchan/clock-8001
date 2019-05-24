@@ -2,6 +2,7 @@ package mitti
 
 import (
 	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 )
 
@@ -40,7 +41,7 @@ func (listener *Listener) update() {
 	for listenChan := range listener.listeners {
 		listenChan <- state
 	}
-	// log.Printf("mitti state update: %v\n", listener.state)
+	debug.Printf("mitti state update: %v\n", listener.state)
 }
 
 func (listener *Listener) handleTogglePlay(msg *osc.Message) {

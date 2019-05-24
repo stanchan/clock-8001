@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"math"
-	"net"
-	"strings"
 	"time"
 )
 
@@ -41,17 +40,11 @@ const (
 	Paused    = iota // Paused countdown timer(s)
 )
 
-const interfacePollTime = 5 * time.Second
-
 type countdownData struct {
 	target   time.Time     // Target timestamp for main countdown
 	duration time.Duration // Total duration of main countdown, used to scale the leds
 	left     time.Duration // Duration left when paused
 	active   bool
-}
-
-type feedbackDestinations struct {
-	udpConns []*net.UDPConn
 }
 
 // Engine contains the state machine for clock-8001
@@ -78,11 +71,10 @@ type Engine struct {
 	flasher     *time.Ticker
 	clockServer *Server
 	oscServer   osc.Server
-	timeout     time.Duration         // Timeout for osc tally events
-	oscTally    bool                  // Tally text was from osc event
-	oscDest     string                // String from options
-	oscDests    *feedbackDestinations // udp connections to send osc feedback to
-	initialized bool                  // Show version on startup until ntp synced or receiving OSC control
+	timeout     time.Duration        // Timeout for osc tally events
+	oscTally    bool                 // Tally text was from osc event
+	oscDests    *feedbackDestination // udp connections to send osc feedback to
+	initialized bool                 // Show version on startup until ntp synced or receiving OSC control
 }
 
 // MakeEngine creates a clock engine
@@ -137,9 +129,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 			log.Printf("OSC feedback disabled")
 		} else {
 			// OSC feedback
-			engine.oscDest = options.Connect
-			// Poll for network interface changes
-			go engine.interfaceMonitor()
+			engine.oscDests = initFeedback(options.Connect)
 		}
 	} else {
 		log.Printf("OSC control and feedback disabled.\n")
@@ -162,67 +152,6 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	return &engine, nil
 }
 
-// Update the udp connections for OSC feedback
-func (engine *Engine) interfaceMonitor() {
-	log.Printf("Monitoring network interface changes\n")
-	port := strings.Join(strings.Split(engine.oscDest, ":")[1:], "")
-	log.Printf("OSC feedback port: %v", port)
-
-	for {
-		time.Sleep(interfacePollTime)
-		log.Printf("Updating feedback connections\n")
-
-		conns := feedbackDestinations{
-			udpConns: make([]*net.UDPConn, 0),
-		}
-
-		if !strings.Contains(engine.oscDest, "255.255.255.255") {
-			log.Printf(" -> Trying single address: %v\n", engine.oscDest)
-			if udpAddr, err := net.ResolveUDPAddr("udp", engine.oscDest); err != nil {
-				log.Printf(" -> Failed to resolve OSC feedback address: %v", err)
-			} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
-				log.Printf("   -> Failed to open OSC feedback address: %v", err)
-			} else {
-				log.Printf("OSC feedback: sending to %v", engine.oscDest)
-				conns.udpConns = append(conns.udpConns, udpConn)
-			}
-			continue
-		}
-
-		addrs, _ := net.InterfaceAddrs()
-		for _, addr := range addrs {
-			ip, n, err := net.ParseCIDR(addr.String())
-			if err != nil {
-				log.Printf(" -> error parsing network\n")
-			} else {
-				if ip.IsLoopback() {
-					// Ignore loopback interfaces
-					continue
-				} else if ip.To4() != nil {
-					broadcast := net.IP(make([]byte, 4))
-					for i := range n.IP {
-						broadcast[i] = n.IP[i] | (^n.Mask[i])
-					}
-					log.Printf(" -> using broadcast address %v", broadcast)
-
-					dest := fmt.Sprintf("%v:%v", broadcast, port)
-
-					if udpAddr, err := net.ResolveUDPAddr("udp", dest); err != nil {
-						log.Printf(" -> Failed to resolve OSC broadcast address %v: %v", dest, err)
-					} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
-						log.Printf("   -> Failed to open OSC broadcast address %v: %v", dest, err)
-					} else {
-						log.Printf("OSC feedback: sending to %v", dest)
-						conns.udpConns = append(conns.udpConns, udpConn)
-					}
-				}
-			}
-		}
-
-		engine.oscDests = &conns
-	}
-}
-
 func (engine *Engine) runOSC() {
 	err := engine.oscServer.ListenAndServe()
 	if err != nil {
@@ -239,10 +168,7 @@ func (engine *Engine) listen() {
 		select {
 		case message := <-oscChan:
 			// New OSC message received
-			// TODO: add a debug flag to enable verbose output
-			// If we print to the console for each mitti/millum message
-			// The writes will end up blocking
-			// log.Printf("Got new osc data.\n")
+			debug.Printf("Got new osc data: %v\n", message)
 			switch message.Type {
 			case "count":
 				msg := message.CountMessage
@@ -325,11 +251,7 @@ func (engine *Engine) sendState() error {
 	if err != nil {
 		return err
 	}
-	for _, conn := range engine.oscDests.udpConns {
-		if _, err := conn.Write(data); err != nil {
-			return err
-		}
-	}
+	engine.oscDests.Write(data)
 	return nil
 }
 

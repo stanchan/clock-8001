@@ -9,6 +9,7 @@ import (
 	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"os"
 	"os/signal"
@@ -33,6 +34,10 @@ func main() {
 		} else {
 			os.Exit(1)
 		}
+	}
+
+	if options.Debug {
+		debug.Enabled = true
 	}
 
 	// GPIO pin for toggling between timezones
