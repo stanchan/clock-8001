@@ -6,7 +6,7 @@ This is a simplistic clock written in go that can be used either as a video out 
 
 The clock can be controlled with the depili-clock-8001 companion module: https://github.com/bitfocus/companion-module-depili-clock-8001
 
-Developed in co-operation with [SVV](http://svv.fi/).
+Developed in co-operation with Daniel Richert.
 
 ## Ready made raspberry pi images
 
