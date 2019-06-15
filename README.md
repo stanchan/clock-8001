@@ -199,6 +199,12 @@ Resumes countdown timers()
 
 Payload: none
 
+### /clock/seconds/off and /clock/seconds/on
+
+Shows or hides the seconds display under the main timer display.
+
+Payload: none
+
 ## OSC feedback
 
 The clock sends it's state to the address specified with --osc-dest on `/clock/status` message. The payload is:
