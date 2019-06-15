@@ -16,8 +16,8 @@ import (
 	"time"
 )
 
-var staticSDLColor sdl.Color = sdl.Color{80, 80, 0, 255} // 12 static indicator circles
-var secSDLColor sdl.Color = sdl.Color{200, 0, 0, 255}
+var staticSDLColor = sdl.Color{80, 80, 0, 255} // 12 static indicator circles
+var secSDLColor = sdl.Color{200, 0, 0, 255}
 var textSDLColor sdl.Color
 var window *sdl.Window
 var renderer *sdl.Renderer
