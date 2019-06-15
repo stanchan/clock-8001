@@ -45,6 +45,25 @@ type DisplayMessage struct {
 	Text       string
 }
 
+// TimeMessage is for /clock/settime
+type TimeMessage struct {
+	Time string
+}
+
+// UnmarshalOSC converts a osc.Message to TimeMessage
+func (message *TimeMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.Time,
+	)
+}
+
+// MarshalOSC converts a TimeMessage to osc.Message
+func (message TimeMessage) MarshalOSC(addr string) *osc.Message {
+	return osc.NewMessage(addr,
+		message.Time,
+	)
+}
+
 // UnmarshalOSC converts a osc.Message to DisplayMessage
 func (message *DisplayMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(

@@ -1,9 +1,12 @@
 package clock
 
 import (
+	"fmt"
 	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/debug"
 	"log"
+	"os/exec"
+	"regexp"
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance
@@ -173,6 +176,32 @@ func (server *Server) handleSecondsOn(msg *osc.Message) {
 	server.update(message)
 }
 
+func (server *Server) handleTimeSet(msg *osc.Message) {
+	var message TimeMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		debug.Printf("Set time: %#v", message)
+		_, lookErr := exec.LookPath("date")
+		if lookErr != nil {
+			debug.Printf("Date binary not found, cannot set system date: %s\n", lookErr.Error())
+			return
+		}
+		// Validate the received time
+		match, _ := regexp.MatchString("^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])$", message.Time)
+		if match {
+			// Set the system time
+			dateString := fmt.Sprintf("2019-01-01T%s", message.Time)
+			debug.Printf("Setting system date to: %s\n", dateString)
+			args := []string{"--set", dateString}
+			exec.Command("date", args...).Run()
+		} else {
+			debug.Printf("Invalid time provided: %v\n", message.Time)
+		}
+	}
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -196,5 +225,5 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/normal", server.handleNormal)
 	registerHandler(oscServer, "/clock/seconds/off", server.handleSecondsOff)
 	registerHandler(oscServer, "/clock/seconds/on", server.handleSecondsOn)
-
+	registerHandler(oscServer, "/clock/time/set", server.handleTimeSet)
 }
