@@ -157,6 +157,22 @@ func (server *Server) handleDisplay(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleSecondsOff(msg *osc.Message) {
+	debug.Printf("Second display off: %v\n", msg)
+	message := Message{
+		Type: "secondsOff",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleSecondsOn(msg *osc.Message) {
+	debug.Printf("Second display on: %v\n", msg)
+	message := Message{
+		Type: "secondsOn",
+	}
+	server.update(message)
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -178,4 +194,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/kill", server.handleKill)
 	registerHandler(oscServer, "/clock/normal", server.handleNormal)
+	registerHandler(oscServer, "/clock/seconds/off", server.handleSecondsOff)
+	registerHandler(oscServer, "/clock/seconds/on", server.handleSecondsOn)
+
 }

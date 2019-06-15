@@ -49,52 +49,54 @@ type countdownData struct {
 
 // Engine contains the state machine for clock-8001
 type Engine struct {
-	timeZone    *time.Location // Time zone, initialized from options
-	mode        int            // Main display mode
-	countdown   *countdownData
-	countdown2  *countdownData
-	countup     *countdownData
-	paused      bool
-	Hours       string
-	Minutes     string
-	Seconds     string
-	Tally       string
-	TallyRed    uint8
-	TallyGreen  uint8
-	TallyBlue   uint8
-	cd2Red      uint8
-	cd2Green    uint8
-	cd2Blue     uint8
-	Leds        int
-	Dots        bool
-	flashLeds   bool
-	flasher     *time.Ticker
-	clockServer *Server
-	oscServer   osc.Server
-	timeout     time.Duration        // Timeout for osc tally events
-	oscTally    bool                 // Tally text was from osc event
-	oscDests    *feedbackDestination // udp connections to send osc feedback to
-	initialized bool                 // Show version on startup until ntp synced or receiving OSC control
+	timeZone       *time.Location // Time zone, initialized from options
+	mode           int            // Main display mode
+	countdown      *countdownData
+	countdown2     *countdownData
+	countup        *countdownData
+	paused         bool
+	Hours          string
+	Minutes        string
+	Seconds        string
+	displaySeconds bool
+	Tally          string
+	TallyRed       uint8
+	TallyGreen     uint8
+	TallyBlue      uint8
+	cd2Red         uint8
+	cd2Green       uint8
+	cd2Blue        uint8
+	Leds           int
+	Dots           bool
+	flashLeds      bool
+	flasher        *time.Ticker
+	clockServer    *Server
+	oscServer      osc.Server
+	timeout        time.Duration        // Timeout for osc tally events
+	oscTally       bool                 // Tally text was from osc event
+	oscDests       *feedbackDestination // udp connections to send osc feedback to
+	initialized    bool                 // Show version on startup until ntp synced or receiving OSC control
 }
 
 // MakeEngine creates a clock engine
 func MakeEngine(options *EngineOptions) (*Engine, error) {
 	var engine = Engine{
-		mode:        Normal,
-		Hours:       "",
-		Minutes:     "",
-		Seconds:     "",
-		Leds:        0,
-		flashLeds:   true,
-		Dots:        true,
-		oscTally:    false,
-		paused:      false,
-		timeout:     time.Duration(options.Timeout) * time.Millisecond,
-		cd2Red:      options.CountdownRed,
-		cd2Green:    options.CountdownGreen,
-		cd2Blue:     options.CountdownBlue,
-		initialized: false,
-		oscDests:    nil,
+		mode:           Normal,
+		Hours:          "",
+		Minutes:        "",
+		Seconds:        "",
+		displaySeconds: true,
+		Leds:           0,
+		flashLeds:      true,
+		Dots:           true,
+		oscTally:       false,
+		paused:         false,
+		timeout:        time.Duration(options.Timeout) * time.Millisecond,
+		cd2Red:         options.CountdownRed,
+		cd2Green:       options.CountdownGreen,
+		cd2Blue:        options.CountdownBlue,
+		initialized:    false,
+		oscDests:       nil,
 	}
 
 	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
@@ -212,6 +214,10 @@ func (engine *Engine) listen() {
 				engine.Kill()
 			case "normal":
 				engine.Normal()
+			case "secondsOff":
+				engine.displaySeconds = false
+			case "secondsOn":
+				engine.displaySeconds = true
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -283,6 +289,11 @@ func (engine *Engine) Update() {
 	}
 
 	engine.countdown2Update() // Update secondary countdown if needed
+
+	if !engine.displaySeconds {
+		// Clear the seconds field as requested
+		engine.Seconds = ""
+	}
 
 	if err := engine.sendState(); err != nil {
 		log.Printf("Error sending osc state: %v", err)
