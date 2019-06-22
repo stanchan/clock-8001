@@ -192,7 +192,7 @@ func (server *Server) handleTimeSet(msg *osc.Message) {
 		match, _ := regexp.MatchString("^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])$", message.Time)
 		if match {
 			// Set the system time
-			dateString := fmt.Sprintf("2019-01-01T%s", message.Time)
+			dateString := fmt.Sprintf("2019-01-01 %s", message.Time)
 			debug.Printf("Setting system date to: %s\n", dateString)
 			args := []string{"--set", dateString}
 			exec.Command("date", args...).Run()
