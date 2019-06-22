@@ -209,7 +209,7 @@ Payload: none
 
 Sets the system time on the clock host. Requires that the clock is running on linux with enough priviledges, which is the default on the raspberry pi images. NTP syncronized time will override time set by this command periodically. To set all clocks in the network to same time use broadcast.
 
-Payload: String in format "01:02:03" where 01 is the hours in 24 hour format, 02 the minutes and 03 the seconds.
+Payload: String in format `01:02:03` where 01 is the hours in 24 hour format, 02 the minutes and 03 the seconds.
 
 ## OSC feedback
 
