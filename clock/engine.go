@@ -7,6 +7,9 @@ import (
 	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"math"
+	"os"
+	"os/exec"
+	"regexp"
 	"time"
 )
 
@@ -218,6 +221,8 @@ func (engine *Engine) listen() {
 				engine.displaySeconds = false
 			case "secondsOn":
 				engine.displaySeconds = true
+			case "setTime":
+				engine.setTime(message.Data)
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -593,5 +598,29 @@ func (engine *Engine) Resume() {
 		engine.countdown2.target = t.Add(engine.countdown2.left).Truncate(time.Second)
 		engine.countup.target = t.Add(-engine.countup.left).Truncate(time.Second)
 		engine.paused = false
+	}
+}
+
+func (engine *Engine) setTime(time string) {
+	debug.Printf("Set time: %#v", time)
+	_, lookErr := exec.LookPath("date")
+	if lookErr != nil {
+		debug.Printf("Date binary not found, cannot set system date: %s\n", lookErr.Error())
+		return
+	}
+	// Validate the received time
+	match, _ := regexp.MatchString("^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])$", time)
+	if match {
+		// Set the system time
+		dateString := fmt.Sprintf("2019-01-01 %s", time)
+		tzString := fmt.Sprintf("TZ=%s", engine.timeZone.String())
+		debug.Printf("Setting system date to: %s\n", dateString)
+		args := []string{"--set", dateString}
+		cmd := exec.Command("date", args...)
+		cmd.Env = os.Environ()
+		cmd.Env = append(cmd.Env, tzString)
+		cmd.Run()
+	} else {
+		debug.Printf("Invalid time provided: %v\n", time)
 	}
 }
