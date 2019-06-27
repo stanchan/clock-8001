@@ -32,9 +32,8 @@ If you need the time of day (ToD)
 8001 needs a connection to the internet, just for a short time to get the correct time from the ntp servers. When time is shown internet can be d
 isconnected if needed.
 
-Pi doesn't remember the time or any other parameter after a power cycle. This is because the program runs on RAM. The card is read on the start, 
-but nothing is never written to it. This is for reliability. 1. The clock will start as new every time 2. The memory card does not corrupt if not
-hing is written to it.
+Pi doesn't remember the time or any other parameter after a power cycle. This is because the program runs from RAM. The card is read on the start, 
+but nothing is never written to it. This is for reliability. 1. The clock will start as new every time 2. The memory card does not corrupt if nothing is written to it.
 You could even remove the memory card after the boot.
 Because of this, you need to provide a connection to the internet on every power-up if you need ToD.
 
@@ -63,8 +62,7 @@ There you can create and download setup files.
 
 ### clock_cmd.sh
 For timezone, colours and flashing interval.
-The flashing is global and will affect the flashing of the colon when 8001 is paused or when the timer reaches zero. If set to 0 the flashing wil
-l be disabled.
+The flashing is global and will affect the flashing of the colon when 8001 is paused or when the timer reaches zero. If set to 0 the flashing will be disabled.
 OSC feedback. You can redirect the feedback to desired address and port, leave this empty to get defaults.
 Default feedback is 255.255.255.255:1245
 
