@@ -126,14 +126,14 @@ func main() {
 		staticCircles = smallStaticCircles
 	} else {
 		// Scale down if needed
-		renderer.SetLogicalSize(1920, 1080)
+		renderer.SetLogicalSize(1080, 1080)
 	}
 
 	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	renderer.SetRenderTarget(staticTexture)
 	if !options.Small {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
-		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
+		// gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 	} else {
 		renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
 		renderer.DrawPoint(0, 1)
@@ -163,7 +163,7 @@ func main() {
 	renderer.SetRenderTarget(secTexture)
 	if !options.Small {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
-		gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
+		// gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	} else {
 		renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
 		renderer.DrawPoint(0, 1)
