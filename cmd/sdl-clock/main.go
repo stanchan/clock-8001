@@ -127,6 +127,26 @@ func main() {
 	} else {
 		// Scale down if needed
 		renderer.SetLogicalSize(1080, 1080)
+
+		// the official raspberry pi display has weird pixels
+		// We detect it by the unusual 800 x 480 resolution
+		// We will eventually support rotated displays also
+		x, y, _ := renderer.GetOutputSize()
+		log.Printf("SDL renderer size: %v x %v", x, y)
+		scaleX, scaleY := renderer.GetScale()
+		log.Printf("Scaling: x: %v, y: %v\n", scaleX, scaleY)
+
+		if (x == 800) && (y == 480) {
+			// Official display, rotated 0 or 180 degrees
+			// Scale for Y is 480 / 1080 = 0.44444445
+			// Scale for X is 0.44444445 * ((9.0*800) / (16*480)) = 0.416666671875
+			renderer.SetScale(0.416666671875, 0.44444445)
+			log.Printf("Detected official raspberry pi display, correcting aspect ratio\n")
+		} else if (y == 800) && (x == 480) {
+			// Official display rotated 90 or 270 degrees
+			renderer.SetScale(0.44444445, 0.416666671875)
+			log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio\n")
+		}
 	}
 
 	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
