@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"time"
 )
 
 var options struct {
@@ -62,6 +63,9 @@ func updateMilluminClock(clockClient *clock.Client, state millumin.State) error 
 			continue
 		} else if options.ignoreRegexp.MatchString(layerState.Layer) {
 			debug.Printf("Ignored layer update\n")
+			continue
+		} else if layerState.Updated.Before(time.Now().Add(-1*time.Second)) == true {
+			debug.Printf("Layer information stale, ignored")
 			continue
 		}
 
