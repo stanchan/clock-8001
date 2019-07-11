@@ -1,3 +1,7 @@
+## Version 3.7.1
+* clock-bridge:
+  * BUGFIX: Millumin osc tally and layer renaming. Renaming an active layer caused the internal state to become corrupt. The clock-bridge now filters layer states that haven't been updated in 1 second to remove ghost layers from the renames.
+
 ## Version 3.7.0
 * BUGFIX: Correct the monitor pixel aspect ratio on the official raspberry pi display. The clock is now round instead of oval.
 * FEATURE: Detect if a monitor is rotated 90 or 270 degrees and move the clock to the top portion of the screen.
