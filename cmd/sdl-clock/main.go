@@ -145,7 +145,16 @@ func main() {
 		} else if (y == 800) && (x == 480) {
 			// Official display rotated 90 or 270 degrees
 			renderer.SetScale(0.44444445, 0.416666671875)
-			log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio\n")
+			log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio.\n")
+			log.Printf("Moving clock to top corner of the display.\n")
+		}
+
+		if y > x {
+			log.Printf("Display rotated 90 or 270 degrees, moving clock to top corner.\n")
+			viewport := renderer.GetViewport()
+			log.Printf("Renderer viewport: %v\n", viewport)
+			viewport = sdl.Rect{0, 0, 1080, 1080}
+			renderer.SetViewport(&viewport)
 		}
 	}
 
