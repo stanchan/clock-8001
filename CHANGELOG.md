@@ -1,3 +1,7 @@
+## Version 3.7.0
+* BUGFIX: Correct the monitor pixel aspect ratio on the official raspberry pi display. The clock is now round instead of oval.
+* FEATURE: Detect if a monitor is rotated 90 or 270 degrees and move the clock to the top portion of the screen.
+
 ## Version 3.6.2
 * BUGFIX: Make /clock/time/set timezone aware.
 
