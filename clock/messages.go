@@ -107,7 +107,7 @@ func (message *CountMessage) SetTimeRemaining(seconds float32) {
 		}
 
 		message.Unit = unit.unit
-		message.Count = int32(seconds/unit.seconds + 0.5) // round
+		message.Count = int32(seconds / unit.seconds)
 		return
 	}
 
