@@ -8,6 +8,7 @@ The clock can be controlled with the depili-clock-8001 companion module: https:/
 
 Features and configuration in greated detail can be found in the [getting started guide in wiki](https://gitlab.com/Depili/clock-8001/wikis/Getting-started).
 
+A web utility for generating the config files for the clock-8001 can be found at [http://www.clock8001.com/settings/](http://www.clock8001.com/settings/)
 
 Developed in co-operation with Daniel Richert.
 
