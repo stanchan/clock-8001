@@ -247,7 +247,11 @@ func main() {
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)
 		case <-eventTicker.C:
-			_ = sdl.PollEvent()
+			e := sdl.PollEvent()
+			switch e.(type) {
+			case *sdl.QuitEvent:
+				os.Exit(0)
+			}
 		case <-updateTicker.C:
 			engine.Update()
 			seconds := engine.Leds
