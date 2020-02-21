@@ -12,19 +12,20 @@ var gridSize int32 = 20
 var gridSpacing = 25
 
 var options struct {
-	Small         bool   `short:"s" description:"Scale to 192x192px"`
-	Font          string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
-	TextRed       uint8  `short:"r" long:"red" description:"Red component of text color" default:"255"`
-	TextGreen     uint8  `short:"g" long:"green" description:"Green component of text color" default:"128"`
-	TextBlue      uint8  `short:"b" long:"blue" description:"Blue component of text color" default:"0"`
-	StaticRed     uint8  `long:"static-red" description:"Red component of static color" default:"80"`
-	StaticGreen   uint8  `long:"static-green" description:"Green component of static color" default:"80"`
-	StaticBlue    uint8  `long:"static-blue" description:"Blue component of static color" default:"0"`
-	SecRed        uint8  `long:"sec-red" description:"Red component of second color" default:"200"`
-	SecGreen      uint8  `long:"sec-green" description:"Green component of second color" default:"0"`
-	SecBlue       uint8  `long:"sec-blue" description:"Blue component of second color" default:"0"`
-	TimePin       int    `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
-	Debug         bool   `long:"debug" description:"Enable debug output"`
+	Config        func(s string) error `short:"C" long:"config" description:"read config from a file"`
+	Small         bool                 `short:"s" description:"Scale to 192x192px"`
+	Font          string               `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`
+	TextRed       uint8                `short:"r" long:"red" description:"Red component of text color" default:"255"`
+	TextGreen     uint8                `short:"g" long:"green" description:"Green component of text color" default:"128"`
+	TextBlue      uint8                `short:"b" long:"blue" description:"Blue component of text color" default:"0"`
+	StaticRed     uint8                `long:"static-red" description:"Red component of static color" default:"80"`
+	StaticGreen   uint8                `long:"static-green" description:"Green component of static color" default:"80"`
+	StaticBlue    uint8                `long:"static-blue" description:"Blue component of static color" default:"0"`
+	SecRed        uint8                `long:"sec-red" description:"Red component of second color" default:"200"`
+	SecGreen      uint8                `long:"sec-green" description:"Green component of second color" default:"0"`
+	SecBlue       uint8                `long:"sec-blue" description:"Blue component of second color" default:"0"`
+	TimePin       int                  `short:"p" long:"time-pin" description:"Pin to select foreign timezone, active low" default:"15"`
+	Debug         bool                 `long:"debug" description:"Enable debug output"`
 	EngineOptions *clock.EngineOptions
 }
 

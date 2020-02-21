@@ -28,6 +28,11 @@ var staticTexture *sdl.Texture
 var secTexture *sdl.Texture
 
 func main() {
+	options.Config = func(s string) error {
+		ini := flags.NewIniParser(parser)
+		return ini.ParseFile(s)
+	}
+
 	if _, err := parser.Parse(); err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
 			os.Exit(0)
