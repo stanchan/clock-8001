@@ -5,8 +5,8 @@ import (
 	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	// "github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/jessevdk/go-flags"
-	"github.com/kidoman/embd"
-	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
+	// "github.com/kidoman/embd"
+	// _ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/debug"
@@ -40,20 +40,21 @@ func main() {
 		debug.Enabled = true
 	}
 
-	// GPIO pin for toggling between timezones
-	if err := embd.InitGPIO(); err != nil {
-		panic(err)
-	}
+	/*
+		// GPIO pin for toggling between timezones
+		if err := embd.InitGPIO(); err != nil {
+			panic(err)
+		}
 
-	timePin, err := embd.NewDigitalPin(options.TimePin)
-	if err != nil {
-		panic(err)
-	} else if err := timePin.SetDirection(embd.In); err != nil {
-		panic(err)
-	}
+		timePin, err := embd.NewDigitalPin(options.TimePin)
+		if err != nil {
+			panic(err)
+		} else if err := timePin.SetDirection(embd.In); err != nil {
+			panic(err)
+		}
 
-	log.Printf("GPIO initialized.\n")
-
+		log.Printf("GPIO initialized.\n")
+	*/
 	/*
 		// Load timezones
 		local, err := time.LoadLocation(options.LocalTime)
@@ -232,6 +233,7 @@ func main() {
 	tallyBitmap := font.TextBitmap("  ")
 
 	updateTicker := time.NewTicker(time.Millisecond * 30)
+	eventTicker := time.NewTicker(time.Millisecond * 5)
 
 	engine, err := clock.MakeEngine(options.EngineOptions)
 	if err != nil {
@@ -244,6 +246,8 @@ func main() {
 		case <-sigChan:
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)
+		case <-eventTicker.C:
+			_ = sdl.PollEvent()
 		case <-updateTicker.C:
 			engine.Update()
 			seconds := engine.Leds
