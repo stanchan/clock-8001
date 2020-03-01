@@ -15,3 +15,5 @@ require (
 	gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20160725180610-c2da37d64860
 	golang.org/x/sys v0.0.0-20200301153931-2f85c7ec1e52 // indirect
 )
+
+replace github.com/hypebeast/go-osc => github.com/SpComb/go-osc v0.0.0-20170806011531-31b2c921f3f8

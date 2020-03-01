@@ -1,11 +1,11 @@
+github.com/SpComb/go-osc v0.0.0-20170806011531-31b2c921f3f8 h1:D0t04F4rj3JknMM9ZOi9+DF4PnbG8awmQu9B6Oe2hJY=
+github.com/SpComb/go-osc v0.0.0-20170806011531-31b2c921f3f8/go.mod h1:X8p35S6ERF3TVmHnocPbpR9hqAR4r/NVJT5s7X40XRA=
 github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f h1:U5y3Y5UE0w7amNe7Z5G/twsBW0KEalRQXZzf8ufSh9I=
 github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f/go.mod h1:xH/i4TFMt8koVQZ6WFms69WAsDWr2XsYL3Hkl7jkoLE=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/husl-colors/husl-go v2.0.0+incompatible h1:oQsbCsz2NaQpADsbb7Han1FbTwvXAjvRkgkQvepjcEs=
 github.com/husl-colors/husl-go v2.0.0+incompatible/go.mod h1:6cGnkrtJV+Zf2bjiMyhg600DGa1p71KigxStau/ELQw=
-github.com/hypebeast/go-osc v0.0.0-20200115085105-85fee7fed692 h1:a5rmrg0wd6LLuRQGk9lopHHgzyjM8DjH0Ek0iHki5Lc=
-github.com/hypebeast/go-osc v0.0.0-20200115085105-85fee7fed692/go.mod h1:VCiuhv+/+jPFqHeZAgVC61Cr4drPso5XEEKmEiqCsuU=
 github.com/jessevdk/go-flags v1.4.0 h1:4IU2WS7AumrZ/40jfhf4QVDMsQwqA7VEHozFRrGARJA=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/kidoman/embd v0.0.0-20170508013040-d3d8c0c5c68d h1:dPUSr0RGzXAdsUTMtiyQ/2RBLIIwkv6jGnhxrufitvQ=
