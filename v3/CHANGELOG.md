@@ -1,3 +1,8 @@
+## Version 3.8.0
+* multi-clock: Implement new display of up to 40 clocks
+* config file support: use -C to read config flags from a file
+* osx support: Remove unused rpi gpio stuff from sdl-clock and handle sdl2 events
+
 ## Version 3.7.1
 * clock-bridge:
   * BUGFIX: Millumin osc tally and layer renaming. Renaming an active layer caused the internal state to become corrupt. The clock-bridge now filters layer states that haven't been updated in 1 second to remove ghost layers from the renames.
