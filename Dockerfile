@@ -5,13 +5,13 @@ MAINTAINER Vesa-Pekka Palmu <vpalmu@depili.fi>
 # Install golint
 ENV GOPATH /go
 ENV PATH ${GOPATH}/bin:$PATH
-RUN go get -u github.com/golang/lint/golint
+RUN go get -u golang.org/x/lint/golint
 
 # Add apt key for LLVM repository
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 
 # Add LLVM apt repository
-RUN echo "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main" | tee -a /etc/apt/sources.list
+RUN echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-7 main" | tee -a /etc/apt/sources.list
 
 # Install clang from LLVM repository and sdl2 headers
 RUN apt-get update && apt-get install -y --no-install-recommends \
