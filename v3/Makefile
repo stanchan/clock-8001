@@ -14,16 +14,16 @@ GO_LD_FLAGS := "-X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitT
 all: build
 
 lint: ## Lint the files
-	@golint -set_exit_status ${PKG_LIST}
+	@golint -set_exit_status ./...
 
 test: ## Run unittests
-	@go test -short ${PKG_LIST}
+	@go test -short ./...
 
 race: dep ## Run data race detector
-	@go test -race -short ${PKG_LIST}
+	@go test -race -short ./...
 
 msan: dep ## Run memory sanitizer
-	@go test -msan -short ${PKG_LIST}
+	@go test -msan -short ./...
 
 coverage: ## Generate global code coverage report
 	@go test $(PKG_LIST) -v -coverprofile .coverage.txt
@@ -37,9 +37,10 @@ dep: ## Get the dependencies
 
 build: dep ## Build the binary file
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT)
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/cmd/clock-bridge
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/cmd/matrix-clock
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/cmd/sdl-clock
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/clock-bridge
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/multi-clock
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/sdl-clock
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/matrix-clock
 
 clean: ## Remove previous build
 	@rm -f $(BINARIES)
