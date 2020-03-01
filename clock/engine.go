@@ -601,6 +601,16 @@ func (engine *Engine) Resume() {
 	}
 }
 
+// DisplaySeconds returns true if the clock should display seconds
+func (engine *Engine) DisplaySeconds() bool {
+	return engine.displaySeconds
+}
+
+// TimeOfDay returns true if the clock is showing time of day, false otherwise
+func (engine *Engine) TimeOfDay() bool {
+	return engine.mode == Normal
+}
+
 func (engine *Engine) setTime(time string) {
 	debug.Printf("Set time: %#v", time)
 	_, lookErr := exec.LookPath("date")

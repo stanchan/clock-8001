@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/Depili/clock-8001/v3/debug"
+	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"math"
 	"os"
@@ -599,6 +599,16 @@ func (engine *Engine) Resume() {
 		engine.countup.target = t.Add(-engine.countup.left).Truncate(time.Second)
 		engine.paused = false
 	}
+}
+
+// DisplaySeconds returns true if the clock should display seconds
+func (engine *Engine) DisplaySeconds() bool {
+	return engine.displaySeconds
+}
+
+// TimeOfDay returns true if the clock is showing time of day, false otherwise
+func (engine *Engine) TimeOfDay() bool {
+	return engine.mode == Normal
 }
 
 func (engine *Engine) setTime(time string) {
