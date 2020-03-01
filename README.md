@@ -12,6 +12,10 @@ A web utility for generating the config files for the clock-8001 can be found at
 
 Developed in co-operation with Daniel Richert.
 
+## Building sdl-clock / multi-clock
+
+The sdl2 based clock binaries require sdl2, sdl2_gfx and sdl2-ttf libraries and headers. On osx you can install them with homebrew `brew install sdl2{,_image,_mixer,_ttf,_gfx} pkg-config` or on debian based linux systems: `apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev`. In addition to that you need the go compiler: `brew install golang` or `apt install golang`. After that you can build the binaries with `go get gitlab.com/Depili/clock-8001/cmd/sdl-clock` and `go get gitlab.com/Depili/clock-8001/cmd/multi-clock`
+
 ## Ready made raspberry pi images
 
 SD-card images for raspberry pi can be found at https://kissa.depili.fi/clock-8001/images
