@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitlab.com/Depili/clock-8001/clock"
+	"gitlab.com/Depili/clock-8001/v3/clock"
 	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	// "github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/jessevdk/go-flags"
