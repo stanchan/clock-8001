@@ -22,6 +22,7 @@ before_script:
   - mkdir -p /go/src/gitlab.com/Depili /go/src/_/builds
   - cp -r $CI_PROJECT_DIR /go/src/gitlab.com/Depili/clock-8001
   - ln -s /go/src/gitlab.com/Depili /go/src/_/builds/clock-8001
+  - cd v3
   - make dep
 
 # unit_tests:
@@ -65,15 +66,16 @@ build:
     - make build
   artifacts:
      paths:
-     - matrix-clock
-     - sdl-clock
-     - clock-bridge
+     - v3/matrix-clock
+     - v3/sdl-clock
+     - v3/clock-bridge
 
 deploy_latest:
     stage: deploy
     before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
+        - cd v3
         - ls
         - sshpass -V
         - export SSHPASS=$USER_PASS
@@ -90,6 +92,7 @@ deploy_release:
     before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
+        - cd v3
         - ls
         - sshpass -V
         - export SSHPASS=$USER_PASS
@@ -100,9 +103,9 @@ deploy_release:
         - curl -X POST -F token=$BR_TOKEN -F "ref=master" -F "variables[CLOCK_TAG]=$CI_COMMIT_TAG" https://gitlab.com/api/v4/projects/10763408/trigger/pipeline
     artifacts:
       paths:
-        - matrix-clock
-        - sdl-clock
-        - clock-bridge
+        - v3/matrix-clock
+        - v3/sdl-clock
+        - v3/clock-bridge
       name: "clock-8001-release-$CI_COMMIT_TAG"
     only:
         - tags
