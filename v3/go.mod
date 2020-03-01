@@ -9,10 +9,13 @@ require (
 	github.com/hypebeast/go-osc v0.0.0-20200115085105-85fee7fed692
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kidoman/embd v0.0.0-20170508013040-d3d8c0c5c68d
+	github.com/pebbe/zmq4 v1.2.0 // indirect
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
 	github.com/veandco/go-sdl2 v0.4.1
+	gitlab.com/Depili/clock-8001 v3.7.2+incompatible
 	gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20160725180610-c2da37d64860
 	golang.org/x/sys v0.0.0-20200301153931-2f85c7ec1e52 // indirect
+	golang.org/x/tools v0.0.0-20200228224639-71482053b885 // indirect
 )
 
-replace github.com/hypebeast/go-osc github.com/SpComb/go-osc v0.0.0-20200115085105-85fee7fed692
+replace github.com/hypebeast/go-osc => github.com/SpComb/go-osc v0.0.0-20170806011531-31b2c921f3f8

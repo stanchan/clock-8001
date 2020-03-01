@@ -1,8 +1,8 @@
 PROJECT_NAME := "clock-8001"
-PKG := "gitlab.com/Depili/$(PROJECT_NAME)"
+PKG := "gitlab.com/Depili/$(PROJECT_NAME)/v3"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
-BINARIES := clock-bridge matrix-clock sdl-clock
+BINARIES := clock-bridge matrix-clock sdl-clock multi-clock
 GOLINT := "$(GOPATH)/bin/golint"
 GIT_TAG ?= $(shell git describe --tags --abbrev=0)
 GIT_COMMIT ?= $(shell git rev-list -1 HEAD)
