@@ -24,8 +24,8 @@ import (
 const dy = 267
 const dx = 192
 
-var staticSDLColor = sdl.Color{80, 80, 0, 255} // 12 static indicator circles
-var secSDLColor = sdl.Color{200, 0, 0, 255}
+var staticSDLColor = sdl.Color{R: 80, G: 80, B: 0, A: 255} // 12 static indicator circles
+var secSDLColor = sdl.Color{R: 200, G: 0, B: 0, A: 255}
 var textSDLColor sdl.Color
 var window *sdl.Window
 var renderer *sdl.Renderer
@@ -133,11 +133,11 @@ func main() {
 	log.Printf("Renderer: %v\n", rendererInfo.Name)
 
 	// Clock colors from flags
-	textSDLColor = sdl.Color{options.TextRed, options.TextGreen, options.TextBlue, 255}
-	staticSDLColor = sdl.Color{options.StaticRed, options.StaticGreen, options.StaticBlue, 255}
-	secSDLColor = sdl.Color{options.SecRed, options.SecGreen, options.SecBlue, 255}
+	textSDLColor = sdl.Color{R: options.TextRed, G: options.TextGreen, B: options.TextBlue, A: 255}
+	staticSDLColor = sdl.Color{R: options.StaticRed, G: options.StaticGreen, B: options.StaticBlue, A: 255}
+	secSDLColor = sdl.Color{R: options.SecRed, G: options.SecGreen, B: options.SecBlue, A: 255}
 	// Default color for the OSC field (black)
-	tallyColor := sdl.Color{0, 0, 0, 255}
+	tallyColor := sdl.Color{R: 0, G: 0, B: 0, A: 255}
 
 	var textureSize int32 = 40
 
@@ -156,7 +156,7 @@ func main() {
 
 	err = renderer.SetRenderTarget(nil)
 	check(err)
-	textureSource = sdl.Rect{0, 0, textureSize, textureSize}
+	textureSource = sdl.Rect{X: 0, Y: 0, W: textureSize, H: textureSize}
 
 	// Trap SIGINT aka Ctrl-C
 	sigChan := make(chan os.Signal, 1)
@@ -240,7 +240,7 @@ func main() {
 			check(err)
 			if showTestPicture {
 				// Show the test picture.
-				err = renderer.Copy(testTexture, &sdl.Rect{0, 0, 1920, 1080}, &sdl.Rect{0, 0, 1920, 1080})
+				err = renderer.Copy(testTexture, &sdl.Rect{X: 0, Y: 0, W: 1920, H: 1080}, &sdl.Rect{X: 0, Y: 0, W: 1920, H: 1080})
 				check(err)
 				renderer.Present()
 				continue
@@ -277,7 +277,7 @@ func main() {
 				hourBitmap = font.TextBitmap(engine.Hours)
 				minuteBitmap = font.TextBitmap(engine.Minutes)
 
-				tallyColor = sdl.Color{feedBackEngine.TallyRed, feedBackEngine.TallyGreen, feedBackEngine.TallyBlue, 255}
+				tallyColor = sdl.Color{R: feedBackEngine.TallyRed, G: feedBackEngine.TallyGreen, B: feedBackEngine.TallyBlue, A: 255}
 				tallyBitmap = font.TextBitmap(feedBackEngine.Tally)
 
 				tzBitmap = font.TextBitmap(tzList[i][1])
@@ -328,7 +328,7 @@ func main() {
 func drawSecondCircles(seconds int) {
 	// Draw second circles
 	for i := 0; i <= int(seconds); i++ {
-		dest := sdl.Rect{secCircles[i][0] - 3, secCircles[i][1] - 3, 5, 5}
+		dest := sdl.Rect{X: secCircles[i][0] - 3, Y: secCircles[i][1] - 3, W: 5, H: 5}
 		err := renderer.Copy(secTexture, &textureSource, &dest)
 		check(err)
 	}
@@ -337,7 +337,7 @@ func drawSecondCircles(seconds int) {
 func drawStaticCircles() {
 	// Draw static indicator circles
 	for _, p := range staticCircles {
-		dest := sdl.Rect{p[0] - 3, p[1] - 3, 5, 5}
+		dest := sdl.Rect{X: p[0] - 3, Y: p[1] - 3, W: 5, H: 5}
 		err := renderer.Copy(staticTexture, &textureSource, &dest)
 		check(err)
 	}
@@ -360,7 +360,7 @@ func drawDots() {
 func setPixel(cy, cx int, color sdl.Color) {
 	x := gridStartX + int32(cx*gridSpacing)
 	y := gridStartY + int32(cy*gridSpacing)
-	rect := sdl.Rect{x, y, gridSize, gridSize}
+	rect := sdl.Rect{X: x, Y: y, W: gridSize, H: gridSize}
 	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
 	check(err)
 	err = renderer.FillRect(&rect)
@@ -393,7 +393,7 @@ func setupTestTexture() {
 
 	for y := 0; y < 4; y++ {
 		for x := 0; x < 10; x++ {
-			rect := sdl.Rect{int32(x * dx), int32(y * dy), dx, dy}
+			rect := sdl.Rect{X: int32(x * dx), Y: int32(y * dy), W: dx, H: dy}
 			if odd {
 				err = renderer.SetDrawColor(255, 0, 0, 255)
 				check(err)
@@ -416,7 +416,7 @@ func setupTestTexture() {
 
 			textTexture, _ = renderer.CreateTextureFromSurface(text)
 			defer textTexture.Destroy()
-			err = renderer.Copy(textTexture, &sdl.Rect{0, 0, text.W, text.H}, &sdl.Rect{textX, textY, text.W, text.H})
+			err = renderer.Copy(textTexture, &sdl.Rect{X: 0, Y: 0, W: text.W, H: text.H}, &sdl.Rect{X: textX, Y: textY, W: text.W, H: text.H})
 			check(err)
 		}
 		odd = !odd

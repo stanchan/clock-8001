@@ -16,8 +16,8 @@ import (
 	"time"
 )
 
-var staticSDLColor = sdl.Color{80, 80, 0, 255} // 12 static indicator circles
-var secSDLColor = sdl.Color{200, 0, 0, 255}
+var staticSDLColor = sdl.Color{R: 80, G: 80, B: 0, A: 255} // 12 static indicator circles
+var secSDLColor = sdl.Color{R: 200, G: 0, B: 0, A: 255}
 var textSDLColor sdl.Color
 var window *sdl.Window
 var renderer *sdl.Renderer
@@ -112,11 +112,11 @@ func main() {
 	log.Printf("Renderer: %v\n", rendererInfo.Name)
 
 	// Clock colors from flags
-	textSDLColor = sdl.Color{options.TextRed, options.TextGreen, options.TextBlue, 255}
-	staticSDLColor = sdl.Color{options.StaticRed, options.StaticGreen, options.StaticBlue, 255}
-	secSDLColor = sdl.Color{options.SecRed, options.SecGreen, options.SecBlue, 255}
+	textSDLColor = sdl.Color{R: options.TextRed, G: options.TextGreen, B: options.TextBlue, A: 255}
+	staticSDLColor = sdl.Color{R: options.StaticRed, G: options.StaticGreen, B: options.StaticBlue, A: 255}
+	secSDLColor = sdl.Color{R: options.SecRed, G: options.SecGreen, B: options.SecBlue, A: 255}
 	// Default color for the OSC field (black)
-	tallyColor := sdl.Color{0, 0, 0, 255}
+	tallyColor := sdl.Color{R: 0, G: 0, B: 0, A: 255}
 
 	var textureSize int32 = 40
 	var textureCoord int32 = 20
@@ -165,7 +165,7 @@ func main() {
 			log.Printf("Display rotated 90 or 270 degrees, moving clock to top corner.\n")
 			viewport := renderer.GetViewport()
 			log.Printf("Renderer viewport: %v\n", viewport)
-			viewport = sdl.Rect{0, 0, 1080, 1080}
+			viewport = sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
 			err = renderer.SetViewport(&viewport)
 			check(err)
 		}
@@ -212,7 +212,7 @@ func main() {
 	err = renderer.SetRenderTarget(nil)
 	check(err)
 
-	textureSource = sdl.Rect{0, 0, textureSize, textureSize}
+	textureSource = sdl.Rect{X: 0, Y: 0, W: textureSize, H: textureSize}
 
 	// Trap SIGINT aka Ctrl-C
 	sigChan := make(chan os.Signal, 1)
@@ -251,7 +251,7 @@ func main() {
 			minuteBitmap = font.TextBitmap(engine.Minutes)
 			secondBitmap = font.TextBitmap(engine.Seconds)
 
-			tallyColor = sdl.Color{engine.TallyRed, engine.TallyGreen, engine.TallyBlue, 255}
+			tallyColor = sdl.Color{R: engine.TallyRed, G: engine.TallyGreen, B: engine.TallyBlue, A: 255}
 			tallyBitmap = font.TextBitmap(engine.Tally)
 
 			// Clear SDL canvas
@@ -284,9 +284,9 @@ func main() {
 func drawSecondCircles(seconds int) {
 	// Draw second circles
 	for i := 0; i <= int(seconds); i++ {
-		dest := sdl.Rect{secCircles[i][0] - 20, secCircles[i][1] - 20, 40, 40}
+		dest := sdl.Rect{X: secCircles[i][0] - 20, Y: secCircles[i][1] - 20, W: 40, H: 40}
 		if options.Small {
-			dest = sdl.Rect{secCircles[i][0] - 3, secCircles[i][1] - 3, 5, 5}
+			dest = sdl.Rect{X: secCircles[i][0] - 3, Y: secCircles[i][1] - 3, W: 5, H: 5}
 		}
 		err := renderer.Copy(secTexture, &textureSource, &dest)
 		check(err)
@@ -297,11 +297,11 @@ func drawStaticCircles() {
 	// Draw static indicator circles
 	for _, p := range staticCircles {
 		if options.Small {
-			dest := sdl.Rect{p[0] - 3, p[1] - 3, 5, 5}
+			dest := sdl.Rect{X: p[0] - 3, Y: p[1] - 3, W: 5, H: 5}
 			err := renderer.Copy(staticTexture, &textureSource, &dest)
 			check(err)
 		} else {
-			dest := sdl.Rect{p[0] - 20, p[1] - 20, 40, 40}
+			dest := sdl.Rect{X: p[0] - 20, Y: p[1] - 20, W: 40, H: 40}
 			err := renderer.Copy(staticTexture, &textureSource, &dest)
 			check(err)
 		}
@@ -325,7 +325,7 @@ func drawDots() {
 func setPixel(cy, cx int, color sdl.Color) {
 	x := gridStartX + int32(cx*gridSpacing)
 	y := gridStartY + int32(cy*gridSpacing)
-	rect := sdl.Rect{x, y, gridSize, gridSize}
+	rect := sdl.Rect{X: x, Y: y, W: gridSize, H: gridSize}
 	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
 	check(err)
 
