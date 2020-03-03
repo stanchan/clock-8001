@@ -30,6 +30,7 @@ var options struct {
 	EngineOptions *clock.EngineOptions
 }
 
+// Pixel coordinates for the 192x192 pixel clock circles
 var circlePixels = [][2]int32{
 	{0, 1},
 	{0, 2},

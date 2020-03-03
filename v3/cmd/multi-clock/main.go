@@ -114,13 +114,16 @@ func main() {
 		log.Fatalf("Failed to create renderer: %s\n", err)
 	}
 
-	sdl.ShowCursor(0) // Hide mouse cursor
+	_, err = sdl.ShowCursor(0) // Hide mouse cursor
+	check(err)
 
-	renderer.Clear()
+	// Clear the screen
+	err = renderer.Clear()
+	check(err)
 	defer renderer.Destroy()
 
 	if err = ttf.Init(); err != nil {
-		return
+		panic(err)
 	}
 	defer ttf.Quit()
 
@@ -151,7 +154,8 @@ func main() {
 
 	setupTestTexture()
 
-	renderer.SetRenderTarget(nil)
+	err = renderer.SetRenderTarget(nil)
+	check(err)
 	textureSource = sdl.Rect{0, 0, textureSize, textureSize}
 
 	// Trap SIGINT aka Ctrl-C
@@ -159,8 +163,10 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	// Cache the second ring texture
-	ringTexture, _ := renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, dx, dy)
-	ringTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	ringTexture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, dx, dy)
+	check(err)
+	err = ringTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
 
 	// Destination texture for the sub-clocks
 	clockTexture, _ := renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, dx, dy)
@@ -228,11 +234,14 @@ func main() {
 			}
 		case <-updateTicker.C:
 			// Clear SDL canvas
-			renderer.SetDrawColor(0, 0, 0, 255) // Black
-			renderer.Clear()                    // Clear screen
+			err = renderer.SetDrawColor(0, 0, 0, 255) // Black
+			check(err)
+			err = renderer.Clear() // Clear screen
+			check(err)
 			if showTestPicture {
 				// Show the test picture.
-				renderer.Copy(testTexture, &sdl.Rect{0, 0, 1920, 1080}, &sdl.Rect{0, 0, 1920, 1080})
+				err = renderer.Copy(testTexture, &sdl.Rect{0, 0, 1920, 1080}, &sdl.Rect{0, 0, 1920, 1080})
+				check(err)
 				renderer.Present()
 				continue
 			}
@@ -248,9 +257,12 @@ func main() {
 					engine = feedBackEngine
 				}
 
-				renderer.SetRenderTarget(clockTexture)
-				renderer.SetDrawColor(0, 0, 0, 255) // Black
-				renderer.Clear()                    // Clear screen
+				err = renderer.SetRenderTarget(clockTexture)
+				check(err)
+				err = renderer.SetDrawColor(0, 0, 0, 255) // Black
+				check(err)
+				err = renderer.Clear() // Clear screen
+				check(err)
 
 				target := sdl.Rect{
 					X: int32(dx * (i % 10)),
@@ -259,7 +271,8 @@ func main() {
 					W: dx,
 				}
 
-				renderer.SetDrawColor(0, 0, 0, 255) // Black
+				err = renderer.SetDrawColor(0, 0, 0, 255) // Black
+				check(err)
 
 				hourBitmap = font.TextBitmap(engine.Hours)
 				minuteBitmap = font.TextBitmap(engine.Minutes)
@@ -285,9 +298,13 @@ func main() {
 					seconds := engine.Leds
 					secondBitmap = font.TextBitmap(engine.Seconds)
 
-					renderer.SetRenderTarget(ringTexture)
-					renderer.SetDrawColor(0, 0, 0, 0) // Black
-					renderer.Clear()                  // Clear screen
+					err = renderer.SetRenderTarget(ringTexture)
+					check(err)
+					err = renderer.SetDrawColor(0, 0, 0, 0) // Black
+					check(err)
+					err = renderer.Clear() // Clear screen
+					check(err)
+
 					drawStaticCircles()
 					drawSecondCircles(seconds)
 					if feedBackEngine.DisplaySeconds() {
@@ -295,12 +312,14 @@ func main() {
 					}
 				}
 
-				renderer.SetRenderTarget(nil)
-				renderer.Copy(clockTexture, &source, &target)
-				renderer.Copy(ringTexture, &source, &target)
-				// Update the canvas
+				err = renderer.SetRenderTarget(nil)
+				check(err)
+				err = renderer.Copy(clockTexture, &source, &target)
+				check(err)
+				err = renderer.Copy(ringTexture, &source, &target)
+				check(err)
 			}
-			renderer.Present()
+			renderer.Present() // Update the screen
 
 		}
 	}
@@ -310,7 +329,8 @@ func drawSecondCircles(seconds int) {
 	// Draw second circles
 	for i := 0; i <= int(seconds); i++ {
 		dest := sdl.Rect{secCircles[i][0] - 3, secCircles[i][1] - 3, 5, 5}
-		renderer.Copy(secTexture, &textureSource, &dest)
+		err := renderer.Copy(secTexture, &textureSource, &dest)
+		check(err)
 	}
 }
 
@@ -318,7 +338,8 @@ func drawStaticCircles() {
 	// Draw static indicator circles
 	for _, p := range staticCircles {
 		dest := sdl.Rect{p[0] - 3, p[1] - 3, 5, 5}
-		renderer.Copy(staticTexture, &textureSource, &dest)
+		err := renderer.Copy(staticTexture, &textureSource, &dest)
+		check(err)
 	}
 }
 
@@ -340,8 +361,10 @@ func setPixel(cy, cx int, color sdl.Color) {
 	x := gridStartX + int32(cx*gridSpacing)
 	y := gridStartY + int32(cy*gridSpacing)
 	rect := sdl.Rect{x, y, gridSize, gridSize}
-	renderer.SetDrawColor(color.R, color.G, color.B, color.A)
-	renderer.FillRect(&rect)
+	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
+	check(err)
+	err = renderer.FillRect(&rect)
+	check(err)
 }
 
 func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
@@ -356,13 +379,15 @@ func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
 
 func setupTestTexture() {
 	testTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1920, 1080)
-	renderer.SetRenderTarget(testTexture)
+	err := renderer.SetRenderTarget(testTexture)
+	check(err)
 	odd := true
 
 	var font *ttf.Font
 	var text *sdl.Surface
 	var textTexture *sdl.Texture
-	font, _ = ttf.OpenFont("fonts/DejaVuSans.ttf", 120)
+	font, err = ttf.OpenFont("fonts/DejaVuSans.ttf", 120)
+	check(err)
 
 	defer font.Close()
 
@@ -370,33 +395,48 @@ func setupTestTexture() {
 		for x := 0; x < 10; x++ {
 			rect := sdl.Rect{int32(x * dx), int32(y * dy), dx, dy}
 			if odd {
-				renderer.SetDrawColor(255, 0, 0, 255)
+				err = renderer.SetDrawColor(255, 0, 0, 255)
+				check(err)
 			} else {
-				renderer.SetDrawColor(0, 0, 255, 255)
+				err = renderer.SetDrawColor(0, 0, 255, 255)
+				check(err)
 			}
 			odd = !odd
-			renderer.DrawRect(&rect)
-			renderer.SetDrawColor(255, 255, 255, 255)
+			err = renderer.DrawRect(&rect)
+			check(err)
+			err = renderer.SetDrawColor(255, 255, 255, 255)
+			check(err)
 
-			text, _ = font.RenderUTF8Blended(strconv.Itoa(1+x+(y*10)), sdl.Color{R: 255, G: 255, B: 255, A: 255})
+			text, err = font.RenderUTF8Blended(strconv.Itoa(1+x+(y*10)), sdl.Color{R: 255, G: 255, B: 255, A: 255})
 			defer text.Free()
+			check(err)
 
 			textX := int32((x*dx)+(dx/2)) - (text.W / 2)
 			textY := int32((y*dy)+(dy/2)) - (text.H / 2)
 
 			textTexture, _ = renderer.CreateTextureFromSurface(text)
 			defer textTexture.Destroy()
-			renderer.Copy(textTexture, &sdl.Rect{0, 0, text.W, text.H}, &sdl.Rect{textX, textY, text.W, text.H})
+			err = renderer.Copy(textTexture, &sdl.Rect{0, 0, text.W, text.H}, &sdl.Rect{textX, textY, text.W, text.H})
+			check(err)
 		}
 		odd = !odd
 	}
 }
 
 func setupSecTexture(textureSize int32) {
-	secTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
-	secTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
-	renderer.SetRenderTarget(secTexture)
-	renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
+	var err error
+	secTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
+	check(err)
+
+	err = secTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
+
+	err = renderer.SetRenderTarget(secTexture)
+	check(err)
+
+	err = renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
+	check(err)
+
 	for _, point := range circlePixels {
 		if err := renderer.DrawPoint(point[0], point[1]); err != nil {
 			panic(err)
@@ -405,14 +445,28 @@ func setupSecTexture(textureSize int32) {
 }
 
 func setupStaticTexture(textureSize int32) {
-	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
-	staticTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
-	renderer.SetRenderTarget(staticTexture)
+	var err error
+	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
+	check(err)
 
-	renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
+	err = staticTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
+
+	err = renderer.SetRenderTarget(staticTexture)
+	check(err)
+
+	err = renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
+	check(err)
+
 	for _, point := range circlePixels {
 		if err := renderer.DrawPoint(point[0], point[1]); err != nil {
 			panic(err)
 		}
+	}
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

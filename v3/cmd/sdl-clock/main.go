@@ -98,14 +98,17 @@ func main() {
 		log.Fatalf("Failed to create renderer: %s\n", err)
 	}
 
-	sdl.ShowCursor(0) // Hide mouse cursor
+	_, err = sdl.ShowCursor(0) // Hide mouse cursor
+	check(err)
 
-	renderer.Clear()
+	err = renderer.Clear()
 	defer renderer.Destroy()
+	check(err)
 
 	log.Printf("SDL init done\n")
 
-	rendererInfo, _ := renderer.GetInfo()
+	rendererInfo, err := renderer.GetInfo()
+	check(err)
 	log.Printf("Renderer: %v\n", rendererInfo.Name)
 
 	// Clock colors from flags
@@ -132,7 +135,8 @@ func main() {
 		staticCircles = smallStaticCircles
 	} else {
 		// Scale down if needed
-		renderer.SetLogicalSize(1080, 1080)
+		err = renderer.SetLogicalSize(1080, 1080)
+		check(err)
 
 		// the official raspberry pi display has weird pixels
 		// We detect it by the unusual 800 x 480 resolution
@@ -146,11 +150,13 @@ func main() {
 			// Official display, rotated 0 or 180 degrees
 			// Scale for Y is 480 / 1080 = 0.44444445
 			// Scale for X is 0.44444445 * ((9.0*800) / (16*480)) = 0.416666671875
-			renderer.SetScale(0.416666671875, 0.44444445)
+			err = renderer.SetScale(0.416666671875, 0.44444445)
+			check(err)
 			log.Printf("Detected official raspberry pi display, correcting aspect ratio\n")
 		} else if (y == 800) && (x == 480) {
 			// Official display rotated 90 or 270 degrees
-			renderer.SetScale(0.44444445, 0.416666671875)
+			err = renderer.SetScale(0.44444445, 0.416666671875)
+			check(err)
 			log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio.\n")
 			log.Printf("Moving clock to top corner of the display.\n")
 		}
@@ -160,71 +166,52 @@ func main() {
 			viewport := renderer.GetViewport()
 			log.Printf("Renderer viewport: %v\n", viewport)
 			viewport = sdl.Rect{0, 0, 1080, 1080}
-			renderer.SetViewport(&viewport)
+			err = renderer.SetViewport(&viewport)
+			check(err)
 		}
 	}
 
-	staticTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
-	renderer.SetRenderTarget(staticTexture)
+	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
+	check(err)
+
+	err = renderer.SetRenderTarget(staticTexture)
+	check(err)
+
 	if !options.Small {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 		// gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
 	} else {
-		renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
-		renderer.DrawPoint(0, 1)
-		renderer.DrawPoint(0, 2)
-		renderer.DrawPoint(0, 3)
-		renderer.DrawPoint(1, 0)
-		renderer.DrawPoint(1, 1)
-		renderer.DrawPoint(1, 2)
-		renderer.DrawPoint(1, 3)
-		renderer.DrawPoint(1, 4)
-		renderer.DrawPoint(2, 0)
-		renderer.DrawPoint(2, 1)
-		renderer.DrawPoint(2, 2)
-		renderer.DrawPoint(2, 3)
-		renderer.DrawPoint(2, 4)
-		renderer.DrawPoint(3, 0)
-		renderer.DrawPoint(3, 1)
-		renderer.DrawPoint(3, 2)
-		renderer.DrawPoint(3, 3)
-		renderer.DrawPoint(3, 4)
-		renderer.DrawPoint(4, 1)
-		renderer.DrawPoint(4, 2)
-		renderer.DrawPoint(4, 3)
+		err = renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
+		check(err)
+
+		for _, point := range circlePixels {
+			if err := renderer.DrawPoint(point[0], point[1]); err != nil {
+				panic(err)
+			}
+		}
 	}
 
 	secTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
-	renderer.SetRenderTarget(secTexture)
+	err = renderer.SetRenderTarget(secTexture)
+	check(err)
+
 	if !options.Small {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 		// gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
 	} else {
-		renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
-		renderer.DrawPoint(0, 1)
-		renderer.DrawPoint(0, 2)
-		renderer.DrawPoint(0, 3)
-		renderer.DrawPoint(1, 0)
-		renderer.DrawPoint(1, 1)
-		renderer.DrawPoint(1, 2)
-		renderer.DrawPoint(1, 3)
-		renderer.DrawPoint(1, 4)
-		renderer.DrawPoint(2, 0)
-		renderer.DrawPoint(2, 1)
-		renderer.DrawPoint(2, 2)
-		renderer.DrawPoint(2, 3)
-		renderer.DrawPoint(2, 4)
-		renderer.DrawPoint(3, 0)
-		renderer.DrawPoint(3, 1)
-		renderer.DrawPoint(3, 2)
-		renderer.DrawPoint(3, 3)
-		renderer.DrawPoint(3, 4)
-		renderer.DrawPoint(4, 1)
-		renderer.DrawPoint(4, 2)
-		renderer.DrawPoint(4, 3)
+		err = renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
+		check(err)
+
+		for _, point := range circlePixels {
+			if err := renderer.DrawPoint(point[0], point[1]); err != nil {
+				panic(err)
+			}
+		}
 	}
 
-	renderer.SetRenderTarget(nil)
+	err = renderer.SetRenderTarget(nil)
+	check(err)
+
 	textureSource = sdl.Rect{0, 0, textureSize, textureSize}
 
 	// Trap SIGINT aka Ctrl-C
@@ -268,8 +255,11 @@ func main() {
 			tallyBitmap = font.TextBitmap(engine.Tally)
 
 			// Clear SDL canvas
-			renderer.SetDrawColor(0, 0, 0, 255) // Black
-			renderer.Clear()                    // Clear screen
+			err = renderer.SetDrawColor(0, 0, 0, 255) // Black
+			check(err)
+
+			err = renderer.Clear() // Clear screen
+			check(err)
 
 			// Dots between hours and minutes
 			if engine.Dots {
@@ -298,7 +288,8 @@ func drawSecondCircles(seconds int) {
 		if options.Small {
 			dest = sdl.Rect{secCircles[i][0] - 3, secCircles[i][1] - 3, 5, 5}
 		}
-		renderer.Copy(secTexture, &textureSource, &dest)
+		err := renderer.Copy(secTexture, &textureSource, &dest)
+		check(err)
 	}
 }
 
@@ -307,10 +298,12 @@ func drawStaticCircles() {
 	for _, p := range staticCircles {
 		if options.Small {
 			dest := sdl.Rect{p[0] - 3, p[1] - 3, 5, 5}
-			renderer.Copy(staticTexture, &textureSource, &dest)
+			err := renderer.Copy(staticTexture, &textureSource, &dest)
+			check(err)
 		} else {
 			dest := sdl.Rect{p[0] - 20, p[1] - 20, 40, 40}
-			renderer.Copy(staticTexture, &textureSource, &dest)
+			err := renderer.Copy(staticTexture, &textureSource, &dest)
+			check(err)
 		}
 	}
 }
@@ -333,8 +326,11 @@ func setPixel(cy, cx int, color sdl.Color) {
 	x := gridStartX + int32(cx*gridSpacing)
 	y := gridStartY + int32(cy*gridSpacing)
 	rect := sdl.Rect{x, y, gridSize, gridSize}
-	renderer.SetDrawColor(color.R, color.G, color.B, color.A)
-	renderer.FillRect(&rect)
+	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
+	check(err)
+
+	err = renderer.FillRect(&rect)
+	check(err)
 }
 
 func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
@@ -344,5 +340,11 @@ func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
 				setPixel(r+y, c+x, color)
 			}
 		}
+	}
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
 	}
 }
