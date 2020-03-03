@@ -626,7 +626,7 @@ func (engine *Engine) setTime(time string) {
 		tzString := fmt.Sprintf("TZ=%s", engine.timeZone.String())
 		debug.Printf("Setting system date to: %s\n", dateString)
 		args := []string{"--set", dateString}
-		cmd := exec.Command("date", args...)
+		cmd := exec.Command("date", args...) // #nosec we have strict validation in place
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, tzString)
 		cmd.Run()
