@@ -59,7 +59,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
 
 	var tzList [][]string
 
@@ -80,6 +79,11 @@ func main() {
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
+	}
+
+	err = file.Close()
+	if err != nil {
+		panic(err)
 	}
 
 	if len(tzList) > 40 {
@@ -393,28 +397,11 @@ func setupSecTexture(textureSize int32) {
 	secTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
 	renderer.SetRenderTarget(secTexture)
 	renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
-	renderer.DrawPoint(0, 1)
-	renderer.DrawPoint(0, 2)
-	renderer.DrawPoint(0, 3)
-	renderer.DrawPoint(1, 0)
-	renderer.DrawPoint(1, 1)
-	renderer.DrawPoint(1, 2)
-	renderer.DrawPoint(1, 3)
-	renderer.DrawPoint(1, 4)
-	renderer.DrawPoint(2, 0)
-	renderer.DrawPoint(2, 1)
-	renderer.DrawPoint(2, 2)
-	renderer.DrawPoint(2, 3)
-	renderer.DrawPoint(2, 4)
-	renderer.DrawPoint(3, 0)
-	renderer.DrawPoint(3, 1)
-	renderer.DrawPoint(3, 2)
-	renderer.DrawPoint(3, 3)
-	renderer.DrawPoint(3, 4)
-	renderer.DrawPoint(4, 1)
-	renderer.DrawPoint(4, 2)
-	renderer.DrawPoint(4, 3)
-
+	for _, point := range circlePixels {
+		if err := renderer.DrawPoint(point[0], point[1]); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func setupStaticTexture(textureSize int32) {
@@ -423,25 +410,9 @@ func setupStaticTexture(textureSize int32) {
 	renderer.SetRenderTarget(staticTexture)
 
 	renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
-	renderer.DrawPoint(0, 1)
-	renderer.DrawPoint(0, 2)
-	renderer.DrawPoint(0, 3)
-	renderer.DrawPoint(1, 0)
-	renderer.DrawPoint(1, 1)
-	renderer.DrawPoint(1, 2)
-	renderer.DrawPoint(1, 3)
-	renderer.DrawPoint(1, 4)
-	renderer.DrawPoint(2, 0)
-	renderer.DrawPoint(2, 1)
-	renderer.DrawPoint(2, 2)
-	renderer.DrawPoint(2, 3)
-	renderer.DrawPoint(2, 4)
-	renderer.DrawPoint(3, 0)
-	renderer.DrawPoint(3, 1)
-	renderer.DrawPoint(3, 2)
-	renderer.DrawPoint(3, 3)
-	renderer.DrawPoint(3, 4)
-	renderer.DrawPoint(4, 1)
-	renderer.DrawPoint(4, 2)
-	renderer.DrawPoint(4, 3)
+	for _, point := range circlePixels {
+		if err := renderer.DrawPoint(point[0], point[1]); err != nil {
+			panic(err)
+		}
+	}
 }
