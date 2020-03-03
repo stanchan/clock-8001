@@ -126,9 +126,12 @@ func startClockClient(milluminListener *millumin.Listener) error {
 
 func run(oscServer *osc.Server) error {
 	if options.Debug {
-		oscServer.Handle("*", func(msg *osc.Message) {
+		err := oscServer.Handle("*", func(msg *osc.Message) {
 			osc.PrintMessage(msg)
 		})
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	var milluminListener = millumin.MakeListener(oscServer)

@@ -629,7 +629,9 @@ func (engine *Engine) setTime(time string) {
 		cmd := exec.Command("date", args...) // #nosec we have strict validation in place
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, tzString)
-		cmd.Run()
+		if err := cmd.Run(); err != nil {
+			panic(err)
+		}
 	} else {
 		debug.Printf("Invalid time provided: %v\n", time)
 	}
