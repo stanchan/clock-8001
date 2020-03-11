@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	db "runtime/debug"
 	"time"
 )
 
@@ -102,6 +103,17 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		oscDests:       nil,
 	}
 
+	clock_module, ok := db.ReadBuildInfo()
+	if ok {
+		for _, mod := range clock_module.Deps {
+			log.Printf("Dep: %s: version %s", mod.Path, mod.Version)
+			if mod.Path == "gitlab.com/Depili/clock-8001" {
+				gitTag = mod.Version
+			}
+		}
+	} else {
+		log.Printf("Error reading BuildInfo, version data unavailable")
+	}
 	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
 
 	countdown := countdownData{
