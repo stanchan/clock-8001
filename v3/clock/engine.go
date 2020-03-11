@@ -103,9 +103,9 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		oscDests:       nil,
 	}
 
-	clock_module, ok := db.ReadBuildInfo()
+	clockModule, ok := db.ReadBuildInfo()
 	if ok {
-		for _, mod := range clock_module.Deps {
+		for _, mod := range clockModule.Deps {
 			log.Printf("Dep: %s: version %s", mod.Path, mod.Version)
 			if mod.Path == "gitlab.com/Depili/clock-8001" {
 				gitTag = mod.Version
