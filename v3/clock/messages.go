@@ -46,7 +46,7 @@ type DisplayMessage struct {
 	Text       string
 }
 
-// TimeMessage is for /clock/settime
+// TimeMessage is for /clock/settime and /clock/ltc
 type TimeMessage struct {
 	Time string
 }

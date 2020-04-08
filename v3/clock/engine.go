@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/Depili/clock-8001/debug"
+	"gitlab.com/Depili/clock-8001/v3/debug"
 	"log"
 	"math"
 	"os"
 	"os/exec"
 	"regexp"
 	db "runtime/debug"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -42,6 +44,7 @@ const (
 	Countup   = iota // Count time up
 	Off       = iota // (Mostly) blank screen
 	Paused    = iota // Paused countdown timer(s)
+	LTC       = iota // LTC display
 )
 
 type countdownData struct {
@@ -49,6 +52,13 @@ type countdownData struct {
 	duration time.Duration // Total duration of main countdown, used to scale the leds
 	left     time.Duration // Duration left when paused
 	active   bool
+}
+
+type ltcData struct {
+	hours   int
+	minutes int
+	seconds int
+	frames  int
 }
 
 // Engine contains the state machine for clock-8001
@@ -80,6 +90,7 @@ type Engine struct {
 	oscTally       bool                 // Tally text was from osc event
 	oscDests       *feedbackDestination // udp connections to send osc feedback to
 	initialized    bool                 // Show version on startup until ntp synced or receiving OSC control
+	ltc            *ltcData
 }
 
 // MakeEngine creates a clock engine
@@ -102,6 +113,9 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		initialized:    false,
 		oscDests:       nil,
 	}
+
+	ltc := ltcData{hours: 0}
+	engine.ltc = &ltc
 
 	clockModule, ok := db.ReadBuildInfo()
 	if ok {
@@ -180,6 +194,7 @@ func (engine *Engine) runOSC() {
 func (engine *Engine) listen() {
 	oscChan := engine.clockServer.Listen()
 	tallyTimer := timer.NewTimer(engine.timeout)
+	ltcTimer := timer.NewTimer(engine.timeout)
 
 	for {
 		select {
@@ -235,6 +250,9 @@ func (engine *Engine) listen() {
 				engine.displaySeconds = true
 			case "setTime":
 				engine.setTime(message.Data)
+			case "LTC":
+				engine.setLTC(message.Data)
+				ltcTimer.Reset(engine.timeout)
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -242,6 +260,9 @@ func (engine *Engine) listen() {
 			// OSC message timeout
 			engine.Tally = ""
 			engine.oscTally = false
+		case <-ltcTimer.C:
+			// LTC message timeout
+			engine.mode = Off
 		}
 	}
 }
@@ -297,6 +318,8 @@ func (engine *Engine) Update() {
 		engine.countdownUpdate()
 	case Countup:
 		engine.countupUpdate()
+	case LTC:
+		engine.ltcUpdate()
 	case Off:
 		engine.Hours = ""
 		engine.Minutes = ""
@@ -353,6 +376,18 @@ func (engine *Engine) normalUpdate() {
 		engine.Dots = false
 		engine.Leds = 0
 	}
+}
+
+func (engine *Engine) ltcUpdate() {
+	engine.Dots = true
+
+	// We have ntp synced time, so display it
+	engine.initialized = true
+	engine.Hours = fmt.Sprintf("%02d", engine.ltc.hours)
+	engine.Minutes = fmt.Sprintf("%02d", engine.ltc.minutes)
+	engine.Seconds = fmt.Sprintf("%02d", engine.ltc.seconds)
+	engine.Leds = engine.ltc.frames
+
 }
 
 func (engine *Engine) countupUpdate() {
@@ -646,5 +681,23 @@ func (engine *Engine) setTime(time string) {
 		}
 	} else {
 		debug.Printf("Invalid time provided: %v\n", time)
+	}
+}
+
+func (engine *Engine) setLTC(timestamp string) {
+	match, _ := regexp.MatchString("^([0-9][0-9]):([0-5][0-9]):([0-5][0-9]):([0-9][0-9])$", timestamp)
+	if match {
+		parts := strings.Split(timestamp, ":")
+		hours, _ := strconv.Atoi(parts[0])
+		minutes, _ := strconv.Atoi(parts[1])
+		seconds, _ := strconv.Atoi(parts[2])
+		frames, _ := strconv.Atoi(parts[3])
+		engine.mode = LTC
+		engine.ltc = &ltcData{
+			hours:   hours,
+			minutes: minutes,
+			seconds: seconds,
+			frames:  frames,
+		}
 	}
 }

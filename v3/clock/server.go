@@ -188,6 +188,21 @@ func (server *Server) handleTimeSet(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleLTC(msg *osc.Message) {
+	var message TimeMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		debug.Printf("LTC: %v\n", message.Time)
+		m := Message{
+			Type: "LTC",
+			Data: message.Time,
+		}
+		server.update(m)
+	}
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -212,4 +227,5 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/seconds/off", server.handleSecondsOff)
 	registerHandler(oscServer, "/clock/seconds/on", server.handleSecondsOn)
 	registerHandler(oscServer, "/clock/time/set", server.handleTimeSet)
+	registerHandler(oscServer, "/clock/ltc", server.handleLTC)
 }
