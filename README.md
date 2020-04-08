@@ -1,4 +1,7 @@
 # OSC controlled simple clock
+
+Support clock-8001 development by paypal: [![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=XUMXUL5RX5MWJ&currency_code=EUR)
+
 * Clock binary builds: [![pipeline status](https://gitlab.com/Depili/clock-8001/badges/master/pipeline.svg)](https://gitlab.com/Depili/clock-8001/commits/master)
 * Clock image builds: [![pipeline status](https://gitlab.com/Depili/buildroot-clock-8001/badges/master/pipeline.svg)](https://gitlab.com/Depili/buildroot-clock-8001/commits/master)
 
