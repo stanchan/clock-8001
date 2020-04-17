@@ -194,7 +194,9 @@ func (engine *Engine) runOSC() {
 func (engine *Engine) listen() {
 	oscChan := engine.clockServer.Listen()
 	tallyTimer := timer.NewTimer(engine.timeout)
+	tallyTimer.Stop()
 	ltcTimer := timer.NewTimer(engine.timeout)
+	ltcTimer.Stop() // Needed to prevent a timeout at the start
 
 	for {
 		select {
@@ -383,9 +385,10 @@ func (engine *Engine) ltcUpdate() {
 
 	// We have ntp synced time, so display it
 	engine.initialized = true
-	engine.Hours = fmt.Sprintf("%02d", engine.ltc.hours)
-	engine.Minutes = fmt.Sprintf("%02d", engine.ltc.minutes)
-	engine.Seconds = fmt.Sprintf("%02d", engine.ltc.seconds)
+	engine.Tally = fmt.Sprintf("%02d", engine.ltc.hours)
+	engine.Hours = fmt.Sprintf("%02d", engine.ltc.minutes)
+	engine.Minutes = fmt.Sprintf("%02d", engine.ltc.seconds)
+	engine.Seconds = fmt.Sprintf("%02d", engine.ltc.frames)
 	engine.Leds = engine.ltc.frames
 
 }
@@ -684,6 +687,11 @@ func (engine *Engine) setTime(time string) {
 	}
 }
 
+// LtcActive returns true if the clock is displaying LTC timecode
+func (engine *Engine) LtcActive() bool {
+	return engine.mode == LTC
+}
+
 func (engine *Engine) setLTC(timestamp string) {
 	match, _ := regexp.MatchString("^([0-9][0-9]):([0-5][0-9]):([0-5][0-9]):([0-9][0-9])$", timestamp)
 	if match {
@@ -691,7 +699,7 @@ func (engine *Engine) setLTC(timestamp string) {
 		hours, _ := strconv.Atoi(parts[0])
 		minutes, _ := strconv.Atoi(parts[1])
 		seconds, _ := strconv.Atoi(parts[2])
-		frames, _ := strconv.Atoi(parts[3])
+		frames, _ := strconv.Atoi(parts[3]) + 1
 		engine.mode = LTC
 		engine.ltc = &ltcData{
 			hours:   hours,

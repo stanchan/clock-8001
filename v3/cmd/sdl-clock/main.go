@@ -251,7 +251,11 @@ func main() {
 			minuteBitmap = font.TextBitmap(engine.Minutes)
 			secondBitmap = font.TextBitmap(engine.Seconds)
 
-			tallyColor = sdl.Color{R: engine.TallyRed, G: engine.TallyGreen, B: engine.TallyBlue, A: 255}
+			if engine.LtcActive() {
+				tallyColor = textSDLColor
+			} else {
+				tallyColor = sdl.Color{R: engine.TallyRed, G: engine.TallyGreen, B: engine.TallyBlue, A: 255}
+			}
 			tallyBitmap = font.TextBitmap(engine.Tally)
 
 			// Clear SDL canvas
