@@ -699,13 +699,13 @@ func (engine *Engine) setLTC(timestamp string) {
 		hours, _ := strconv.Atoi(parts[0])
 		minutes, _ := strconv.Atoi(parts[1])
 		seconds, _ := strconv.Atoi(parts[2])
-		frames, _ := strconv.Atoi(parts[3]) + 1
+		frames, _ := strconv.Atoi(parts[3])
 		engine.mode = LTC
 		engine.ltc = &ltcData{
 			hours:   hours,
 			minutes: minutes,
 			seconds: seconds,
-			frames:  frames,
+			frames:  frames + 1,
 		}
 	}
 }
