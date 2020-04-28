@@ -5,7 +5,7 @@ import (
 )
 
 var winTitle = "SDL CLOCK"
-var winWidth, winHeight int32 = 1080, 1080
+var winWidth, winHeight int32 = 1920, 1080
 var gridStartX int32 = 149
 var gridStartY int32 = 149
 var gridSize int32 = 20
