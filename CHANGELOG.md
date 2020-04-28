@@ -1,7 +1,14 @@
+## Version 3.9.0
+* Build automation:
+  * Build one unified image
+* Clock:
+  * Web configuration interface
+  * Dual-clock mode
+
 ## Version 3.8.2
 * Build automation improvements
   * Read version information from runtime/debug.ReadBuildInfo()
-  * Include pimoroni hyperpixel4 square display support 
+  * Include pimoroni hyperpixel4 square display support
 
 ## Version 3.8.0
 * multi-clock: Implement new display of up to 40 clocks
