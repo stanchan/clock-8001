@@ -1,3 +1,7 @@
+
+## Version 3.10.0
+* Add /clock/dual/text OSC message for setting a text field on dual clock mode
+
 ## Version 3.9.0
 * Build automation:
   * Build one unified image

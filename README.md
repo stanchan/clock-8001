@@ -237,6 +237,12 @@ Sets the system time on the clock host. Requires that the clock is running on li
 
 Payload: String in format `01:02:03` where 01 is the hours in 24 hour format, 02 the minutes and 03 the seconds.
 
+### /clock/dual/text
+
+Sets the optional extra text field on dual clock mode. The text is rendered between the clocks on vertical displays and on the bottom of the screen on horizontal ones.
+
+Payload: String, at most 8 characters are displayed
+
 ## OSC feedback
 
 The clock sends it's state to the address specified with --osc-dest on `/clock/status` message. The payload is:
