@@ -18,6 +18,9 @@ Developed in co-operation with Daniel Richert.
 
 SD-card images for raspberry pi can be found at https://kissa.depili.fi/clock-8001/images
 
+Clock-8001 no longer has multiple different images, they have all been consolidated to one unified image which uses `enable_` files to activate various parts of the clock system as desired. The new images are named as `clock-800-unified-<version>.img`
+
+Old images are:
 * Images with `no_login` in filename are secure without login password
 * Images with `clockworkadmin` have root login enabled with password `clockworkadmin`. They should be considered insecure.
 * All image flavors except "bridge-only" contain the hdmi clock.
@@ -47,6 +50,10 @@ You can place the following files on the sd-card FAT partition to customize the 
 * `enable_ltc` delete this file and the LTC audio -> OSC functionality will not be active
 
 #### Web configuration interface
+
+The new unified images have a web configuration interface for the clock settings. You can access this interface by pointing your browser to the address of the clock. The default username is `admin` and the default password is `clockwork`. You should change them from the interface or the clock.ini file.
+
+Currently the configuration interface does just about no validation on the requested settings and errors might lead to the clock not working at all. To recover you need to edit the `clock.ini` and remove the invalid settings from there.
 
 ## sdl-clock - Output the clock to hdmi on the raspberry pi
 
