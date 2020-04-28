@@ -340,6 +340,8 @@ func main() {
 
 			source := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
 
+			// FIXME: the text positioning and size is just magic numbers
+
 			if options.DualClock {
 				dualText := font.TextBitmap(engine.DualText)
 
@@ -355,7 +357,7 @@ func main() {
 					for y, row := range dualText {
 						for x, b := range row {
 							if b {
-								setPixel(y, x, textSDLColor, (1920-1064)/2, 800+50, 19, 17)
+								setPixel(y, x, textSDLColor, (1920-1064)/2, 800+50, 19, 16)
 							}
 						}
 					}
@@ -370,7 +372,7 @@ func main() {
 					for y, row := range dualText {
 						for x, b := range row {
 							if b {
-								setPixel(y, x, textSDLColor, (1080-1064)/2, 800+50, 19, 17)
+								setPixel(y, x, textSDLColor, (1080-1064)/2, 800+50, 19, 16)
 							}
 						}
 					}

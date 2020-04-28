@@ -1,3 +1,6 @@
+## Version 3.10.1
+* Little more black space between dual clock text display "pixels"
+
 
 ## Version 3.10.0
 * Add /clock/dual/text OSC message for setting a text field on dual clock mode
