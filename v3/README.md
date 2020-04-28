@@ -55,6 +55,7 @@ Usage:
   sdl-clock [OPTIONS]
 
 Application Options:
+  -C, --config=           read config from a file
   -s                      Scale to 192x192px
   -F, --font=             Font for event name (default: fonts/7x13.bdf)
   -r, --red=              Red component of text color (default: 255)
@@ -68,6 +69,11 @@ Application Options:
       --sec-blue=         Blue component of second color (default: 0)
   -p, --time-pin=         Pin to select foreign timezone, active low (default: 15)
       --debug             Enable debug output
+      --http-port=        Port to listen on for the http configuration interface (default: :8080)
+      --disable-http      Disable the web configuration interface
+      --http-user=        Username for web configuration (default: admin)
+      --http-password=    Password for web configuration interface (default: clockwork)
+      --dual-clock        Display two clock faces, with one of them being constant time of day display
       --flash=            Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
   -t, --local-time=       Local timezone (default: Europe/Helsinki)
       --osc-listen=       Address to listen for incoming osc messages (default: 0.0.0.0:1245)

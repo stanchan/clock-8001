@@ -11,6 +11,9 @@ HTTPPassword={{.HTTPPassword}}
 # set to true for 192x192 clock
 Small={{.Small}}
 
+# Set to true to render two clock faces, one of them always displays time of day
+DualClock={{.DualClock}}
+
 # Font to use
 Font={{.Font}}
 

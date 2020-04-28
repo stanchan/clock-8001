@@ -43,6 +43,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Booleans
 	newOptions.Small = r.FormValue("Small") != ""
+	newOptions.DualClock = r.FormValue("DualClock") != ""
 	newOptions.Debug = r.FormValue("Debug") != ""
 	newOptions.DisableHTTP = r.FormValue("DisableHTTP") != ""
 	newOptions.EngineOptions.DisableOSC = r.FormValue("DisableOSC") != ""

@@ -6,6 +6,9 @@ const configHTML = `
 
 <input type="checkbox" id="Small" name="Small" {{if .Small}} checked {{end}}/>
 <label for="Small">Render small 192x192 pixel clock</label><br />
+<input type="checkbox" id="DualClock" name="DualClock" {{if .DualClock}} checked {{end}}/>
+<label for="DualClock">Render two clock faces, one of them always displays time of day</label><br />
+
 <input type="checkbox" id="Debug" name="Debug" {{if .Debug}} checked {{end}}/>
 <label for="Debug">Output verbose debug information. This will impact performance.</label><br />
 
