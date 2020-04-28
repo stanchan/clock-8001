@@ -5,7 +5,7 @@ import (
 )
 
 var winTitle = "SDL CLOCK"
-var winWidth, winHeight int32 = 1080, 1080
+var winWidth, winHeight int32 = 1920, 1080
 var gridStartX int32 = 149
 var gridStartY int32 = 149
 var gridSize int32 = 20
@@ -31,6 +31,7 @@ type clockOptions struct {
 	DisableHTTP   bool   `long:"disable-http" description:"Disable the web configuration interface"`
 	HTTPUser      string `long:"http-user" description:"Username for web configuration" default:"admin"`
 	HTTPPassword  string `long:"http-password" description:"Password for web configuration interface" default:"clockwork"`
+	DualClock     bool   `long:"dual-clock" description:"Display two clock faces, with one of them being constant time of day display"`
 	EngineOptions *clock.EngineOptions
 }
 

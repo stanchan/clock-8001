@@ -138,7 +138,7 @@ func main() {
 		gridSpacing = 4
 		secCircles = smallSecCircles
 		staticCircles = smallStaticCircles
-	} else {
+	} else if !options.DualClock {
 		// Scale down if needed
 		err = renderer.SetLogicalSize(1080, 1080)
 		check(err)
@@ -172,6 +172,18 @@ func main() {
 			log.Printf("Renderer viewport: %v\n", viewport)
 			viewport = sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
 			err = renderer.SetViewport(&viewport)
+			check(err)
+		}
+	} else {
+		// Dual clock
+		x, y, _ := renderer.GetOutputSize()
+
+		if x > y {
+			err = renderer.SetLogicalSize(1920, 1080)
+			check(err)
+		} else {
+			// rotated display
+			err = renderer.SetLogicalSize(1080, 1920)
 			check(err)
 		}
 	}
@@ -233,8 +245,33 @@ func main() {
 	eventTicker := time.NewTicker(time.Millisecond * 5)
 
 	engine, err := clock.MakeEngine(options.EngineOptions)
-	if err != nil {
-		panic(err)
+	check(err)
+
+	clockTextures := make([]*sdl.Texture, 2)
+
+	clockTextures[0], _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
+	clockTextures[1], _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
+
+	// Second clock engine for constant time of day display with dual clock mode
+	var todOptions = clock.EngineOptions{
+		Timezone:        options.EngineOptions.Timezone,
+		Flash:           options.EngineOptions.Flash,
+		DisableOSC:      true,
+		DisableFeedback: true,
+	}
+
+	todEngine, err := clock.MakeEngine(&todOptions)
+	check(err)
+
+	var engines []*clock.Engine
+
+	if options.DualClock {
+		engines = make([]*clock.Engine, 2)
+		engines[0] = todEngine
+		engines[1] = engine
+	} else {
+		engines = make([]*clock.Engine, 1)
+		engines[0] = engine
 	}
 
 	log.Printf("Entering main loop\n")
@@ -250,18 +287,49 @@ func main() {
 				os.Exit(0)
 			}
 		case <-updateTicker.C:
-			engine.Update()
-			seconds := engine.Leds
-			hourBitmap = font.TextBitmap(engine.Hours)
-			minuteBitmap = font.TextBitmap(engine.Minutes)
-			secondBitmap = font.TextBitmap(engine.Seconds)
+			for i, eng := range engines {
 
-			if engine.LtcActive() {
-				tallyColor = textSDLColor
-			} else {
-				tallyColor = sdl.Color{R: engine.TallyRed, G: engine.TallyGreen, B: engine.TallyBlue, A: 255}
+				eng.Update()
+				seconds := eng.Leds
+				hourBitmap = font.TextBitmap(eng.Hours)
+				minuteBitmap = font.TextBitmap(eng.Minutes)
+				secondBitmap = font.TextBitmap(eng.Seconds)
+
+				if eng.LtcActive() {
+					tallyColor = textSDLColor
+				} else {
+					tallyColor = sdl.Color{R: eng.TallyRed, G: eng.TallyGreen, B: eng.TallyBlue, A: 255}
+				}
+				tallyBitmap = font.TextBitmap(eng.Tally)
+
+				// Renderer target
+				err = renderer.SetRenderTarget(clockTextures[i])
+				check(err)
+
+				// Clear SDL canvas
+				err = renderer.SetDrawColor(0, 0, 0, 255) // Black
+				check(err)
+
+				err = renderer.Clear() // Clear screen
+				check(err)
+
+				// Dots between hours and minutes
+				if eng.Dots {
+					drawDots()
+				}
+
+				// Draw the text
+				drawBitmask(hourBitmap, textSDLColor, 10, 0)
+				drawBitmask(minuteBitmap, textSDLColor, 10, 17)
+				drawBitmask(secondBitmap, textSDLColor, 21, 8)
+				drawBitmask(tallyBitmap, tallyColor, 0, 2)
+
+				drawStaticCircles()
+				drawSecondCircles(seconds)
 			}
-			tallyBitmap = font.TextBitmap(engine.Tally)
+
+			err = renderer.SetRenderTarget(nil)
+			check(err)
 
 			// Clear SDL canvas
 			err = renderer.SetDrawColor(0, 0, 0, 255) // Black
@@ -270,19 +338,31 @@ func main() {
 			err = renderer.Clear() // Clear screen
 			check(err)
 
-			// Dots between hours and minutes
-			if engine.Dots {
-				drawDots()
+			source := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
+
+			if options.DualClock {
+				x, y, _ := renderer.GetOutputSize()
+				if x > y {
+					dest := sdl.Rect{X: 0, Y: (1080 - 800) / 2, W: 800, H: 800}
+					err := renderer.Copy(clockTextures[0], &source, &dest)
+					check(err)
+					dest = sdl.Rect{X: 1920 - 800, Y: (1080 - 800) / 2, W: 800, H: 800}
+					err = renderer.Copy(clockTextures[1], &source, &dest)
+					check(err)
+				} else {
+					// Rotated
+					dest := sdl.Rect{X: (1080 - 800) / 2, Y: 0, W: 800, H: 800}
+					err := renderer.Copy(clockTextures[0], &source, &dest)
+					check(err)
+					dest = sdl.Rect{X: (1080 - 800) / 2, Y: 1920 - 800, W: 800, H: 800}
+					err = renderer.Copy(clockTextures[1], &source, &dest)
+					check(err)
+				}
+			} else {
+				dest := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
+				err := renderer.Copy(clockTextures[0], &source, &dest)
+				check(err)
 			}
-
-			// Draw the text
-			drawBitmask(hourBitmap, textSDLColor, 10, 0)
-			drawBitmask(minuteBitmap, textSDLColor, 10, 17)
-			drawBitmask(secondBitmap, textSDLColor, 21, 8)
-			drawBitmask(tallyBitmap, tallyColor, 0, 2)
-
-			drawStaticCircles()
-			drawSecondCircles(seconds)
 
 			// Update the canvas
 			renderer.Present()
