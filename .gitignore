@@ -1,8 +1,8 @@
 .*
-sdl-clock
-clock-bridge
-matrix-clock
-v3/sdl-clock
-v3/multi-clock
-v3/clock-bridge
-v3/matrix-clock
+/sdl-clock
+/clock-bridge
+/matrix-clock
+/v3/sdl-clock
+/v3/multi-clock
+/v3/clock-bridge
+/v3/matrix-clock
