@@ -1,11 +1,10 @@
 # OSC controlled simple clock
-
-Support clock-8001 development by paypal: [![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=XUMXUL5RX5MWJ&currency_code=EUR)
-
 * Clock binary builds: [![pipeline status](https://gitlab.com/Depili/clock-8001/badges/master/pipeline.svg)](https://gitlab.com/Depili/clock-8001/commits/master)
 * Clock image builds: [![pipeline status](https://gitlab.com/Depili/buildroot-clock-8001/badges/master/pipeline.svg)](https://gitlab.com/Depili/buildroot-clock-8001/commits/master)
 
 This is a simplistic clock written in go that can be used either as a video out with SDL or as a dedicated clock buidt with a 32x32 pixel hub75 led matrix and a ring of 60 addressable leds.
+
+The README has been written for the version 3.x.x clocks, ie. the gitlab.com/Depili/clock-8001/v3 go module.
 
 The clock can be controlled with the depili-clock-8001 companion module: https://github.com/bitfocus/companion-module-depili-clock-8001
 
@@ -14,10 +13,6 @@ Features and configuration in greated detail can be found in the [getting starte
 A web utility for generating the config files for the clock-8001 can be found at [http://www.clock8001.com/settings/](http://www.clock8001.com/settings/)
 
 Developed in co-operation with Daniel Richert.
-
-## Building sdl-clock / multi-clock
-
-The sdl2 based clock binaries require sdl2, sdl2_gfx and sdl2-ttf libraries and headers. On osx you can install them with homebrew `brew install sdl2{,_image,_mixer,_ttf,_gfx} pkg-config` or on debian based linux systems: `apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev`. In addition to that you need the go compiler: `brew install golang` or `apt install golang`. After that you can build the binaries with `go get gitlab.com/Depili/clock-8001/cmd/sdl-clock` and `go get gitlab.com/Depili/clock-8001/cmd/multi-clock`
 
 ## Ready made raspberry pi images
 
@@ -37,6 +32,7 @@ The image tries to get a dhcp address on wired ethernet and also brings up a vir
 ### Customizing the images
 
 You can place the following files on the sd-card FAT partition to customize the installation:
+* `clock.ini` main clock configuration file that is used by the default `clock_cmd.sh`
 * `hostname` to change the hostname used by the clock, it is available with "hostname.local" for bonjour / mDNS requests
 * `interfaces` a replacement for /etc/network/interfaces for custom network configuration
 * `ntp.conf` for custom ntp server configuration
@@ -45,6 +41,12 @@ You can place the following files on the sd-card FAT partition to customize the 
 * `clock_cmd.sh` is the command line for the clock, it should start with `/root/sdl-clock ` and be followed by any command line parameters you wish to use for the clock.
 * `clock_bridge` to update the clock bridge binary file
 * `clock_bridge_cmd.sh` to update the clock bridge command line. It should start with `/root/clock-bridge` and be followed by any command line paramaters for the bridge.
+* `enable_clock` delete this file and the main clock will not be active
+* `enable_bridge` delete this file and the mitti / millumin osc bridge will not be active
+* `enable_ssh` delete this file and remote ssh logins to the raspberry pi will not be allowed
+* `enable_ltc` delete this file and the LTC audio -> OSC functionality will not be active
+
+#### Web configuration interface
 
 ## sdl-clock - Output the clock to hdmi on the raspberry pi
 
@@ -62,6 +64,7 @@ Usage:
   sdl-clock [OPTIONS]
 
 Application Options:
+  -C, --config=           read config from a file
   -s                      Scale to 192x192px
   -F, --font=             Font for event name (default: fonts/7x13.bdf)
   -r, --red=              Red component of text color (default: 255)
@@ -75,6 +78,11 @@ Application Options:
       --sec-blue=         Blue component of second color (default: 0)
   -p, --time-pin=         Pin to select foreign timezone, active low (default: 15)
       --debug             Enable debug output
+      --http-port=        Port to listen on for the http configuration interface (default: :8080)
+      --disable-http      Disable the web configuration interface
+      --http-user=        Username for web configuration (default: admin)
+      --http-password=    Password for web configuration interface (default: clockwork)
+      --dual-clock        Display two clock faces, with one of them being constant time of day display
       --flash=            Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
   -t, --local-time=       Local timezone (default: Europe/Helsinki)
       --osc-listen=       Address to listen for incoming osc messages (default: 0.0.0.0:1245)
