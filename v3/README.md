@@ -30,6 +30,7 @@ The image tries to get a dhcp address on wired ethernet and also brings up a vir
 ### Customizing the images
 
 You can place the following files on the sd-card FAT partition to customize the installation:
+* `clock.ini` main clock configuration file that is used by the default `clock_cmd.sh`
 * `hostname` to change the hostname used by the clock, it is available with "hostname.local" for bonjour / mDNS requests
 * `interfaces` a replacement for /etc/network/interfaces for custom network configuration
 * `ntp.conf` for custom ntp server configuration
@@ -38,6 +39,12 @@ You can place the following files on the sd-card FAT partition to customize the 
 * `clock_cmd.sh` is the command line for the clock, it should start with `/root/sdl-clock ` and be followed by any command line parameters you wish to use for the clock.
 * `clock_bridge` to update the clock bridge binary file
 * `clock_bridge_cmd.sh` to update the clock bridge command line. It should start with `/root/clock-bridge` and be followed by any command line paramaters for the bridge.
+* `enable_clock` delete this file and the main clock will not be active
+* `enable_bridge` delete this file and the mitti / millumin osc bridge will not be active
+* `enable_ssh` delete this file and remote ssh logins to the raspberry pi will not be allowed
+* `enable_ltc` delete this file and the LTC audio -> OSC functionality will not be active
+
+#### Web configuration interface
 
 ## sdl-clock - Output the clock to hdmi on the raspberry pi
 
