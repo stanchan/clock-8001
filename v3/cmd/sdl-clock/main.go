@@ -30,6 +30,7 @@ var secTexture *sdl.Texture
 func main() {
 	options.Config = func(s string) error {
 		ini := flags.NewIniParser(parser)
+		options.configFile = s
 		return ini.ParseFile(s)
 	}
 
@@ -39,6 +40,10 @@ func main() {
 		} else {
 			os.Exit(1)
 		}
+	}
+
+	if !options.DisableHTTP {
+		go runHTTP()
 	}
 
 	if options.Debug {

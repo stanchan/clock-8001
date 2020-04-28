@@ -1,63 +1,66 @@
-# Example configuration file for clock-8001
+package main
+
+const configTemplate = `# Example configuration file for clock-8001
 # Lines starting with '#' are comments and
 # are ignored by clock-8001
 
 # Username and password for the web configuration interface
-HTTPUser=admin
-HTTPPassword=clockwork
+HTTPUser={{.HTTPUser}}
+HTTPPassword={{.HTTPPassword}}
 
 # set to true for 192x192 clock
-Small=false
+Small={{.Small}}
 
 # Font to use
-Font=fonts/7x13.bdf
+Font={{.Font}}
 
 # Color for text
-TextRed=255
-TextGreen=128
-TextBlue=0
+TextRed={{.TextRed}}
+TextGreen={{.TextGreen}}
+TextBlue={{.TextBlue}}
 
 # Color for the 12 static "hour" markers
-StaticRed=80
-StaticGreen=80
-StaticBlue=0
+StaticRed={{.StaticRed}}
+StaticGreen={{.StaticGreen}}
+StaticBlue={{.StaticBlue}}
 
 # Color for the second ring dots
-SecRed=200
-SecGreen=0
-SecBlue=0
+SecRed={{.SecRed}}
+SecGreen={{.SecGreen}}
+SecBlue={{.SecBlue}}
 
 # Color for the secondary countdown display
-CountdownRed=255
-CountdownGreen=0
-CountdownBlue=0
+CountdownRed={{.EngineOptions.CountdownRed}}
+CountdownGreen={{.EngineOptions.CountdownGreen}}
+CountdownBlue={{.EngineOptions.CountdownBlue}}
 
 # Set to true to output verbose debug information
-Debug=false
+Debug={{.Debug}}
 
 # Flashing interval for ellapsed countdowns, in milliseconds
-Flash=500
+Flash={{.EngineOptions.Flash}}
 
 # Timezone
-Timezone=Europe/Helsinki
+Timezone={{.EngineOptions.Timezone}}
 
 # Set to true to disable remote osc commands
-DisableOSC=false
+DisableOSC={{.EngineOptions.DisableOSC}}
 
 # Address to listen for osc commands. 0.0.0.0 defaults to all network interfaces
-ListenAddr=0.0.0.0:1245
+ListenAddr={{.EngineOptions.ListenAddr}}
 
 # Timeout for clearing OSC text display messages
-Timeout=1000
+Timeout={{.EngineOptions.Timeout}}
 
 # Set to true to disable sending of the OSC feedback messages
-DisableFeedback=false
+DisableFeedback={{.EngineOptions.DisableFeedback}}
 
 # Address to send OSC feedback to. 255.255.255.255 broadcasts to all network interfaces
-Connect=255.255.255.255:1245
+Connect={{.EngineOptions.Connect}}
 
 # Set to true to disable the web configuration interface
-DisableHTTP=false
+DisableHTTP={{.DisableHTTP}}
 
 # Port to listen for the web configuration. Needs to be in format of ":1234".
-HTTPPort=:8080
+HTTPPort={{.HTTPPort}}
+`
