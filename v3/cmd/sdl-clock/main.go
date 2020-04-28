@@ -341,14 +341,24 @@ func main() {
 			source := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
 
 			if options.DualClock {
+				dualText := font.TextBitmap(engine.DualText)
+
 				x, y, _ := renderer.GetOutputSize()
 				if x > y {
-					dest := sdl.Rect{X: 0, Y: (1080 - 800) / 2, W: 800, H: 800}
+					dest := sdl.Rect{X: 0, Y: 0, W: 800, H: 800}
 					err := renderer.Copy(clockTextures[0], &source, &dest)
 					check(err)
-					dest = sdl.Rect{X: 1920 - 800, Y: (1080 - 800) / 2, W: 800, H: 800}
+					dest = sdl.Rect{X: 1920 - 800, Y: 0, W: 800, H: 800}
 					err = renderer.Copy(clockTextures[1], &source, &dest)
 					check(err)
+
+					for y, row := range dualText {
+						for x, b := range row {
+							if b {
+								setPixel(y, x, textSDLColor, (1920-1064)/2, 800+50, 19, 17)
+							}
+						}
+					}
 				} else {
 					// Rotated
 					dest := sdl.Rect{X: (1080 - 800) / 2, Y: 0, W: 800, H: 800}
@@ -357,6 +367,14 @@ func main() {
 					dest = sdl.Rect{X: (1080 - 800) / 2, Y: 1920 - 800, W: 800, H: 800}
 					err = renderer.Copy(clockTextures[1], &source, &dest)
 					check(err)
+					for y, row := range dualText {
+						for x, b := range row {
+							if b {
+								setPixel(y, x, textSDLColor, (1080-1064)/2, 800+50, 19, 17)
+							}
+						}
+					}
+
 				}
 			} else {
 				dest := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
@@ -399,22 +417,33 @@ func drawStaticCircles() {
 
 func drawDots() {
 	// Draw the dots between hours and minutes
-	setPixel(14, 15, textSDLColor)
-	setPixel(14, 16, textSDLColor)
-	setPixel(15, 15, textSDLColor)
-	setPixel(15, 16, textSDLColor)
+	setMatrix(14, 15, textSDLColor)
+	setMatrix(14, 16, textSDLColor)
+	setMatrix(15, 15, textSDLColor)
+	setMatrix(15, 16, textSDLColor)
 
-	setPixel(18, 15, textSDLColor)
-	setPixel(18, 16, textSDLColor)
-	setPixel(19, 15, textSDLColor)
-	setPixel(19, 16, textSDLColor)
+	setMatrix(18, 15, textSDLColor)
+	setMatrix(18, 16, textSDLColor)
+	setMatrix(19, 15, textSDLColor)
+	setMatrix(19, 16, textSDLColor)
 }
 
 // Set "led matrix" pixel
-func setPixel(cy, cx int, color sdl.Color) {
+func setMatrix(cy, cx int, color sdl.Color) {
 	x := gridStartX + int32(cx*gridSpacing)
 	y := gridStartY + int32(cy*gridSpacing)
 	rect := sdl.Rect{X: x, Y: y, W: gridSize, H: gridSize}
+	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
+	check(err)
+
+	err = renderer.FillRect(&rect)
+	check(err)
+}
+
+func setPixel(cy, cx int, color sdl.Color, startX, startY, spacing, pixelSize int32) {
+	x := startX + int32(cx)*spacing
+	y := startY + int32(cy)*spacing
+	rect := sdl.Rect{X: x, Y: y, W: pixelSize, H: pixelSize}
 	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
 	check(err)
 
@@ -426,7 +455,7 @@ func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
 	for y, row := range bitmask {
 		for x, b := range row {
 			if b {
-				setPixel(r+y, c+x, color)
+				setMatrix(r+y, c+x, color)
 			}
 		}
 	}

@@ -203,6 +203,20 @@ func (server *Server) handleLTC(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleDualText(msg *osc.Message) {
+	var message TextMessage
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		debug.Printf("Dual clock text: %v\n", message.Text)
+		m := Message{
+			Type: "dualText",
+			Data: message.Text,
+		}
+		server.update(m)
+	}
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -228,4 +242,5 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/seconds/on", server.handleSecondsOn)
 	registerHandler(oscServer, "/clock/time/set", server.handleTimeSet)
 	registerHandler(oscServer, "/clock/ltc", server.handleLTC)
+	registerHandler(oscServer, "/clock/dual/text", server.handleDualText)
 }

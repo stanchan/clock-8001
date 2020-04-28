@@ -51,6 +51,25 @@ type TimeMessage struct {
 	Time string
 }
 
+// TextMessage is for text only messages like /clock/dual/text
+type TextMessage struct {
+	Text string
+}
+
+// UnmarshalOSC converts a osc.Message to TextMessage
+func (message *TextMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.Text,
+	)
+}
+
+// MarshalOSC converts a TextMessage to osc.Message
+func (message TextMessage) MarshalOSC(addr string) *osc.Message {
+	return osc.NewMessage(addr,
+		message.Text,
+	)
+}
+
 // UnmarshalOSC converts a osc.Message to TimeMessage
 func (message *TimeMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(

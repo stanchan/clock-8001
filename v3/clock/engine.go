@@ -90,7 +90,8 @@ type Engine struct {
 	oscTally       bool                 // Tally text was from osc event
 	oscDests       *feedbackDestination // udp connections to send osc feedback to
 	initialized    bool                 // Show version on startup until ntp synced or receiving OSC control
-	ltc            *ltcData
+	ltc            *ltcData             // LTC time code status
+	DualText       string               // Dual clock mode text message, 8 characters
 }
 
 // MakeEngine creates a clock engine
@@ -112,6 +113,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		cd2Blue:        options.CountdownBlue,
 		initialized:    false,
 		oscDests:       nil,
+		DualText:       "",
 	}
 
 	ltc := ltcData{hours: 0}
@@ -255,6 +257,8 @@ func (engine *Engine) listen() {
 			case "LTC":
 				engine.setLTC(message.Data)
 				ltcTimer.Reset(engine.timeout)
+			case "dualText":
+				engine.DualText = fmt.Sprintf("%-.8s", message.Data)
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
