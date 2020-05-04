@@ -269,6 +269,7 @@ func (engine *Engine) listen() {
 		case <-ltcTimer.C:
 			// LTC message timeout
 			engine.mode = Off
+			engine.oscTally = false
 		}
 	}
 }
@@ -387,14 +388,13 @@ func (engine *Engine) normalUpdate() {
 func (engine *Engine) ltcUpdate() {
 	engine.Dots = true
 
-	// We have ntp synced time, so display it
+	// We have LTC time, so display it
 	engine.initialized = true
-	engine.Tally = fmt.Sprintf("%02d", engine.ltc.hours)
+	engine.Tally = fmt.Sprintf(" %02d", engine.ltc.hours)
 	engine.Hours = fmt.Sprintf("%02d", engine.ltc.minutes)
 	engine.Minutes = fmt.Sprintf("%02d", engine.ltc.seconds)
 	engine.Seconds = fmt.Sprintf("%02d", engine.ltc.frames)
 	engine.Leds = engine.ltc.frames
-
 }
 
 func (engine *Engine) countupUpdate() {
@@ -705,6 +705,7 @@ func (engine *Engine) setLTC(timestamp string) {
 		seconds, _ := strconv.Atoi(parts[2])
 		frames, _ := strconv.Atoi(parts[3])
 		engine.mode = LTC
+		engine.oscTally = true
 		engine.ltc = &ltcData{
 			hours:   hours,
 			minutes: minutes,
