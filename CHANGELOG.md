@@ -1,3 +1,8 @@
+## Version 3.10.2
+* LTC reception & Hifiberry ADC+ DAC Pro
+  * Bugfix on sdl-clock to display the hour part of LTC timestamp
+  * Added configuration for the hifiberry to the sd-card image
+
 ## Version 3.10.1
 * Little more black space between dual clock text display "pixels"
 
