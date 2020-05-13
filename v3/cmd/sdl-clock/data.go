@@ -32,6 +32,7 @@ type clockOptions struct {
 	HTTPUser      string `long:"http-user" description:"Username for web configuration" default:"admin"`
 	HTTPPassword  string `long:"http-password" description:"Password for web configuration interface" default:"clockwork"`
 	DualClock     bool   `long:"dual-clock" description:"Display two clock faces, with one of them being constant time of day display"`
+	DumpConfig    bool   `long:"dump-config" description:"Write configuration to stdout and exit"`
 	EngineOptions *clock.EngineOptions
 }
 

@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"text/template"
 	"time"
 )
 
@@ -40,6 +41,16 @@ func main() {
 		} else {
 			os.Exit(1)
 		}
+	}
+
+	// Dump the current config to stdout
+	if options.DumpConfig {
+		tmpl, err := template.New("config.ini").Parse(configTemplate)
+		if err != nil {
+			panic(err)
+		}
+		err = tmpl.Execute(os.Stdout, options)
+		os.Exit(0)
 	}
 
 	if !options.DisableHTTP {
