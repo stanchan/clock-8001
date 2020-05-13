@@ -47,7 +47,10 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.Debug = r.FormValue("Debug") != ""
 	newOptions.DisableHTTP = r.FormValue("DisableHTTP") != ""
 	newOptions.EngineOptions.DisableOSC = r.FormValue("DisableOSC") != ""
-	newOptions.EngineOptions.DisableFeedback = r.FormValue("disableFeedback") != ""
+	newOptions.EngineOptions.DisableFeedback = r.FormValue("DisableFeedback") != ""
+	newOptions.EngineOptions.DisableLTC = r.FormValue("DisableLTC") != ""
+	newOptions.EngineOptions.LTCSeconds = r.FormValue("LTCSeconds") != ""
+	newOptions.EngineOptions.LTCFollow = r.FormValue("LTCFollow") != ""
 
 	// Strings
 	newOptions.Font = r.FormValue("Font")

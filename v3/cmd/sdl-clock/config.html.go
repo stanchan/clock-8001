@@ -68,6 +68,17 @@ const configHTML = `
 <input type="text" id="HTTPPort" name="HTTPPort" value="{{.HTTPPort}}" />
 <label for="HTTPPort">Port to listen for the web configuration. Needs to be in format of ":1234".</label><br />
 
+<h2>LTC</h2>
+
+<input type="checkbox" id="DisableLTC" name="DisableLTC" {{if .EngineOptions.DisableLTC}} checked {{end}}/>
+<label for="DisableLTC">Disable LTC display.</label><br />
+
+<input type="checkbox" id="LTCSeconds" name="LTCSeconds" {{if .EngineOptions.LTCSeconds}} checked {{end}}/>
+<label for="LTCSeconds">Controls what is displayed on the clock ring in LTC mode, unchecked = frames, checked = seconds</label><br />
+
+<input type="checkbox" id="LTCFollow" name="LTCFollow" {{if .EngineOptions.LTCFollow}} checked {{end}}/>
+<label for="LTCFollow">Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone.</label><br />
+
 <br />
 <input type="submit" value="Save config and restart clock" />
 

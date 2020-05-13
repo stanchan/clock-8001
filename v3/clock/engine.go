@@ -35,6 +35,9 @@ type EngineOptions struct {
 	CountdownBlue   uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
 	DisableOSC      bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
 	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC feedback"`
+	DisableLTC      bool   `long:"disable-ltc" description:"Disable LTC display mode"`
+	LTCSeconds      bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
+	LTCFollow       bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
 }
 
 // Clock engine state constants
@@ -59,6 +62,8 @@ type ltcData struct {
 	minutes int
 	seconds int
 	frames  int
+	target  time.Time
+	timeout bool
 }
 
 // Engine contains the state machine for clock-8001
@@ -91,6 +96,10 @@ type Engine struct {
 	oscDests       *feedbackDestination // udp connections to send osc feedback to
 	initialized    bool                 // Show version on startup until ntp synced or receiving OSC control
 	ltc            *ltcData             // LTC time code status
+	ltcShowSeconds bool                 // Toggles led display on LTC mode between seconds and frames
+	ltcFollow      bool                 // Continue on internal timer if LTC signal is lost
+	ltcEnabled     bool                 // Toggle LTC mode on or off
+	ltcTimeout     bool                 // Set to true if LTC signal is lost by the ltc timer
 	DualText       string               // Dual clock mode text message, 8 characters
 }
 
@@ -114,6 +123,9 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		initialized:    false,
 		oscDests:       nil,
 		DualText:       "",
+		ltcShowSeconds: options.LTCSeconds,
+		ltcFollow:      options.LTCFollow,
+		ltcEnabled:     !options.DisableLTC,
 	}
 
 	ltc := ltcData{hours: 0}
@@ -255,8 +267,10 @@ func (engine *Engine) listen() {
 			case "setTime":
 				engine.setTime(message.Data)
 			case "LTC":
-				engine.setLTC(message.Data)
-				ltcTimer.Reset(engine.timeout)
+				if engine.ltcEnabled {
+					engine.setLTC(message.Data)
+					ltcTimer.Reset(engine.timeout)
+				}
 			case "dualText":
 				engine.DualText = fmt.Sprintf("%-.8s", message.Data)
 			}
@@ -268,8 +282,7 @@ func (engine *Engine) listen() {
 			engine.oscTally = false
 		case <-ltcTimer.C:
 			// LTC message timeout
-			engine.mode = Off
-			engine.oscTally = false
+			engine.ltcTimeout = true
 		}
 	}
 }
@@ -387,14 +400,44 @@ func (engine *Engine) normalUpdate() {
 
 func (engine *Engine) ltcUpdate() {
 	engine.Dots = true
+	if !engine.ltcTimeout {
+		// We have LTC time, so display it
+		engine.initialized = true
+		engine.Tally = fmt.Sprintf(" %02d", engine.ltc.hours)
+		engine.Hours = fmt.Sprintf("%02d", engine.ltc.minutes)
+		engine.Minutes = fmt.Sprintf("%02d", engine.ltc.seconds)
+		engine.Seconds = fmt.Sprintf("%02d", engine.ltc.frames)
+		if engine.ltcShowSeconds {
+			engine.Leds = engine.ltc.seconds
+		} else {
+			engine.Leds = engine.ltc.frames
+		}
+	} else if engine.ltcFollow {
+		// Follow the LTC time when signal is lost
+		t := time.Now()
+		diff := t.Sub(engine.ltc.target)
+		hours := int32(diff.Truncate(time.Hour).Hours())
+		minutes := int32(diff.Truncate(time.Minute).Minutes()) - (hours * 60)
+		secs := int32(diff.Truncate(time.Second).Seconds()) - (((hours * 60) + minutes) * 60)
 
-	// We have LTC time, so display it
-	engine.initialized = true
-	engine.Tally = fmt.Sprintf(" %02d", engine.ltc.hours)
-	engine.Hours = fmt.Sprintf("%02d", engine.ltc.minutes)
-	engine.Minutes = fmt.Sprintf("%02d", engine.ltc.seconds)
-	engine.Seconds = fmt.Sprintf("%02d", engine.ltc.frames)
-	engine.Leds = engine.ltc.frames
+		engine.Tally = fmt.Sprintf(" %02d", hours)
+		engine.Hours = fmt.Sprintf("%02d", minutes)
+		engine.Minutes = fmt.Sprintf("%02d", secs)
+		engine.Seconds = ""
+		if engine.ltcShowSeconds {
+			engine.Leds = int(secs)
+		} else {
+			engine.Leds = 0
+		}
+	} else {
+		// Timeout without follow mode
+		engine.Tally = ""
+		engine.Hours = ""
+		engine.Minutes = ""
+		engine.Seconds = ""
+		engine.Leds = 0
+		engine.Dots = false
+	}
 }
 
 func (engine *Engine) countupUpdate() {
@@ -704,13 +747,25 @@ func (engine *Engine) setLTC(timestamp string) {
 		minutes, _ := strconv.Atoi(parts[1])
 		seconds, _ := strconv.Atoi(parts[2])
 		frames, _ := strconv.Atoi(parts[3])
+		var ltcTarget time.Time
+		if frames == 0 {
+			// Update the LTC countdown target
+			ltcDuration := time.Duration(hours) * time.Hour
+			ltcDuration += time.Duration(minutes) * time.Minute
+			ltcDuration += time.Duration(seconds) * time.Second
+			ltcTarget = time.Now().Add(-ltcDuration).Truncate(time.Second)
+		} else {
+			ltcTarget = engine.ltc.target
+		}
 		engine.mode = LTC
 		engine.oscTally = true
+		engine.ltcTimeout = false
 		engine.ltc = &ltcData{
 			hours:   hours,
 			minutes: minutes,
 			seconds: seconds,
 			frames:  frames + 1,
+			target:  ltcTarget,
 		}
 	}
 }

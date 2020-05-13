@@ -66,4 +66,13 @@ DisableHTTP={{.DisableHTTP}}
 
 # Port to listen for the web configuration. Needs to be in format of ":1234".
 HTTPPort={{.HTTPPort}}
+
+# Set to true to disable LTC timecode display mode
+DisableLTC={{.EngineOptions.DisableLTC}}
+
+# Controls what is displayed on the clock ring in LTC mode, false = frames, true = seconds
+LTCSeconds={{.EngineOptions.LTCSeconds}}
+
+# Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone.
+LTCFollow={{.EngineOptions.LTCFollow}}
 `
