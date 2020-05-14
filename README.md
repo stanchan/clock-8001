@@ -93,6 +93,7 @@ Application Options:
       --http-user=        Username for web configuration (default: admin)
       --http-password=    Password for web configuration interface (default: clockwork)
       --dual-clock        Display two clock faces, with one of them being constant time of day display
+      --dump-config       Write configuration to stdout and exit
       --flash=            Flashing interval when countdown reached zero (ms), 0 disables (default: 500)
   -t, --local-time=       Local timezone (default: Europe/Helsinki)
       --osc-listen=       Address to listen for incoming osc messages (default: 0.0.0.0:1245)
@@ -103,10 +104,17 @@ Application Options:
       --cd-blue=          Blue component of secondary countdown color (default: 0)
       --disable-osc       Disable OSC control and feedback
       --disable-feedback  Disable OSC feedback
+      --disable-ltc       Disable LTC display mode
+      --ltc-seconds       Show seconds on the ring in LTC mode
+      --ltc-follow        Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone.
 
 Help Options:
   -h, --help              Show this help message
 ```
+
+### LTC timecode support
+
+The clock can be used to display a SMPTE LTC time. This requires a Hifiberry ADC+ DAC Pro hat: https://www.hifiberry.com/shop/boards/hifiberry-dac-adc-pro/ Currently only the hifiberry hat is supported, as most soundcards need device specific configuration. It is recommended to use the pin headers for balanced audio input and to wire the incoming mono LTC signal to both left and right channels.
 
 ## matrix-clock - Dedicated led matrix clock
 
@@ -245,6 +253,12 @@ Payload: String in format `01:02:03` where 01 is the hours in 24 hour format, 02
 Sets the optional extra text field on dual clock mode. The text is rendered between the clocks on vertical displays and on the bottom of the screen on horizontal ones.
 
 Payload: String, at most 8 characters are displayed
+
+### /clock/ltc
+
+Used to provide decoded LTC data to the clock. Reception of a message changes the clock to the LTC display mode. A timestamp with zero frame syncs the internal timer to LTC time.
+
+Payload: String, `HH:MM:SS:FF` where HH = hours, MM = minutes, SS = seconds, FF = frames
 
 ## OSC feedback
 
