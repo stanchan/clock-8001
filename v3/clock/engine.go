@@ -753,7 +753,7 @@ func (engine *Engine) setLTC(timestamp string) {
 			ltcDuration := time.Duration(hours) * time.Hour
 			ltcDuration += time.Duration(minutes) * time.Minute
 			ltcDuration += time.Duration(seconds) * time.Second
-			ltcTarget = time.Now().Add(-ltcDuration).Truncate(time.Second)
+			ltcTarget = time.Now().Add(-ltcDuration)
 		} else {
 			ltcTarget = engine.ltc.target
 		}
