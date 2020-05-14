@@ -59,6 +59,15 @@ lint_code:
   script:
     - make lint
 
+create_config:
+    stage: test
+    script:
+     - make build
+     - ./sdl-clock --dump-config > clock.ini
+    artifacts:
+        paths:
+            - v3/clock.ini
+
 build:
   image: registry.gitlab.com/depili/clock-8001-build:master
   stage: build
