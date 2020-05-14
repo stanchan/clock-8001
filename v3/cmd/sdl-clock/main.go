@@ -201,6 +201,8 @@ func main() {
 
 	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	check(err)
+	err = staticTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
 
 	err = renderer.SetRenderTarget(staticTexture)
 	check(err)
@@ -219,7 +221,11 @@ func main() {
 		}
 	}
 
-	secTexture, _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
+	secTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
+	check(err)
+	err = secTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
+
 	err = renderer.SetRenderTarget(secTexture)
 	check(err)
 
@@ -260,8 +266,15 @@ func main() {
 
 	clockTextures := make([]*sdl.Texture, 2)
 
-	clockTextures[0], _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
-	clockTextures[1], _ = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
+	clockTextures[0], err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
+	check(err)
+	clockTextures[1], err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
+	check(err)
+
+	err = clockTextures[0].SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
+	err = clockTextures[1].SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
 
 	// Second clock engine for constant time of day display with dual clock mode
 	var todOptions = clock.EngineOptions{
@@ -298,6 +311,7 @@ func main() {
 				os.Exit(0)
 			}
 		case <-updateTicker.C:
+			startTime := time.Now()
 			for i, eng := range engines {
 
 				eng.Update()
@@ -397,6 +411,7 @@ func main() {
 
 			// Update the canvas
 			renderer.Present()
+			debug.Printf("Frame time: %d microseconds\n", time.Now().Sub(startTime).Microseconds())
 		}
 	}
 }
