@@ -41,7 +41,6 @@ build: dep ## Build the binary file
 	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/multi-clock
 	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/sdl-clock
 	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/matrix-clock
-	@sdl-clock --dump-config > clock.ini
 
 clean: ## Remove previous build
 	@rm -f $(BINARIES)
