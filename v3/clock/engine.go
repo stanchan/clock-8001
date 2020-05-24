@@ -17,11 +17,11 @@ import (
 )
 
 // Version is the current clock engine version
-const Version = "3.11.0"
+const Version = "3.11.1"
 
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
-var gitTag = "v3.11.0"
+var gitTag = "v3.11.1"
 
 // EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
