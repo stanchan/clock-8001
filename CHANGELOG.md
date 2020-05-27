@@ -1,3 +1,6 @@
+## Version 3.12.1
+* BUGFIX: missing colon from default clock.ini for port 80
+
 ## Version 3.12.0
 * Add support for 12 hour format on time-of-day display
 
