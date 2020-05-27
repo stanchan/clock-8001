@@ -1,3 +1,6 @@
+## Version 3.12.0
+* Add support for 12 hour format on time-of-day display
+
 ## Version 3.11.1
 * LTC Bugfix, we had a wrong audio device in the default configuration
 
