@@ -38,6 +38,7 @@ type EngineOptions struct {
 	DisableLTC      bool   `long:"disable-ltc" description:"Disable LTC display mode"`
 	LTCSeconds      bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
 	LTCFollow       bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
+	Format12h       bool   `long:"format-12h" description:"Use 12 hour format for time-of-day display"`
 }
 
 // Clock engine state constants
@@ -101,6 +102,7 @@ type Engine struct {
 	ltcEnabled     bool                 // Toggle LTC mode on or off
 	ltcTimeout     bool                 // Set to true if LTC signal is lost by the ltc timer
 	DualText       string               // Dual clock mode text message, 8 characters
+	format12h      bool                 // Use 12 hour format for time-of-day
 }
 
 // MakeEngine creates a clock engine
@@ -126,6 +128,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		ltcShowSeconds: options.LTCSeconds,
 		ltcFollow:      options.LTCFollow,
 		ltcEnabled:     !options.DisableLTC,
+		format12h:      options.Format12h,
 	}
 
 	ltc := ltcData{hours: 0}
@@ -368,7 +371,13 @@ func (engine *Engine) normalUpdate() {
 	if t.Year() > 2000 {
 		// We have ntp synced time, so display it
 		engine.initialized = true
-		engine.Hours = t.Format("15")
+
+		// Optional 12 hour format
+		if engine.format12h {
+			engine.Hours = t.Format("03")
+		} else {
+			engine.Hours = t.Format("15")
+		}
 		engine.Minutes = t.Format("04")
 		engine.Seconds = t.Format("05")
 		engine.Leds = t.Second()

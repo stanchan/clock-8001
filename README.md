@@ -107,6 +107,7 @@ Application Options:
       --disable-ltc       Disable LTC display mode
       --ltc-seconds       Show seconds on the ring in LTC mode
       --ltc-follow        Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone.
+      --format-12h        Use 12 hour format for time-of-day display
 
 Help Options:
   -h, --help              Show this help message

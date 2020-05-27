@@ -14,6 +14,9 @@ Small={{.Small}}
 # Set to true to render two clock faces, one of them always displays time of day
 DualClock={{.DualClock}}
 
+# Set to true to use 12 hour format for time-of-day display.
+Format12h={{.EngineOptions.Format12h}}
+
 # Font to use
 Font={{.Font}}
 
