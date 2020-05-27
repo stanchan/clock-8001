@@ -81,6 +81,7 @@ build:
      - v3/sdl-clock
      - v3/clock-bridge
      - v3/clock.ini
+     - v3/clock_port80.ini
      - fonts/7x13.bdf
 
 deploy_latest:
