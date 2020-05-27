@@ -64,9 +64,11 @@ create_config:
     script:
      - make build
      - ./sdl-clock --dump-config > clock.ini
+     - ./sdl-clock --http-port 80 --dump-config > clock_port80.ini
     artifacts:
         paths:
             - v3/clock.ini
+            - v3/clock_port80.ini
 
 build:
   image: registry.gitlab.com/depili/clock-8001-build:master
