@@ -64,7 +64,7 @@ create_config:
     script:
      - make build
      - ./sdl-clock --dump-config > clock.ini
-     - ./sdl-clock --http-port 80 --dump-config > clock_port80.ini
+     - ./sdl-clock --http-port :80 --dump-config > clock_port80.ini
     artifacts:
         paths:
             - v3/clock.ini
