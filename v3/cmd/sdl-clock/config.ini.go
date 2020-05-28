@@ -17,6 +17,9 @@ DualClock={{.DualClock}}
 # Set to true to use 12 hour format for time-of-day display.
 Format12h={{.EngineOptions.Format12h}}
 
+# Set to true to disable detection of official raspberry pi display for aspect ratio correction
+NoARCorrection={{.NoARCorrection}}
+
 # Font to use
 Font={{.Font}}
 

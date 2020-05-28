@@ -120,6 +120,7 @@ func main() {
 	var textureCoord int32 = 20
 	var textureRadius int32 = 19
 
+	// Dot circles for the clock face
 	secCircles = util.Points(center1080, secondRadius1080, 60)
 	staticCircles = util.Points(center1080, staticRadius1080, 12)
 
@@ -143,7 +144,7 @@ func main() {
 		scaleX, scaleY := renderer.GetScale()
 		log.Printf("Scaling: x: %v, y: %v\n", scaleX, scaleY)
 
-		if (x == 800) && (y == 480) {
+		if (x == 800) && (y == 480) && !options.NoARCorrection {
 			// Official display, rotated 0 or 180 degrees
 			// Scale for Y is 480 / 1080 = 0.44444445
 			// Scale for X is 0.44444445 * ((9.0*800) / (16*480)) = 0.416666671875

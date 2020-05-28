@@ -46,6 +46,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.DualClock = r.FormValue("DualClock") != ""
 	newOptions.Debug = r.FormValue("Debug") != ""
 	newOptions.DisableHTTP = r.FormValue("DisableHTTP") != ""
+	newOptions.NoARCorrection = r.FormValue("NoARCorrection") != ""
 	newOptions.EngineOptions.DisableOSC = r.FormValue("DisableOSC") != ""
 	newOptions.EngineOptions.DisableFeedback = r.FormValue("DisableFeedback") != ""
 	newOptions.EngineOptions.DisableLTC = r.FormValue("DisableLTC") != ""
