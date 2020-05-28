@@ -1,3 +1,8 @@
+## Version 3.13.0
+* Add an option to disable detection and aspect ratio correction of official raspberry pi displays
+* BUGFIX: setting 12h format from the http interface didn't work
+* Internal refactoring and code cleanup
+
 ## Version 3.12.1
 * BUGFIX: missing colon from default clock.ini for port 80
 
