@@ -51,6 +51,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.EngineOptions.DisableLTC = r.FormValue("DisableLTC") != ""
 	newOptions.EngineOptions.LTCSeconds = r.FormValue("LTCSeconds") != ""
 	newOptions.EngineOptions.LTCFollow = r.FormValue("LTCFollow") != ""
+	newOptions.EngineOptions.Format12h = r.FormValue("Format12h") != ""
 
 	// Strings
 	newOptions.Font = r.FormValue("Font")

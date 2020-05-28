@@ -13,7 +13,6 @@ const configHTML = `
 <input type="checkbox" id="Format12h" name="Format12h" {{if .EngineOptions.Format12h}} checked {{end}}/>
 <label for="Format12h">Use 12 hour format for time-of-day display.</label><br />
 
-
 <input type="checkbox" id="Debug" name="Debug" {{if .Debug}} checked {{end}}/>
 <label for="Debug">Output verbose debug information. This will impact performance.</label><br />
 
