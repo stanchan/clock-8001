@@ -10,6 +10,7 @@ import (
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v3/debug"
+	"gitlab.com/Depili/clock-8001/v3/util"
 	"log"
 	"os"
 	"os/signal"
@@ -27,6 +28,16 @@ var parser = flags.NewParser(&options, flags.Default)
 var textureSource sdl.Rect
 var staticTexture *sdl.Texture
 var secTexture *sdl.Texture
+
+var secCircles []util.Point
+var staticCircles []util.Point
+
+const int32 center1080 = 1080 / 2
+const int32 center192 = 192 / 2
+const float64 staticRadius1080 = 500
+const float64 secondRadius1080 = 450
+const float64 staticRadius192 = staticRadius1080 * 192 / 1080
+const float64 secondRadius192 = secondRadius1080 * 192 / 1080
 
 func main() {
 	options.Config = func(s string) error {
@@ -60,35 +71,6 @@ func main() {
 	if options.Debug {
 		debug.Enabled = true
 	}
-
-	/*
-		// GPIO pin for toggling between timezones
-		if err := embd.InitGPIO(); err != nil {
-			panic(err)
-		}
-
-		timePin, err := embd.NewDigitalPin(options.TimePin)
-		if err != nil {
-			panic(err)
-		} else if err := timePin.SetDirection(embd.In); err != nil {
-			panic(err)
-		}
-
-		log.Printf("GPIO initialized.\n")
-	*/
-	/*
-		// Load timezones
-		local, err := time.LoadLocation(options.LocalTime)
-		if err != nil {
-			panic(err)
-		}
-
-		foreign, err := time.LoadLocation(options.ForeignTime)
-		if err != nil {
-			panic(err)
-		}
-		log.Printf("Timezones loaded.\n")
-	*/
 
 	// Parse font for clock text
 	font, err := bdf.Parse(options.Font)
@@ -138,6 +120,9 @@ func main() {
 	var textureCoord int32 = 20
 	var textureRadius int32 = 19
 
+	secCircles = util.Points(center1080, secondRadius1080, 60)
+	staticCircles = util.Points(center1080, staticRadius1080, 12)
+
 	// Create a texture for circles
 	if options.Small {
 		textureSize = 5
@@ -147,8 +132,8 @@ func main() {
 		gridStartY = 32
 		gridSize = 3
 		gridSpacing = 4
-		secCircles = smallSecCircles
-		staticCircles = smallStaticCircles
+		secCircles = util.Points(center192, secondRadius192, 60)
+		staticCircles = util.Points(center192, staticRadius192, 12)
 	} else if !options.DualClock {
 		// Scale down if needed
 		err = renderer.SetLogicalSize(1080, 1080)
@@ -419,9 +404,9 @@ func main() {
 func drawSecondCircles(seconds int) {
 	// Draw second circles
 	for i := 0; i <= int(seconds); i++ {
-		dest := sdl.Rect{X: secCircles[i][0] - 20, Y: secCircles[i][1] - 20, W: 40, H: 40}
+		dest := sdl.Rect{X: secCircles[i].X - 20, Y: secCircles[i].Y - 20, W: 40, H: 40}
 		if options.Small {
-			dest = sdl.Rect{X: secCircles[i][0] - 3, Y: secCircles[i][1] - 3, W: 5, H: 5}
+			dest = sdl.Rect{X: secCircles[i].X - 3, Y: secCircles[i].Y - 3, W: 5, H: 5}
 		}
 		err := renderer.Copy(secTexture, &textureSource, &dest)
 		check(err)
@@ -432,11 +417,11 @@ func drawStaticCircles() {
 	// Draw static indicator circles
 	for _, p := range staticCircles {
 		if options.Small {
-			dest := sdl.Rect{X: p[0] - 3, Y: p[1] - 3, W: 5, H: 5}
+			dest := sdl.Rect{X: p.X - 3, Y: p.Y - 3, W: 5, H: 5}
 			err := renderer.Copy(staticTexture, &textureSource, &dest)
 			check(err)
 		} else {
-			dest := sdl.Rect{X: p[0] - 20, Y: p[1] - 20, W: 40, H: 40}
+			dest := sdl.Rect{X: p.X - 20, Y: p.Y - 20, W: 40, H: 40}
 			err := renderer.Copy(staticTexture, &textureSource, &dest)
 			check(err)
 		}
