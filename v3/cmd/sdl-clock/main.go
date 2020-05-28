@@ -32,12 +32,12 @@ var secTexture *sdl.Texture
 var secCircles []util.Point
 var staticCircles []util.Point
 
-const int32 center1080 = 1080 / 2
-const int32 center192 = 192 / 2
-const float64 staticRadius1080 = 500
-const float64 secondRadius1080 = 450
-const float64 staticRadius192 = staticRadius1080 * 192 / 1080
-const float64 secondRadius192 = secondRadius1080 * 192 / 1080
+const center1080 = 1080 / 2
+const center192 = 192 / 2
+const staticRadius1080 = 500
+const secondRadius1080 = 450
+const staticRadius192 = staticRadius1080 * 192 / 1080
+const secondRadius192 = secondRadius1080 * 192 / 1080
 
 func main() {
 	options.Config = func(s string) error {
@@ -135,10 +135,6 @@ func main() {
 		secCircles = util.Points(center192, secondRadius192, 60)
 		staticCircles = util.Points(center192, staticRadius192, 12)
 	} else if !options.DualClock {
-		// Scale down if needed
-		err = renderer.SetLogicalSize(1080, 1080)
-		check(err)
-
 		// the official raspberry pi display has weird pixels
 		// We detect it by the unusual 800 x 480 resolution
 		// We will eventually support rotated displays also
@@ -389,7 +385,23 @@ func main() {
 
 				}
 			} else {
-				dest := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
+				x, y, _ := renderer.GetOutputSize()
+				var dest sdl.Rect
+				if x > y {
+					dest = sdl.Rect{
+						X: (x - y) / 2,
+						Y: 0,
+						W: y,
+						H: y,
+					}
+				} else {
+					dest = sdl.Rect{
+						X: 0,
+						Y: (y - x) / 2,
+						W: x,
+						H: x,
+					}
+				}
 				err := renderer.Copy(clockTextures[0], &source, &dest)
 				check(err)
 			}
