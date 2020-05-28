@@ -87,7 +87,7 @@ func main() {
 	}
 	defer sdl.Quit()
 
-	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_SHOWN); err != nil {
+	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE); err != nil {
 		log.Fatalf("Failed to create window: %s\n", err)
 	}
 	defer window.Destroy()
