@@ -1,3 +1,6 @@
+## Version 3.14.0
+* Experimental background image support
+
 ## Version 3.13.0
 * Add an option to disable detection and aspect ratio correction of official raspberry pi displays
 * BUGFIX: setting 12h format from the http interface didn't work
