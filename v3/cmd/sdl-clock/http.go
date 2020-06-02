@@ -62,6 +62,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.HTTPPort = r.FormValue("HTTPPort")
 	newOptions.HTTPUser = r.FormValue("HTTPUser")
 	newOptions.HTTPPassword = r.FormValue("HTTPPassword")
+	newOptions.Background = r.FormValue("Background")
 
 	// Integers
 	newOptions.EngineOptions.Flash, _ = strconv.Atoi(r.FormValue("Flash"))

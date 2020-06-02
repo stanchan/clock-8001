@@ -8,6 +8,7 @@ import (
 	// "github.com/kidoman/embd"
 	// _ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
 	"github.com/veandco/go-sdl2/gfx"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v3/debug"
 	"gitlab.com/Depili/clock-8001/v3/util"
@@ -87,7 +88,7 @@ func main() {
 	}
 	defer sdl.Quit()
 
-	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE); err != nil {
+	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_OPENGL+sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE); err != nil {
 		log.Fatalf("Failed to create window: %s\n", err)
 	}
 	defer window.Destroy()
@@ -183,7 +184,7 @@ func main() {
 
 	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	check(err)
-	err = staticTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	err = staticTexture.SetBlendMode(sdl.BLENDMODE_NONE)
 	check(err)
 
 	err = renderer.SetRenderTarget(staticTexture)
@@ -205,7 +206,7 @@ func main() {
 
 	secTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	check(err)
-	err = secTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	err = secTexture.SetBlendMode(sdl.BLENDMODE_NONE)
 	check(err)
 
 	err = renderer.SetRenderTarget(secTexture)
@@ -257,6 +258,24 @@ func main() {
 	check(err)
 	err = clockTextures[1].SetBlendMode(sdl.BLENDMODE_BLEND)
 	check(err)
+
+	// Load and process background image
+	showBackground := true
+	backgroundImage, err := img.Load(options.Background)
+	var backgroundTexture *sdl.Texture
+	if err == nil {
+		// Create texture from surface
+		backgroundTexture, err = renderer.CreateTextureFromSurface(backgroundImage)
+		check(err)
+
+		err = backgroundTexture.SetBlendMode(sdl.BLENDMODE_NONE)
+		check(err)
+	} else {
+		// Failed to load background image, continue without it
+		showBackground = false
+		log.Printf("Error loading background image: %v %v\n", options.Background, err)
+		log.Printf("Disabling background image.")
+	}
 
 	// Second clock engine for constant time of day display with dual clock mode
 	var todOptions = clock.EngineOptions{
@@ -314,7 +333,7 @@ func main() {
 				check(err)
 
 				// Clear SDL canvas
-				err = renderer.SetDrawColor(0, 0, 0, 255) // Black
+				err = renderer.SetDrawColor(0, 0, 0, 0) // Black
 				check(err)
 
 				err = renderer.Clear() // Clear screen
@@ -344,6 +363,10 @@ func main() {
 
 			err = renderer.Clear() // Clear screen
 			check(err)
+
+			if showBackground {
+				renderer.Copy(backgroundTexture, nil, nil)
+			}
 
 			source := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
 
@@ -409,7 +432,7 @@ func main() {
 
 			// Update the canvas
 			renderer.Present()
-			debug.Printf("Frame time: %d microseconds\n", time.Now().Sub(startTime).Microseconds())
+			debug.Printf("Frame time: %d ms\n", time.Now().Sub(startTime).Milliseconds())
 		}
 	}
 }

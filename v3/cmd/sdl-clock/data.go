@@ -34,6 +34,7 @@ type clockOptions struct {
 	DualClock      bool   `long:"dual-clock" description:"Display two clock faces, with one of them being constant time of day display"`
 	DumpConfig     bool   `long:"dump-config" description:"Write configuration to stdout and exit"`
 	NoARCorrection bool   `long:"no-ar-correction" description:"Do not try to detect official raspberry pi display and correct it's aspect ratio"`
+	Background     string `long:"background" description:"Background image file location."`
 	EngineOptions  *clock.EngineOptions
 }
 

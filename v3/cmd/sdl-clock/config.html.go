@@ -31,6 +31,11 @@ const configHTML = `
 <input type="number" min="0" id="Timeout" name="Timeout" value="{{.EngineOptions.Timeout}}" />
 <label for="Flash">Timeout for clearing OSC text display messages, milliseconds</label><br />
 
+<input type="text" id="Background" name="Background" value="{{.Background}}" />
+<label for="Background">Experimental background image support. Image filename</label><br />
+<p>The image needs to be in the correct resolution and either png or jpeg file. Place the
+image in the fat partition and refer to it as /boot/imagename.png</p>
+
 
 <h2>Colors</h2>
 

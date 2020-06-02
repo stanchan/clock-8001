@@ -20,6 +20,10 @@ Format12h={{.EngineOptions.Format12h}}
 # Set to true to disable detection of official raspberry pi display for aspect ratio correction
 NoARCorrection={{.NoARCorrection}}
 
+# Experimental background image support. You need to provide the background in
+# the correct resolution as a png or jpeg image.
+Background={{.Background}}
+
 # Font to use
 Font={{.Font}}
 
