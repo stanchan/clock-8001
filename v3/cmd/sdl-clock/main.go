@@ -136,7 +136,19 @@ func main() {
 		gridSpacing = 4
 		secCircles = util.Points(center192, secondRadius192, 60)
 		staticCircles = util.Points(center192, staticRadius192, 12)
-	} else if !options.DualClock {
+	} else if options.DualClock {
+		// Dual clock
+		x, y, _ := renderer.GetOutputSize()
+
+		if x > y {
+			err = renderer.SetLogicalSize(1920, 1080)
+			check(err)
+		} else {
+			// rotated display
+			err = renderer.SetLogicalSize(1080, 1920)
+			check(err)
+		}
+	} else {
 		// the official raspberry pi display has weird pixels
 		// We detect it by the unusual 800 x 480 resolution
 		// We will eventually support rotated displays also
@@ -147,14 +159,16 @@ func main() {
 
 		if (x == 800) && (y == 480) && !options.NoARCorrection {
 			// Official display, rotated 0 or 180 degrees
-			// Scale for Y is 480 / 1080 = 0.44444445
-			// Scale for X is 0.44444445 * ((9.0*800) / (16*480)) = 0.416666671875
-			err = renderer.SetScale(0.416666671875, 0.44444445)
+			// The display has non-square pixels and needs correction:
+			// Y scale = 1
+			// Scale for x is ((9*800) / (16*480)) = 0.9375
+			err = renderer.SetScale(0.9375, 1)
 			check(err)
 			log.Printf("Detected official raspberry pi display, correcting aspect ratio\n")
-		} else if (y == 800) && (x == 480) {
+			check(err)
+		} else if (y == 800) && (x == 480) && !options.NoARCorrection {
 			// Official display rotated 90 or 270 degrees
-			err = renderer.SetScale(0.44444445, 0.416666671875)
+			err = renderer.SetScale(1, 0.9375)
 			check(err)
 			log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio.\n")
 			log.Printf("Moving clock to top corner of the display.\n")
@@ -168,20 +182,7 @@ func main() {
 			err = renderer.SetViewport(&viewport)
 			check(err)
 		}
-	} else {
-		// Dual clock
-		x, y, _ := renderer.GetOutputSize()
-
-		if x > y {
-			err = renderer.SetLogicalSize(1920, 1080)
-			check(err)
-		} else {
-			// rotated display
-			err = renderer.SetLogicalSize(1080, 1920)
-			check(err)
-		}
 	}
-
 	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	check(err)
 	err = staticTexture.SetBlendMode(sdl.BLENDMODE_NONE)
