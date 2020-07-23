@@ -1,3 +1,6 @@
+## Version 3.14.1
+* BUGFIX: Clock scaling on the official 7" display
+
 ## Version 3.14.0
 * Experimental background image support
 
