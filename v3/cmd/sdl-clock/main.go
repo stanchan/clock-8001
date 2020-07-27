@@ -7,7 +7,6 @@ import (
 	"github.com/jessevdk/go-flags"
 	// "github.com/kidoman/embd"
 	// _ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
-	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v3/debug"
@@ -19,26 +18,7 @@ import (
 	"time"
 )
 
-var staticSDLColor = sdl.Color{R: 80, G: 80, B: 0, A: 255} // 12 static indicator circles
-var secSDLColor = sdl.Color{R: 200, G: 0, B: 0, A: 255}
-var textSDLColor sdl.Color
-var window *sdl.Window
-var renderer *sdl.Renderer
 var parser = flags.NewParser(&options, flags.Default)
-
-var textureSource sdl.Rect
-var staticTexture *sdl.Texture
-var secTexture *sdl.Texture
-
-var secCircles []util.Point
-var staticCircles []util.Point
-
-const center1080 = 1080 / 2
-const center192 = 192 / 2
-const staticRadius1080 = 500
-const secondRadius1080 = 450
-const staticRadius192 = staticRadius1080 * 192 / 1080
-const secondRadius192 = secondRadius1080 * 192 / 1080
 
 func main() {
 	options.Config = func(s string) error {
@@ -82,44 +62,12 @@ func main() {
 	log.Printf("Fonts loaded.\n")
 
 	// Initialize SDL
-
-	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		log.Fatalf("Failed to initialize SDL: %s\n", err)
-	}
+	initSDL()
 	defer sdl.Quit()
-
-	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_OPENGL+sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE); err != nil {
-		log.Fatalf("Failed to create window: %s\n", err)
-	}
 	defer window.Destroy()
-
-	if renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED); err != nil {
-		log.Fatalf("Failed to create renderer: %s\n", err)
-	}
-
-	_, err = sdl.ShowCursor(0) // Hide mouse cursor
-	check(err)
-
-	err = renderer.Clear()
 	defer renderer.Destroy()
-	check(err)
 
-	log.Printf("SDL init done\n")
-
-	rendererInfo, err := renderer.GetInfo()
-	check(err)
-	log.Printf("Renderer: %v\n", rendererInfo.Name)
-
-	// Clock colors from flags
-	textSDLColor = sdl.Color{R: options.TextRed, G: options.TextGreen, B: options.TextBlue, A: 255}
-	staticSDLColor = sdl.Color{R: options.StaticRed, G: options.StaticGreen, B: options.StaticBlue, A: 255}
-	secSDLColor = sdl.Color{R: options.SecRed, G: options.SecGreen, B: options.SecBlue, A: 255}
-	// Default color for the OSC field (black)
-	tallyColor := sdl.Color{R: 0, G: 0, B: 0, A: 255}
-
-	var textureSize int32 = 40
-	var textureCoord int32 = 20
-	var textureRadius int32 = 19
+	initColors()
 
 	// Dot circles for the clock face
 	secCircles = util.Points(center1080, secondRadius1080, 60)
@@ -127,16 +75,10 @@ func main() {
 
 	// Create a texture for circles
 	if options.Small {
-		textureSize = 5
-		textureCoord = 3
-		textureRadius = 3
-		gridStartX = 32
-		gridStartY = 32
-		gridSize = 3
-		gridSpacing = 4
 		secCircles = util.Points(center192, secondRadius192, 60)
 		staticCircles = util.Points(center192, staticRadius192, 12)
 	} else if options.DualClock {
+		// FIXME: rpi display scaling fix
 		// Dual clock
 		x, y, _ := renderer.GetOutputSize()
 
@@ -149,88 +91,10 @@ func main() {
 			check(err)
 		}
 	} else {
-		// the official raspberry pi display has weird pixels
-		// We detect it by the unusual 800 x 480 resolution
-		// We will eventually support rotated displays also
-		x, y, _ := renderer.GetOutputSize()
-		log.Printf("SDL renderer size: %v x %v", x, y)
-		scaleX, scaleY := renderer.GetScale()
-		log.Printf("Scaling: x: %v, y: %v\n", scaleX, scaleY)
-
-		if (x == 800) && (y == 480) && !options.NoARCorrection {
-			// Official display, rotated 0 or 180 degrees
-			// The display has non-square pixels and needs correction:
-			// Y scale = 1
-			// Scale for x is ((9*800) / (16*480)) = 0.9375
-			err = renderer.SetScale(0.9375, 1)
-			check(err)
-			log.Printf("Detected official raspberry pi display, correcting aspect ratio\n")
-			check(err)
-		} else if (y == 800) && (x == 480) && !options.NoARCorrection {
-			// Official display rotated 90 or 270 degrees
-			err = renderer.SetScale(1, 0.9375)
-			check(err)
-			log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio.\n")
-			log.Printf("Moving clock to top corner of the display.\n")
-		}
-
-		if y > x {
-			log.Printf("Display rotated 90 or 270 degrees, moving clock to top corner.\n")
-			viewport := renderer.GetViewport()
-			log.Printf("Renderer viewport: %v\n", viewport)
-			viewport = sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
-			err = renderer.SetViewport(&viewport)
-			check(err)
-		}
-	}
-	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
-	check(err)
-	err = staticTexture.SetBlendMode(sdl.BLENDMODE_NONE)
-	check(err)
-
-	err = renderer.SetRenderTarget(staticTexture)
-	check(err)
-
-	if !options.Small {
-		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
-		// gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, staticSDLColor)
-	} else {
-		err = renderer.SetDrawColor(staticSDLColor.R, staticSDLColor.G, staticSDLColor.B, 255)
-		check(err)
-
-		for _, point := range circlePixels {
-			if err := renderer.DrawPoint(point[0], point[1]); err != nil {
-				panic(err)
-			}
-		}
+		rpiDisplayCorrection()
 	}
 
-	secTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
-	check(err)
-	err = secTexture.SetBlendMode(sdl.BLENDMODE_NONE)
-	check(err)
-
-	err = renderer.SetRenderTarget(secTexture)
-	check(err)
-
-	if !options.Small {
-		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
-		// gfx.AACircleColor(renderer, textureCoord, textureCoord, textureRadius, secSDLColor)
-	} else {
-		err = renderer.SetDrawColor(secSDLColor.R, secSDLColor.G, secSDLColor.B, 255)
-		check(err)
-
-		for _, point := range circlePixels {
-			if err := renderer.DrawPoint(point[0], point[1]); err != nil {
-				panic(err)
-			}
-		}
-	}
-
-	err = renderer.SetRenderTarget(nil)
-	check(err)
-
-	textureSource = sdl.Rect{X: 0, Y: 0, W: textureSize, H: textureSize}
+	initTextures()
 
 	// Trap SIGINT aka Ctrl-C
 	sigChan := make(chan os.Signal, 1)
@@ -435,6 +299,33 @@ func main() {
 			renderer.Present()
 			debug.Printf("Frame time: %d ms\n", time.Now().Sub(startTime).Milliseconds())
 		}
+	}
+}
+
+func rpiDisplayCorrection() {
+	// the official raspberry pi display has weird pixels
+	// We detect it by the unusual 800 x 480 resolution
+	// We will eventually support rotated displays also
+	x, y, _ := renderer.GetOutputSize()
+	log.Printf("SDL renderer size: %v x %v", x, y)
+	scaleX, scaleY := renderer.GetScale()
+	log.Printf("Scaling: x: %v, y: %v\n", scaleX, scaleY)
+
+	if (x == 800) && (y == 480) && !options.NoARCorrection {
+		// Official display, rotated 0 or 180 degrees
+		// The display has non-square pixels and needs correction:
+		// Y scale = 1
+		// Scale for x is ((9*800) / (16*480)) = 0.9375
+		err := renderer.SetScale(0.9375, 1)
+		check(err)
+		log.Printf("Detected official raspberry pi display, correcting aspect ratio\n")
+		check(err)
+	} else if (y == 800) && (x == 480) && !options.NoARCorrection {
+		// Official display rotated 90 or 270 degrees
+		err := renderer.SetScale(1, 0.9375)
+		check(err)
+		log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio.\n")
+		log.Printf("Moving clock to top corner of the display.\n")
 	}
 }
 

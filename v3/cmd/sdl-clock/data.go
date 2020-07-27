@@ -2,6 +2,7 @@ package main
 
 import (
 	"gitlab.com/Depili/clock-8001/v3/clock"
+	"gitlab.com/Depili/clock-8001/v3/util"
 )
 
 var winTitle = "SDL CLOCK"
@@ -10,6 +11,16 @@ var gridStartX int32 = 149
 var gridStartY int32 = 149
 var gridSize int32 = 20
 var gridSpacing = 25
+
+const center1080 = 1080 / 2
+const center192 = 192 / 2
+const staticRadius1080 = 500
+const secondRadius1080 = 450
+const staticRadius192 = staticRadius1080 * 192 / 1080
+const secondRadius192 = secondRadius1080 * 192 / 1080
+
+var secCircles []util.Point
+var staticCircles []util.Point
 
 type clockOptions struct {
 	Config         func(s string) error `short:"C" long:"config" description:"read config from a file"`
