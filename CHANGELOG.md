@@ -1,3 +1,6 @@
+## Version 3.15.0
+* Add experimental support for Interspace Industries USB AiO soundcard for LTC to the generated images
+
 ## Version 3.14.1
 * BUGFIX: Clock scaling on the official 7" display
 

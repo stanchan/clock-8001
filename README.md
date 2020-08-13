@@ -115,7 +115,11 @@ Help Options:
 
 ### LTC timecode support
 
-The clock can be used to display a SMPTE LTC time. This requires a Hifiberry ADC+ DAC Pro hat: https://www.hifiberry.com/shop/boards/hifiberry-dac-adc-pro/ Currently only the hifiberry hat is supported, as most soundcards need device specific configuration. It is recommended to use the pin headers for balanced audio input and to wire the incoming mono LTC signal to both left and right channels.
+The clock can be used to display a SMPTE LTC time. This requires a Hifiberry ADC+ DAC Pro hat: https://www.hifiberry.com/shop/boards/hifiberry-dac-adc-pro/ or Interpace Industries USB AiO interface. Currently only these two options for audio input are supported.
+
+For Hifiberry it is recommended to use the pin headers for balanced audio input and to wire the incoming mono LTC signal to both left and right channels.
+
+Other usb audio interfaces might work, but they are completely untested and no support is offered for them.
 
 ## matrix-clock - Dedicated led matrix clock
 
