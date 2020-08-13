@@ -7,7 +7,6 @@ import (
 	"github.com/jessevdk/go-flags"
 	// "github.com/kidoman/embd"
 	// _ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
-	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v3/debug"
 	"gitlab.com/Depili/clock-8001/v3/util"
@@ -19,30 +18,16 @@ import (
 )
 
 var parser = flags.NewParser(&options, flags.Default)
+var font *bdf.Bdf
 
 func main() {
-	options.Config = func(s string) error {
-		ini := flags.NewIniParser(parser)
-		options.configFile = s
-		return ini.ParseFile(s)
-	}
+	var err error
 
-	if _, err := parser.Parse(); err != nil {
-		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			os.Exit(0)
-		} else {
-			os.Exit(1)
-		}
-	}
+	parseOptions()
 
 	// Dump the current config to stdout
 	if options.DumpConfig {
-		tmpl, err := template.New("config.ini").Parse(configTemplate)
-		if err != nil {
-			panic(err)
-		}
-		err = tmpl.Execute(os.Stdout, options)
-		os.Exit(0)
+		dumpConfig()
 	}
 
 	if !options.DisableHTTP {
@@ -54,7 +39,7 @@ func main() {
 	}
 
 	// Parse font for clock text
-	font, err := bdf.Parse(options.Font)
+	font, err = bdf.Parse(options.Font)
 	if err != nil {
 		panic(err)
 	}
@@ -69,15 +54,9 @@ func main() {
 
 	initColors()
 
-	// Dot circles for the clock face
-	secCircles = util.Points(center1080, secondRadius1080, 60)
-	staticCircles = util.Points(center1080, staticRadius1080, 12)
+	createRings()
 
-	// Create a texture for circles
-	if options.Small {
-		secCircles = util.Points(center192, secondRadius192, 60)
-		staticCircles = util.Points(center192, staticRadius192, 12)
-	} else if options.DualClock {
+	if options.DualClock {
 		// FIXME: rpi display scaling fix
 		// Dual clock
 		x, y, _ := renderer.GetOutputSize()
@@ -90,7 +69,7 @@ func main() {
 			err = renderer.SetLogicalSize(1080, 1920)
 			check(err)
 		}
-	} else {
+	} else if !options.NoARCorrection {
 		rpiDisplayCorrection()
 	}
 
@@ -106,9 +85,11 @@ func main() {
 	secondBitmap := font.TextBitmap("05")
 	tallyBitmap := font.TextBitmap("  ")
 
+	// Intialize polling timers
 	updateTicker := time.NewTicker(time.Millisecond * 30)
 	eventTicker := time.NewTicker(time.Millisecond * 5)
 
+	// Create main clock engine
 	engine, err := clock.MakeEngine(options.EngineOptions)
 	check(err)
 
@@ -124,23 +105,7 @@ func main() {
 	err = clockTextures[1].SetBlendMode(sdl.BLENDMODE_BLEND)
 	check(err)
 
-	// Load and process background image
-	showBackground := true
-	backgroundImage, err := img.Load(options.Background)
-	var backgroundTexture *sdl.Texture
-	if err == nil {
-		// Create texture from surface
-		backgroundTexture, err = renderer.CreateTextureFromSurface(backgroundImage)
-		check(err)
-
-		err = backgroundTexture.SetBlendMode(sdl.BLENDMODE_NONE)
-		check(err)
-	} else {
-		// Failed to load background image, continue without it
-		showBackground = false
-		log.Printf("Error loading background image: %v %v\n", options.Background, err)
-		log.Printf("Disabling background image.")
-	}
+	showBackground := loadBackground()
 
 	// Second clock engine for constant time of day display with dual clock mode
 	var todOptions = clock.EngineOptions{
@@ -164,6 +129,8 @@ func main() {
 		engines[0] = engine
 	}
 
+	// Main clock event loop
+
 	log.Printf("Entering main loop\n")
 	for {
 		select {
@@ -171,15 +138,19 @@ func main() {
 			// SIGINT received, shutdown gracefully
 			os.Exit(1)
 		case <-eventTicker.C:
+			// SDL event polling
 			e := sdl.PollEvent()
 			switch e.(type) {
 			case *sdl.QuitEvent:
 				os.Exit(0)
 			}
 		case <-updateTicker.C:
+			// Display update
+
 			startTime := time.Now()
 			for i, eng := range engines {
 
+				// Update clock display fields
 				eng.Update()
 				seconds := eng.Leds
 				hourBitmap = font.TextBitmap(eng.Hours)
@@ -193,16 +164,11 @@ func main() {
 				}
 				tallyBitmap = font.TextBitmap(eng.Tally)
 
-				// Renderer target
+				// Set renderer target to the corresponding clock texture
 				err = renderer.SetRenderTarget(clockTextures[i])
 				check(err)
 
-				// Clear SDL canvas
-				err = renderer.SetDrawColor(0, 0, 0, 0) // Black
-				check(err)
-
-				err = renderer.Clear() // Clear screen
-				check(err)
+				clearCanvas()
 
 				// Dots between hours and minutes
 				if eng.Dots {
@@ -222,13 +188,9 @@ func main() {
 			err = renderer.SetRenderTarget(nil)
 			check(err)
 
-			// Clear SDL canvas
-			err = renderer.SetDrawColor(0, 0, 0, 255) // Black
-			check(err)
+			clearCanvas()
 
-			err = renderer.Clear() // Clear screen
-			check(err)
-
+			// Copy the background image as needed
 			if showBackground {
 				renderer.Copy(backgroundTexture, nil, nil)
 			}
@@ -238,13 +200,16 @@ func main() {
 			// FIXME: the text positioning and size is just magic numbers
 
 			if options.DualClock {
+				// Render the dual clock displays
 				dualText := font.TextBitmap(engine.DualText)
 
 				x, y, _ := renderer.GetOutputSize()
 				if x > y {
+					// Normal horizontal view with the clocks side by side
 					dest := sdl.Rect{X: 0, Y: 0, W: 800, H: 800}
 					err := renderer.Copy(clockTextures[0], &source, &dest)
 					check(err)
+
 					dest = sdl.Rect{X: 1920 - 800, Y: 0, W: 800, H: 800}
 					err = renderer.Copy(clockTextures[1], &source, &dest)
 					check(err)
@@ -257,13 +222,15 @@ func main() {
 						}
 					}
 				} else {
-					// Rotated
+					// Rotated view with the clocks on top of each other
 					dest := sdl.Rect{X: (1080 - 800) / 2, Y: 0, W: 800, H: 800}
 					err := renderer.Copy(clockTextures[0], &source, &dest)
 					check(err)
+
 					dest = sdl.Rect{X: (1080 - 800) / 2, Y: 1920 - 800, W: 800, H: 800}
 					err = renderer.Copy(clockTextures[1], &source, &dest)
 					check(err)
+
 					for y, row := range dualText {
 						for x, b := range row {
 							if b {
@@ -274,9 +241,16 @@ func main() {
 
 				}
 			} else {
+				// Single clock mode
 				x, y, _ := renderer.GetOutputSize()
 				var dest sdl.Rect
-				if x > y {
+
+				if options.Small {
+					// Do not scale the small 192x192 px clock
+
+					err := renderer.Copy(clockTextures[0], nil, nil)
+					check(err)
+				} else if x > y {
 					dest = sdl.Rect{
 						X: (x - y) / 2,
 						Y: 0,
@@ -284,6 +258,8 @@ func main() {
 						H: y,
 					}
 				} else {
+					// Rotated display
+					// FIXME this centers the clock
 					dest = sdl.Rect{
 						X: 0,
 						Y: (y - x) / 2,
@@ -302,103 +278,41 @@ func main() {
 	}
 }
 
-func rpiDisplayCorrection() {
-	// the official raspberry pi display has weird pixels
-	// We detect it by the unusual 800 x 480 resolution
-	// We will eventually support rotated displays also
-	x, y, _ := renderer.GetOutputSize()
-	log.Printf("SDL renderer size: %v x %v", x, y)
-	scaleX, scaleY := renderer.GetScale()
-	log.Printf("Scaling: x: %v, y: %v\n", scaleX, scaleY)
-
-	if (x == 800) && (y == 480) && !options.NoARCorrection {
-		// Official display, rotated 0 or 180 degrees
-		// The display has non-square pixels and needs correction:
-		// Y scale = 1
-		// Scale for x is ((9*800) / (16*480)) = 0.9375
-		err := renderer.SetScale(0.9375, 1)
-		check(err)
-		log.Printf("Detected official raspberry pi display, correcting aspect ratio\n")
-		check(err)
-	} else if (y == 800) && (x == 480) && !options.NoARCorrection {
-		// Official display rotated 90 or 270 degrees
-		err := renderer.SetScale(1, 0.9375)
-		check(err)
-		log.Printf("Detected official raspberry pi display (rotated 90 or 270 deg), correcting aspect ratio.\n")
-		log.Printf("Moving clock to top corner of the display.\n")
+// paRseOptions parses the command line options and provided ini file
+func parseOptions() {
+	options.Config = func(s string) error {
+		ini := flags.NewIniParser(parser)
+		options.configFile = s
+		return ini.ParseFile(s)
 	}
-}
 
-func drawSecondCircles(seconds int) {
-	// Draw second circles
-	for i := 0; i <= int(seconds); i++ {
-		dest := sdl.Rect{X: secCircles[i].X - 20, Y: secCircles[i].Y - 20, W: 40, H: 40}
-		if options.Small {
-			dest = sdl.Rect{X: secCircles[i].X - 3, Y: secCircles[i].Y - 3, W: 5, H: 5}
-		}
-		err := renderer.Copy(secTexture, &textureSource, &dest)
-		check(err)
-	}
-}
-
-func drawStaticCircles() {
-	// Draw static indicator circles
-	for _, p := range staticCircles {
-		if options.Small {
-			dest := sdl.Rect{X: p.X - 3, Y: p.Y - 3, W: 5, H: 5}
-			err := renderer.Copy(staticTexture, &textureSource, &dest)
-			check(err)
+	if _, err := parser.Parse(); err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			os.Exit(0)
 		} else {
-			dest := sdl.Rect{X: p.X - 20, Y: p.Y - 20, W: 40, H: 40}
-			err := renderer.Copy(staticTexture, &textureSource, &dest)
-			check(err)
+			os.Exit(1)
 		}
 	}
 }
 
-func drawDots() {
-	// Draw the dots between hours and minutes
-	setMatrix(14, 15, textSDLColor)
-	setMatrix(14, 16, textSDLColor)
-	setMatrix(15, 15, textSDLColor)
-	setMatrix(15, 16, textSDLColor)
-
-	setMatrix(18, 15, textSDLColor)
-	setMatrix(18, 16, textSDLColor)
-	setMatrix(19, 15, textSDLColor)
-	setMatrix(19, 16, textSDLColor)
+// dumpConfig dumps the clock configuration ini file to stdout
+func dumpConfig() {
+	tmpl, err := template.New("config.ini").Parse(configTemplate)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(os.Stdout, options)
+	os.Exit(0)
 }
 
-// Set "led matrix" pixel
-func setMatrix(cy, cx int, color sdl.Color) {
-	x := gridStartX + int32(cx*gridSpacing)
-	y := gridStartY + int32(cy*gridSpacing)
-	rect := sdl.Rect{X: x, Y: y, W: gridSize, H: gridSize}
-	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
-	check(err)
-
-	err = renderer.FillRect(&rect)
-	check(err)
-}
-
-func setPixel(cy, cx int, color sdl.Color, startX, startY, spacing, pixelSize int32) {
-	x := startX + int32(cx)*spacing
-	y := startY + int32(cy)*spacing
-	rect := sdl.Rect{X: x, Y: y, W: pixelSize, H: pixelSize}
-	err := renderer.SetDrawColor(color.R, color.G, color.B, color.A)
-	check(err)
-
-	err = renderer.FillRect(&rect)
-	check(err)
-}
-
-func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
-	for y, row := range bitmask {
-		for x, b := range row {
-			if b {
-				setMatrix(r+y, c+x, color)
-			}
-		}
+// createRings creates the coordinate rings for the static and second rings
+func createRings() {
+	if options.Small {
+		secCircles = util.Points(center192, secondRadius192, 60)
+		staticCircles = util.Points(center192, staticRadius192, 12)
+	} else {
+		secCircles = util.Points(center1080, secondRadius1080, 60)
+		staticCircles = util.Points(center1080, staticRadius1080, 12)
 	}
 }
 

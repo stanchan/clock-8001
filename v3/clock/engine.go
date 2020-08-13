@@ -136,29 +136,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 
 	engine.printVersion()
 	engine.initCounters()
-
-	// Setup the OSC listener and feedback
-	if !options.DisableOSC {
-		engine.oscServer = osc.Server{
-			Addr: options.ListenAddr,
-		}
-		engine.clockServer = MakeServer(&engine.oscServer)
-		log.Printf("OSC control: listening on %v", engine.oscServer.Addr)
-		go engine.runOSC()
-
-		// process osc commands
-		go engine.listen()
-
-		if options.DisableFeedback {
-			engine.oscDests = nil
-			log.Printf("OSC feedback disabled")
-		} else {
-			// OSC feedback
-			engine.oscDests = initFeedback(options.Connect)
-		}
-	} else {
-		log.Printf("OSC control and feedback disabled.\n")
-	}
+	engine.initOSC(options)
 
 	// Time zones
 	tz, err := time.LoadLocation(options.Timezone)
@@ -803,4 +781,29 @@ func (engine *Engine) initCounters() {
 		active: false,
 	}
 	engine.countup = &countup
+}
+
+// initOSC Sets up the OSC listener and feedback
+func (engine *Engine) initOSC(options *EngineOptions) {
+	if !options.DisableOSC {
+		engine.oscServer = osc.Server{
+			Addr: options.ListenAddr,
+		}
+		engine.clockServer = MakeServer(&engine.oscServer)
+		log.Printf("OSC control: listening on %v", engine.oscServer.Addr)
+		go engine.runOSC()
+
+		// process osc commands
+		go engine.listen()
+
+		if options.DisableFeedback {
+			engine.oscDests = nil
+			log.Printf("OSC feedback disabled")
+		} else {
+			// OSC feedback
+			engine.oscDests = initFeedback(options.Connect)
+		}
+	} else {
+		log.Printf("OSC control and feedback disabled.\n")
+	}
 }
