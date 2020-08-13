@@ -62,6 +62,10 @@ func (server *Server) handleCountupStart(msg *osc.Message) {
 	server.update(message)
 }
 
+func (server *Server) handleCountupModify(msg *osc.Message) {
+	server.sendCountdownMessage("countupModify", msg)
+}
+
 func (server *Server) handleKill(msg *osc.Message) {
 	debug.Printf("kill: %#v", msg)
 
@@ -236,6 +240,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/pause", server.handlePause)
 	registerHandler(oscServer, "/clock/resume", server.handleResume)
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
+	registerHandler(oscServer, "/clock/countup/modify", server.handleCountupModify)
 	registerHandler(oscServer, "/clock/kill", server.handleKill)
 	registerHandler(oscServer, "/clock/normal", server.handleNormal)
 	registerHandler(oscServer, "/clock/seconds/off", server.handleSecondsOff)

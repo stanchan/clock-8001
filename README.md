@@ -217,6 +217,15 @@ Starts counting up time.
 
 Payload: none
 
+### /clock/countup/modify
+
+Changes the start time of the running count up.
+
+Be aware that since this alters the start timestamp you need to use negative values to increase the displayed value and positive to decrease.
+
+Payload:
+1. int32 time in seconds to add or substract from the count up start timestamp
+
 ### /clock/kill
 
 (Almost) blanks the display. Only the 12 static leds and one led on the ring will be on.

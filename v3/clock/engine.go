@@ -134,31 +134,8 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	ltc := ltcData{hours: 0}
 	engine.ltc = &ltc
 
-	clockModule, ok := db.ReadBuildInfo()
-	if ok {
-		for _, mod := range clockModule.Deps {
-			log.Printf("Dep: %s: version %s", mod.Path, mod.Version)
-			if mod.Path == "gitlab.com/Depili/clock-8001" {
-				gitTag = mod.Version
-			}
-		}
-	} else {
-		log.Printf("Error reading BuildInfo, version data unavailable")
-	}
-	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
-
-	countdown := countdownData{
-		active: false,
-	}
-	engine.countdown = &countdown
-	countdown2 := countdownData{
-		active: false,
-	}
-	engine.countdown2 = &countdown2
-	countup := countdownData{
-		active: false,
-	}
-	engine.countup = &countup
+	engine.printVersion()
+	engine.initCounters()
 
 	// Setup the OSC listener and feedback
 	if !options.DisableOSC {
@@ -259,6 +236,9 @@ func (engine *Engine) listen() {
 				engine.Resume()
 			case "countup":
 				engine.StartCountup()
+			case "countupModify":
+				msg := message.CountdownMessage
+				engine.ModifyCountup(time.Duration(msg.Seconds) * time.Second)
 			case "kill":
 				engine.Kill()
 			case "normal":
@@ -654,6 +634,18 @@ func (engine *Engine) ModifyCountdown2(delta time.Duration) {
 	}
 }
 
+// ModifyCountup adds or removes time from countup timer
+func (engine *Engine) ModifyCountup(delta time.Duration) {
+	if engine.countup.active {
+		cd := countdownData{
+			target: engine.countup.target.Add(delta),
+			left:   engine.countup.left + delta,
+			active: engine.countup.active,
+		}
+		engine.countup = &cd
+	}
+}
+
 // StopCountdown stops the primary countdown
 func (engine *Engine) StopCountdown() {
 	if engine.mode == Countdown {
@@ -777,4 +769,38 @@ func (engine *Engine) setLTC(timestamp string) {
 			target:  ltcTarget,
 		}
 	}
+}
+
+// printVersion prints to stdout the clock version and dependency versions
+func (engine *Engine) printVersion() {
+	clockModule, ok := db.ReadBuildInfo()
+	if ok {
+		for _, mod := range clockModule.Deps {
+			log.Printf("Dep: %s: version %s", mod.Path, mod.Version)
+			if mod.Path == "gitlab.com/Depili/clock-8001" {
+				gitTag = mod.Version
+			}
+		}
+	} else {
+		log.Printf("Error reading BuildInfo, version data unavailable")
+	}
+	log.Printf("Clock-8001 engine version %s git: %s\n", gitTag, gitCommit)
+}
+
+// initCounters initializes the countdown and count up timers
+func (engine *Engine) initCounters() {
+	countdown := countdownData{
+		active: false,
+	}
+	engine.countdown = &countdown
+
+	countdown2 := countdownData{
+		active: false,
+	}
+	engine.countdown2 = &countdown2
+
+	countup := countdownData{
+		active: false,
+	}
+	engine.countup = &countup
 }
