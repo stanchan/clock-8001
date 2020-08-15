@@ -47,6 +47,8 @@ type clockOptions struct {
 	NoARCorrection bool   `long:"no-ar-correction" description:"Do not try to detect official raspberry pi display and correct it's aspect ratio"`
 	Background     string `long:"background" description:"Background image file location."`
 	EngineOptions  *clock.EngineOptions
+	Raspberry      bool   // Is the host a raspberry pi
+	ConfigTxt      string // /boot/config.txt contents
 }
 
 var options clockOptions

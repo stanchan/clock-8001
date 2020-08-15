@@ -91,7 +91,14 @@ image in the fat partition and refer to it as /boot/imagename.png</p>
 <input type="checkbox" id="LTCFollow" name="LTCFollow" {{if .EngineOptions.LTCFollow}} checked {{end}}/>
 <label for="LTCFollow">Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone.</label><br />
 
+{{if .Raspberry}}
+	<h1>Raspberry pi configuration</h1>
+	<textarea id="configtxt" name="configtxt" rows="20" cols="50">{{.ConfigTxt}}</textarea>
+	<br />
+	<label for="configtxt">Raspberry pi /boot/config.txt. Changing this will reboot the raspberry pi.</label><br />
+{{end}}
 <br />
+
 <input type="submit" value="Save config and restart clock" />
 
 

@@ -6,9 +6,11 @@ import (
 	"encoding/hex"
 	"gitlab.com/Depili/clock-8001/v3/clock"
 	htmlTemplate "html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"text/template"
 )
@@ -30,6 +32,18 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
+	options.Raspberry = fileExists("/boot/config.txt")
+
+	if options.Raspberry {
+		// Read out various config files for editing
+		bytes, err := ioutil.ReadFile("/boot/config.txt")
+		if err != nil {
+			panic(err)
+		}
+		options.ConfigTxt = string(bytes)
+	}
+
 	err = tmpl.Execute(w, options)
 	if err != nil {
 		panic(err)
@@ -78,7 +92,31 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.EngineOptions.CountdownRed, newOptions.EngineOptions.CountdownGreen, newOptions.EngineOptions.CountdownBlue =
 		parseColor(r.FormValue("CountdownColor"))
 
+	log.Printf("Writing new config ini file")
 	newOptions.writeConfig(options.configFile)
+
+	if r.FormValue("configtxt") != "" {
+		bytes, err := ioutil.ReadFile("/boot/config.txt")
+		check(err)
+		current_config := string(bytes)
+
+		if r.FormValue("configtxt") != current_config {
+			log.Printf("Writing /boot/config.txt")
+			f, err := os.Create("/boot/config.txt")
+			check(err)
+			_, err = f.WriteString(r.FormValue("configtxt"))
+			check(err)
+			f.Close()
+
+			// reboot the rpi
+			cmd := exec.Command("reboot")
+			cmd.Env = os.Environ()
+			if err := cmd.Run(); err != nil {
+				panic(err)
+			}
+		}
+	}
+
 	os.Exit(0)
 }
 
@@ -104,6 +142,18 @@ func (options *clockOptions) createHTML() {
 	if err != nil {
 		panic(err)
 	}
+
+	options.Raspberry = fileExists("/boot/config.txt")
+
+	if options.Raspberry {
+		// Read out various config files for editing
+		bytes, err := ioutil.ReadFile("/boot/config.txt")
+		if err != nil {
+			panic(err)
+		}
+		options.ConfigTxt = string(bytes)
+	}
+
 	err = tmpl.Execute(os.Stdout, options)
 	if err != nil {
 		panic(err)
@@ -123,4 +173,13 @@ func basicAuth(handler http.HandlerFunc) http.HandlerFunc {
 
 		handler(w, r)
 	}
+}
+
+// fileExists checks if a file exists and is not a directory
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
