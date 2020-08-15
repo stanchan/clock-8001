@@ -1,3 +1,8 @@
+## Version 3.16.0
+* Start refactoring internal clock engine to implement new clock faces
+* Add /clock/countup/modify OSC command
+* Add /boot/config.txt editing to the web configuration
+
 ## Version 3.15.0
 * Add experimental support for Interspace Industries USB AiO soundcard for LTC to the generated images
 
