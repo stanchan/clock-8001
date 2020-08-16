@@ -107,6 +107,10 @@ func (counter *Counter) Modify(delta time.Duration) {
 	if !counter.active {
 		return
 	}
+	if !counter.countdown {
+		// Invert delta if counting up
+		delta = -delta
+	}
 
 	s := counterState{
 		target:   counter.state.target.Add(delta),
