@@ -98,9 +98,9 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("configtxt") != "" {
 		bytes, err := ioutil.ReadFile("/boot/config.txt")
 		check(err)
-		current_config := string(bytes)
+		currentConfig := string(bytes)
 
-		if r.FormValue("configtxt") != current_config {
+		if r.FormValue("configtxt") != currentConfig {
 			log.Printf("Writing /boot/config.txt")
 			f, err := os.Create("/boot/config.txt")
 			check(err)

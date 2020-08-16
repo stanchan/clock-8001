@@ -1,3 +1,6 @@
+## Version 3.16.1
+* Fix a linter error preventing automatic builds
+
 ## Version 3.16.0
 * Start refactoring internal clock engine to implement new clock faces
 * Add /clock/countup/modify OSC command
