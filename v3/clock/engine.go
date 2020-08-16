@@ -17,11 +17,11 @@ import (
 )
 
 // Version is the current clock engine version
-const Version = "3.16.1"
+const Version = "3.16.2"
 
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
-var gitTag = "v3.16.1"
+var gitTag = "v3.16.2"
 
 // EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
@@ -71,7 +71,7 @@ type ltcData struct {
 type Engine struct {
 	timeZone *time.Location // Time zone, initialized from options
 	mode     int            // Main display mode
-	Counters []Counter      // Timer counters
+	Counters []*Counter     // Timer counters
 	//countdown      *countdownData
 	//countdown2     *countdownData
 	//countup        *countdownData
@@ -595,22 +595,21 @@ func (engine *Engine) Kill() {
 
 // Pause pauses both countdowns
 func (engine *Engine) Pause() {
-	if !engine.paused {
-		for _, c := range engine.Counters {
-			c.Pause()
-		}
-		engine.paused = true
+	for _, c := range engine.Counters {
+		c.Pause()
+	}
+	engine.paused = true
+	for i, c := range engine.Counters {
+		fmt.Printf("Counter %d: %v\n", i, c)
 	}
 }
 
 // Resume resumes both countdowns if they have been paused
 func (engine *Engine) Resume() {
-	if engine.paused {
-		for _, c := range engine.Counters {
-			c.Resume()
-		}
-		engine.paused = false
+	for _, c := range engine.Counters {
+		c.Resume()
 	}
+	engine.paused = false
 }
 
 // DisplaySeconds returns true if the clock should display seconds
@@ -703,9 +702,9 @@ func (engine *Engine) printVersion() {
 
 // initCounters initializes the countdown and count up timers
 func (engine *Engine) initCounters() {
-	engine.Counters = make([]Counter, numCounters)
+	engine.Counters = make([]*Counter, numCounters)
 	for i := 0; i < numCounters; i++ {
-		engine.Counters[i] = Counter{
+		engine.Counters[i] = &Counter{
 			active: false,
 			state:  &counterState{},
 		}

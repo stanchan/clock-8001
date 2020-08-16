@@ -221,10 +221,9 @@ Payload: none
 
 Changes the start time of the running count up.
 
-Be aware that since this alters the start timestamp you need to use negative values to increase the displayed value and positive to decrease.
 
 Payload:
-1. int32 time in seconds to add or substract from the count up start timestamp
+1. int32 time in seconds to add or substract from the count up
 
 ### /clock/kill
 
