@@ -1,3 +1,6 @@
+## Version 3.16.3
+* BUGFIX: Do not unpause counters when started
+
 ## Version 3.16.2
 * BUGFIX: Timer pause, resume and turning clock off
 * BUGFIX: /clock/countup/modify direction flip to be more natural
