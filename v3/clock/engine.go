@@ -705,8 +705,10 @@ func (engine *Engine) initCounters() {
 	engine.Counters = make([]*Counter, numCounters)
 	for i := 0; i < numCounters; i++ {
 		engine.Counters[i] = &Counter{
-			active: false,
-			state:  &counterState{},
+			active:    false,
+			paused:    false,
+			countdown: false,
+			state:     &counterState{},
 		}
 	}
 }

@@ -98,7 +98,6 @@ func (counter *Counter) Start(countdown bool, timer time.Duration) {
 	counter.state = &s
 
 	counter.countdown = countdown
-	counter.paused = false
 	counter.active = true
 }
 
@@ -123,7 +122,6 @@ func (counter *Counter) Modify(delta time.Duration) {
 // Stop stops and deactivates the counter
 func (counter *Counter) Stop() {
 	counter.active = false
-	counter.paused = false
 
 	s := counterState{
 		target:   time.Now(),
