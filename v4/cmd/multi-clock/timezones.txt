@@ -1,0 +1,46 @@
+# Lines starting with # are ignored
+#
+# Each line starts with the timezone definition and
+# is followed by the text to print under that clock
+#
+# Supports max 40 defined clocks
+#
+# Due to legacy reasons Etc/GMT timezones use inverted offset signs.
+Etc/GMT+12 IDLW
+Etc/GMT+11 TAHT
+Etc/GMT+10 HST
+Pacific/Marquesas PF
+Etc/GMT+9 AKST
+Etc/GMT+8 PST
+Etc/GMT+7 MST
+Etc/GMT+6 CST
+Etc/GMT+5 EST
+Etc/GMT+4 AST
+America/St_Johns NST
+Etc/GMT+3 GFT
+Etc/GMT+2 GST
+Etc/GMT+1 EGT
+UTC UTC
+Etc/GMT-1 CET
+Etc/GMT-2 EET
+Etc/GMT-3 MSK
+Asia/Tehran IRST
+Etc/GMT-4 MUT
+Asia/Kabul AFT
+Etc/GMT-5 PKT
+Asia/Kolkata IST
+Asia/Kathmandu NPT
+Etc/GMT-6 BST
+Asia/Yangon MNT
+Etc/GMT-7 THA
+Etc/GMT-8 CST
+Australia/Eucla CWST
+Etc/GMT-9 JST
+Australia/Darwin ACST
+Etc/GMT-10 VLAT
+Australia/Lord_Howe LHST
+Etc/GMT-11 NFT
+Etc/GMT-12 MHT
+Pacific/Chatham CHAST
+Etc/GMT-13 TOT
+Etc/GMT-14 LINT

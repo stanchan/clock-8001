@@ -1,3 +1,17 @@
+## Version 4.0.0 beta1
+Possibly unstable preview release. config.ini, command line options and OSC api isn
+t stable yet. Not recommended for production use.
+
+* BREAKING: config.ini has been changed
+* BREAKING: some of the OSC commands result in slightly different behaviour
+* Internal clock engine has been reworked
+* Added new text based clock face
+* Added more fine grained clock timer source configuration
+* Implemented the mitti and millumin handling inside the main clock executable
+* New OSC API is still to be written
+  * Also new companion module needs to be written
+
+
 ## Version 3.16.3
 * BUGFIX: Do not unpause counters when started
 

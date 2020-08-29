@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/Depili/clock-8001/v3/debug"
+	"gitlab.com/Depili/clock-8001/v4/debug"
 	"image/color"
 	"log"
-	"math"
 	"os"
 	"os/exec"
 	"regexp"
@@ -18,28 +17,43 @@ import (
 )
 
 // Version is the current clock engine version
-const Version = "3.16.3"
+const Version = "3.16.2"
 
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
-var gitTag = "v3.16.3"
+var gitTag = "v3.16.2"
+
+// SourceOptions contains all options for clock display sources.
+type SourceOptions struct {
+	Text     string `long:"text" description:"Title text for the time source"`
+	Counter  int    `long:"counter" description:"Counter number to associate with this source, leave empty to disable it as a suorce" default:"0"`
+	LTC      bool   `long:"ltc" description:"Enable LTC as a source"`
+	UDP      bool   `long:"udp" description:"Enable UDP as a source"`
+	Timer    bool   `long:"timer" description:"Enable timer counter as a source"`
+	Tod      bool   `long:"tod" description:"Enable time-of-day as a source"`
+	TimeZone string `long:"timezone" description:"Time zone to use for ToD display" default:"Europe/Helsinki"`
+}
 
 // EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
 	Flash           int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
-	Timezone        string `short:"t" long:"local-time" description:"Local timezone" default:"Europe/Helsinki"`
 	ListenAddr      string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
 	Timeout         int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
 	Connect         string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
-	CountdownRed    uint8  `long:"cd-red" description:"Red component of secondary countdown color" default:"255"`
-	CountdownGreen  uint8  `long:"cd-green" description:"Green component of secondary countdown color" default:"0"`
-	CountdownBlue   uint8  `long:"cd-blue" description:"Blue component of secondary countdown color" default:"0"`
 	DisableOSC      bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
 	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC feedback"`
 	DisableLTC      bool   `long:"disable-ltc" description:"Disable LTC display mode"`
 	LTCSeconds      bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
 	LTCFollow       bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
 	Format12h       bool   `long:"format-12h" description:"Use 12 hour format for time-of-day display"`
+	Mitti           int    `long:"mitti" description:"Counter number for Mitti OSC feedback" default:"8"`
+	Millumin        int    `long:"millumin" description:"Counter number for Millumin OSC feedback" default:"9"`
+	Ignore          string `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
+
+	Source1 *SourceOptions `group:"1st clock display source" namespace:"source1"`
+	Source2 *SourceOptions `group:"2nd clock display source" namespace:"source2"`
+	Source3 *SourceOptions `group:"3rd clock display source" namespace:"source3"`
+	Source4 *SourceOptions `group:"4th clock display source" namespace:"source4"`
 }
 
 // Clock engine state constants
@@ -50,12 +64,13 @@ const (
 	Off       = iota // (Mostly) blank screen
 	Paused    = iota // Paused countdown timer(s)
 	LTC       = iota // LTC display
+	Media     = iota // Playing media counter
 )
 
 // Misc constants
 const (
-	numCounters      = 2 // Number of distinct counters to initialize
-	numSources       = 2
+	numCounters      = 10 // Number of distinct counters to initialize
+	numSources       = 4
 	PrimaryCounter   = 0 // Main counter that replaces the ToD display on the round clock when active
 	SecondaryCounter = 1 // Secondary counter that is displayed in the tally message space on the round clock
 )
@@ -71,47 +86,39 @@ type ltcData struct {
 
 // Engine contains the state machine for clock-8001
 type Engine struct {
-	timeZone       *time.Location // Time zone, initialized from options
-	mode           int            // Main display mode
-	Counters       []*Counter     // Timer counters
-	sources        []*source      // Time sources for 1-3 displays
-	paused         bool
-	Hours          string
-	Minutes        string
-	Seconds        string
-	displaySeconds bool
-	Tally          string // 4 character "tally" field, contains either the message from OSC or the secondary timer
-	TallyRed       uint8  // Red component for the OSC tally message color 0-255
-	TallyGreen     uint8  // Green component for the OSC tally message color 0-255
-	TallyBlue      uint8  // Blue component for the OSC tally message color 0-255
-	cd2Red         uint8
-	cd2Green       uint8
-	cd2Blue        uint8
-	Leds           int
-	Dots           bool
-	flashLeds      bool
-	flasher        *time.Ticker
-	clockServer    *Server
-	oscServer      osc.Server
-	timeout        time.Duration        // Timeout for osc tally events
-	oscTally       bool                 // Tally text was from osc event
-	tallyFull      string               // Full tally message as received from OSC
-	oscDests       *feedbackDestination // udp connections to send osc feedback to
-	initialized    bool                 // Show version on startup until ntp synced or receiving OSC control
-	ltc            *ltcData             // LTC time code status
-	ltcShowSeconds bool                 // Toggles led display on LTC mode between seconds and frames
-	ltcFollow      bool                 // Continue on internal timer if LTC signal is lost
-	ltcEnabled     bool                 // Toggle LTC mode on or off
-	ltcTimeout     bool                 // Set to true if LTC signal is lost by the ltc timer
-	ltcActive      bool                 // Do we have a active LTC to display?
-	udpActive      bool                 // Do we have a active UDP time to display?
-	DualText       string               // Dual clock mode text message, 8 characters
-	format12h      bool                 // Use 12 hour format for time-of-day
+	mode            int        // Main display mode
+	Counters        []*Counter // Timer counters
+	sources         []*source  // Time sources for 1-3 displays
+	displaySeconds  bool
+	flashPeriod     int
+	clockServer     *Server
+	oscServer       osc.Server
+	timeout         time.Duration        // Timeout for osc tally events
+	oscTally        bool                 // Tally text was from osc event
+	message         string               // Full tally message as received from OSC
+	messageColor    *color.RGBA          // Tally message color from OSC
+	oscDests        *feedbackDestination // udp connections to send osc feedback to
+	initialized     bool                 // Show version on startup until ntp synced or receiving OSC control
+	ltc             *ltcData             // LTC time code status
+	ltcShowSeconds  bool                 // Toggles led display on LTC mode between seconds and frames
+	ltcFollow       bool                 // Continue on internal timer if LTC signal is lost
+	ltcEnabled      bool                 // Toggle LTC mode on or off
+	ltcTimeout      bool                 // Set to true if LTC signal is lost by the ltc timer
+	ltcActive       bool                 // Do we have a active LTC to display?
+	udpActive       bool                 // Do we have a active UDP time to display?
+	DualText        string               // Dual clock mode text message, 8 characters
+	format12h       bool                 // Use 12 hour format for time-of-day
+	off             bool                 // Is the engine output off?
+	ignoreRegexp    *regexp.Regexp
+	mittiCounter    *Counter
+	milluminCounter *Counter
 }
 
 // Clock contains the state of a single component clock / timer
 type Clock struct {
 	Text     string  // Normal clock representation
+	Label    string  // Label text
+	Icon     string  // Icon for the clock type
 	Compact  string  // 4 character condensed output
 	Expired  bool    // true if asscociated timer is expired
 	Mode     int     // Display type
@@ -121,29 +128,22 @@ type Clock struct {
 
 // State is a snapshot of the clock representation on the time State() was called
 type State struct {
-	Initialized bool        // Does the clock have valid time or has it received an osc command?
-	Clocks      []*Clock    // All configured clocks / timers
-	Tally       string      // Tally message text
-	TallyColor  *color.RGBA // Tally message color
+	Initialized    bool        // Does the clock have valid time or has it received an osc command?
+	Clocks         []*Clock    // All configured clocks / timers
+	Tally          string      // Tally message text
+	TallyColor     *color.RGBA // Tally message color
+	Flash          bool        // Flash cycle state
+	DisplaySeconds bool        // Show seconds in text and in the ring for ToD display
+	Caption        string      // Caption for all of the clocks, formely DualText
 }
 
 // MakeEngine creates a clock engine
 func MakeEngine(options *EngineOptions) (*Engine, error) {
 	var engine = Engine{
 		mode:           Normal,
-		Hours:          "",
-		Minutes:        "",
-		Seconds:        "",
 		displaySeconds: true,
-		Leds:           0,
-		flashLeds:      true,
-		Dots:           true,
 		oscTally:       false,
-		paused:         false,
 		timeout:        time.Duration(options.Timeout) * time.Millisecond,
-		cd2Red:         options.CountdownRed,
-		cd2Green:       options.CountdownGreen,
-		cd2Blue:        options.CountdownBlue,
 		initialized:    false,
 		oscDests:       nil,
 		DualText:       "",
@@ -153,35 +153,56 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		ltcActive:      false,
 		udpActive:      false,
 		format12h:      options.Format12h,
+		off:            false,
 	}
 
-	// Time zones
-	tz, err := time.LoadLocation(options.Timezone)
-	if err != nil {
-		return nil, err
-	}
-	engine.timeZone = tz
+	log.Printf("Source1: %v", options.Source1)
+	log.Printf("Source2: %v", options.Source2)
+	log.Printf("Source3: %v", options.Source3)
+	log.Printf("Source4: %v", options.Source4)
 
 	ltc := ltcData{hours: 0}
 	engine.ltc = &ltc
 
 	engine.printVersion()
 	engine.initCounters()
-	engine.initSources()
+
+	engine.mittiCounter = engine.Counters[options.Mitti]
+	engine.milluminCounter = engine.Counters[options.Millumin]
+
+	sources := make([]*SourceOptions, 4)
+	sources[0] = options.Source1
+	sources[1] = options.Source2
+	sources[2] = options.Source3
+	sources[3] = options.Source4
+
+	if err := engine.initSources(sources); err != nil {
+		log.Printf("Error initializing engine clock sources")
+		return nil, err
+	}
 	engine.initOSC(options)
 
 	// Led flash cycle
 	// Setting the interval to 0 disables
-	if options.Flash > 0 {
-		engine.flasher = time.NewTicker(time.Duration(options.Flash) * time.Millisecond)
-		go engine.flash()
+	engine.flashPeriod = options.Flash
+
+	// Millumin ignore regexp
+	regexp, err := regexp.Compile("(?i)" + options.Ignore)
+	if err != nil {
+		log.Fatalf("Invalid --millumin-ignore-layer=%v: %v", options.Ignore, err)
 	}
+	engine.ignoreRegexp = regexp
 
 	return &engine, nil
 }
 
 func (engine *Engine) runOSC() {
-	err := engine.oscServer.ListenAndServe()
+	err := engine.oscBridge()
+	if err != nil {
+		panic(err)
+	}
+
+	err = engine.oscServer.ListenAndServe()
 	if err != nil {
 		panic(err)
 	}
@@ -203,20 +224,30 @@ func (engine *Engine) listen() {
 			switch message.Type {
 			case "count":
 				msg := message.CountMessage
-				engine.TallyRed = uint8(msg.ColorRed)
-				engine.TallyGreen = uint8(msg.ColorGreen)
-				engine.TallyBlue = uint8(msg.ColorBlue)
-				engine.Tally = fmt.Sprintf("%.1s%02d%.1s", msg.Symbol, msg.Count, msg.Unit)
 				engine.oscTally = true
+				engine.message = fmt.Sprintf("%.1s%02d%.1s", msg.Symbol, msg.Count, msg.Unit)
+				engine.messageColor = &color.RGBA{
+					R: uint8(msg.ColorRed),
+					G: uint8(msg.ColorBlue),
+					B: uint8(msg.ColorGreen),
+					A: 255,
+				}
+
 				tallyTimer.Reset(engine.timeout)
 			case "display":
 				msg := message.DisplayMessage
-				engine.TallyRed = uint8(msg.ColorRed)
-				engine.TallyGreen = uint8(msg.ColorGreen)
-				engine.TallyBlue = uint8(msg.ColorBlue)
-				engine.Tally = fmt.Sprintf("%-.4s", msg.Text)
-				engine.tallyFull = msg.Text
+				engine.message = msg.Text
+				engine.messageColor = &color.RGBA{
+					R: uint8(msg.ColorRed),
+					G: uint8(msg.ColorBlue),
+					B: uint8(msg.ColorGreen),
+					A: 255,
+				}
+
+				// Mark the OSC message state as active
 				engine.oscTally = true
+
+				// Reset the timer that will clear the message when it expires
 				tallyTimer.Reset(engine.timeout)
 			case "countdownStart":
 				msg := message.CountdownMessage
@@ -265,7 +296,7 @@ func (engine *Engine) listen() {
 			engine.initialized = true
 		case <-tallyTimer.C:
 			// OSC message timeout
-			engine.Tally = ""
+			engine.message = ""
 			engine.oscTally = false
 		case <-ltcTimer.C:
 			// LTC message timeout
@@ -275,41 +306,44 @@ func (engine *Engine) listen() {
 }
 
 // Send the clock state as /clock/state
-func (engine *Engine) sendState() error {
+func (engine *Engine) sendState(state *State) error {
 	if engine.oscDests == nil {
 		// No osc connection
 		return nil
 	}
-	hours := engine.Hours
-	minutes := engine.Minutes
-	seconds := engine.Seconds
 
-	if seconds == "" {
-		hours = ""
-		minutes = engine.Hours
-		seconds = engine.Minutes
+	var hours, minutes, seconds string
+
+	// HH:MM:SS(:FF for LTC)
+	parts := strings.Split(state.Clocks[0].Text, ":")
+	if len(parts) > 2 {
+		hours = parts[0]
+		minutes = parts[1]
+		seconds = parts[2]
 	}
-	mode := engine.mode
+	mode := state.Clocks[0].Mode
 	pause := int32(0)
 
-	if engine.paused {
+	if state.Clocks[0].Paused {
 		pause = 1
 	}
 
-	packet := osc.NewMessage("/clock/state", int32(mode), hours, minutes, seconds, engine.Tally, pause)
+	packet := osc.NewMessage("/clock/state", int32(mode), hours, minutes, seconds, state.Tally, pause)
 
 	data, err := packet.MarshalBinary()
 	if err != nil {
 		return err
 	}
 	engine.oscDests.Write(data)
+
 	return nil
 }
 
-func (engine *Engine) flash() {
-	for range engine.flasher.C {
-		engine.flashLeds = !engine.flashLeds
+func (engine *Engine) flash(t time.Time) bool {
+	if t.Nanosecond() < engine.flashPeriod*1000000 {
+		return true
 	}
+	return false
 }
 
 // State creates a snapshot of the clock state for display on clock faces
@@ -317,12 +351,18 @@ func (engine *Engine) State() *State {
 	t := time.Now()
 	var clocks []*Clock
 	for _, s := range engine.sources {
-		if s.ltc && engine.ltcActive {
-			c := Clock{
-				Expired: engine.ltcTimeout,
-				Compact: "",
-				Mode:    LTC,
-			}
+		c := Clock{
+			Text:    "",
+			Compact: "",
+			Label:   s.title,
+			Icon:    "",
+			Expired: false,
+		}
+		if s.off {
+			c.Mode = Off
+		} else if s.ltc && engine.ltcActive {
+			c.Expired = engine.ltcTimeout
+			c.Mode = LTC
 			ltc := engine.ltc
 			if !engine.ltcTimeout {
 				// We have LTC time, so display it
@@ -338,102 +378,60 @@ func (engine *Engine) State() *State {
 				// Timeout without follow mode
 				c.Text = ""
 			}
-			clocks = append(clocks, &c)
 		} else if s.udp && engine.udpActive {
 			// UDP time reception
 
 		} else if s.timer && s.counter.active {
 			// Active timer
 			out := s.counter.Output(t)
-			c := Clock{
-				Text:     out.Text,
-				Compact:  out.Compact,
-				Expired:  out.Expired,
-				Paused:   out.Paused,
-				Progress: out.Progress,
-			}
-			if out.Countdown {
+			c.Text = out.Text
+			c.Compact = out.Compact
+			c.Expired = out.Expired
+			c.Paused = out.Paused
+			c.Progress = out.Progress
+			c.Icon = out.Icon
+
+			if s.counter.media != nil {
+				c.Mode = Media
+			} else if out.Countdown {
 				c.Mode = Countdown
 			} else {
 				c.Mode = Countup
 			}
-			clocks = append(clocks, &c)
 		} else if s.tod {
 			// Time of day
-			c := Clock{
-				Mode:    Normal,
-				Compact: "",
-				Expired: false,
-			}
+			c.Mode = Normal
 			if engine.format12h {
 				c.Text = t.In(s.tz).Format("03:04:05")
 			} else {
 				c.Text = t.In(s.tz).Format("15:04:05")
 			}
-			clocks = append(clocks, &c)
-		} else {
-			// Nothing to display
-			c := Clock{
-				Text:    "",
-				Compact: "",
-				Mode:    Off,
-			}
-			clocks = append(clocks, &c)
 		}
+		clocks = append(clocks, &c)
 	}
 	state := State{
-		Initialized: engine.initialized,
-		Clocks:      clocks,
+		Initialized:    engine.initialized,
+		Clocks:         clocks,
+		Flash:          engine.flash(t),
+		DisplaySeconds: engine.displaySeconds,
+		TallyColor:     &color.RGBA{},
+		Caption:        engine.DualText,
 	}
 
 	if engine.oscTally {
-		state.Tally = engine.tallyFull
-		state.TallyColor = &color.RGBA{
-			R: engine.TallyRed,
-			G: engine.TallyGreen,
-			B: engine.TallyBlue,
-			A: 255,
-		}
+		state.Tally = engine.message
+		state.TallyColor = engine.messageColor
+	}
+
+	// Send OSC feedback
+	if err := engine.sendState(&state); err != nil {
+		log.Printf("Error sending osc state: %v", err)
 	}
 
 	return &state
 }
 
 /*
- * Display update requests
- */
-
-// Update Hours, Minutes and Seconds
-func (engine *Engine) Update() {
-	switch engine.mode {
-	case Normal:
-		engine.normalUpdate()
-	case Countdown:
-		engine.primaryCounterUpdate()
-	case Countup:
-		engine.primaryCounterUpdate()
-	case LTC:
-		engine.ltcUpdate()
-	case Off:
-		engine.Hours = ""
-		engine.Minutes = ""
-		engine.Seconds = ""
-		engine.Leds = 0
-		engine.Dots = false
-	}
-
-	engine.countdown2Update() // Update secondary countdown if needed
-
-	if !engine.displaySeconds {
-		// Clear the seconds field as requested
-		engine.Seconds = ""
-	}
-
-	if err := engine.sendState(); err != nil {
-		log.Printf("Error sending osc state: %v", err)
-	}
-}
-
 func (engine *Engine) normalUpdate() {
 	t := time.Now().In(engine.timeZone)
 	engine.Dots = true
@@ -606,6 +604,8 @@ func (engine *Engine) countdown2Update() {
 	}
 }
 
+*/
+
 /*
  * OSC Message handlers
  */
@@ -617,15 +617,7 @@ func (engine *Engine) StartCounter(counter int, countdown bool, timer time.Durat
 	}
 
 	engine.Counters[counter].Start(countdown, timer)
-
-	// Handle main display mode changes
-	if counter == PrimaryCounter {
-		if countdown {
-			engine.mode = Countdown
-		} else {
-			engine.mode = Countup
-		}
-	}
+	engine.activateSourceByCounter(counter)
 }
 
 // ModifyCounter adds or removes time from a counter
@@ -644,9 +636,6 @@ func (engine *Engine) StopCounter(counter int) {
 	}
 
 	engine.Counters[counter].Stop()
-	if counter == PrimaryCounter {
-		engine.mode = Off
-	}
 }
 
 /* Legacy handlers */
@@ -693,15 +682,15 @@ func (engine *Engine) StopCountdown2() {
 
 // Normal returns main display to normal clock
 func (engine *Engine) Normal() {
-	engine.mode = Normal
-	// engine.countdown2.active = false
+	for _, s := range engine.sources {
+		s.off = false
+	}
 }
 
 // Kill blanks the clock display
 func (engine *Engine) Kill() {
-	engine.mode = Off
-	for _, c := range engine.Counters {
-		c.Stop()
+	for _, s := range engine.sources {
+		s.off = true
 	}
 }
 
@@ -710,10 +699,6 @@ func (engine *Engine) Pause() {
 	for _, c := range engine.Counters {
 		c.Pause()
 	}
-	engine.paused = true
-	for i, c := range engine.Counters {
-		fmt.Printf("Counter %d: %v\n", i, c)
-	}
 }
 
 // Resume resumes both countdowns if they have been paused
@@ -721,17 +706,11 @@ func (engine *Engine) Resume() {
 	for _, c := range engine.Counters {
 		c.Resume()
 	}
-	engine.paused = false
 }
 
 // DisplaySeconds returns true if the clock should display seconds
 func (engine *Engine) DisplaySeconds() bool {
 	return engine.displaySeconds
-}
-
-// TimeOfDay returns true if the clock is showing time of day, false otherwise
-func (engine *Engine) TimeOfDay() bool {
-	return engine.mode == Normal
 }
 
 func (engine *Engine) setTime(time string) {
@@ -746,7 +725,7 @@ func (engine *Engine) setTime(time string) {
 	if match {
 		// Set the system time
 		dateString := fmt.Sprintf("2019-01-01 %s", time)
-		tzString := fmt.Sprintf("TZ=%s", engine.timeZone.String())
+		tzString := fmt.Sprintf("TZ=%s", engine.sources[0].tz.String())
 		debug.Printf("Setting system date to: %s\n", dateString)
 		args := []string{"--set", dateString}
 		cmd := exec.Command("date", args...) // #nosec we have strict validation in place
@@ -818,37 +797,35 @@ func (engine *Engine) initCounters() {
 	engine.Counters = make([]*Counter, numCounters)
 	for i := 0; i < numCounters; i++ {
 		engine.Counters[i] = &Counter{
-			active:    false,
-			paused:    false,
-			countdown: false,
-			state:     &counterState{},
+			active: false,
+			state:  &counterState{},
 		}
 	}
-	log.Printf("aff %v", engine.Counters)
+	log.Printf("Initialized %d timer counters", len(engine.Counters))
 }
 
-func (engine *Engine) initSources() {
+func (engine *Engine) initSources(sources []*SourceOptions) error {
 	// Todo get the map from options...
-	engine.sources = make([]*source, numSources)
-	engine.sources[0] = &source{
-		counter: engine.Counters[0],
-		tod:     true,
-		timer:   true,
-		ltc:     engine.ltcEnabled,
-		udp:     true,
-		tz:      engine.timeZone,
-	}
+	engine.sources = make([]*source, len(sources))
+	for i, s := range sources {
+		// Time zone
+		tz, err := time.LoadLocation(s.TimeZone)
+		if err != nil {
+			return err
+		}
 
-	engine.sources[1] = &source{
-		counter: engine.Counters[1],
-		tod:     false,
-		timer:   true,
-		ltc:     false,
-		udp:     false,
-		tz:      engine.timeZone,
+		engine.sources[i] = &source{
+			counter: engine.Counters[s.Counter],
+			tod:     s.Tod,
+			timer:   s.Timer,
+			ltc:     s.LTC,
+			udp:     s.UDP,
+			tz:      tz,
+			title:   s.Text,
+		}
 	}
-
-	log.Printf("fsdf %v", engine.sources)
+	log.Printf("Initialized %d clock display sources", len(engine.sources))
+	return nil
 }
 
 // initOSC Sets up the OSC listener and feedback
@@ -859,6 +836,7 @@ func (engine *Engine) initOSC(options *EngineOptions) {
 		}
 		engine.clockServer = MakeServer(&engine.oscServer)
 		log.Printf("OSC control: listening on %v", engine.oscServer.Addr)
+
 		go engine.runOSC()
 
 		// process osc commands
@@ -873,6 +851,14 @@ func (engine *Engine) initOSC(options *EngineOptions) {
 		}
 	} else {
 		log.Printf("OSC control and feedback disabled.\n")
+	}
+}
+
+func (engine *Engine) activateSourceByCounter(c int) {
+	for _, s := range engine.sources {
+		if s.counter == engine.Counters[c] {
+			s.off = false
+		}
 	}
 }
 
