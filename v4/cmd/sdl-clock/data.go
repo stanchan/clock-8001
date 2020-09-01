@@ -3,6 +3,7 @@ package main
 import (
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/util"
+	htmlTemplate "html/template"
 )
 
 var winTitle = "SDL CLOCK"
@@ -69,6 +70,7 @@ type clockOptions struct {
 	small      bool
 	dualClock  bool
 	textClock  bool
+	Errors     htmlTemplate.HTML // For passing errors to the html template
 }
 
 var options clockOptions

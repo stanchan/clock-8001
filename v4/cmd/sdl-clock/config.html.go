@@ -6,7 +6,14 @@ const configHTML = `
 	<title>Clock-8001 configuration</title>
 </head>
 	<body>
-
+		{{if .Errors}}
+			<div class="errors">
+				<p>
+					Following errors prevented the configuration from being saved:
+					{{.Errors}}
+				</p>
+			</div>
+		{{end}}
 		<div class="config-form">
 			<h1>Clock configuration editor</h1>
 			<form action="/save" method="post">
