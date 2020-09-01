@@ -499,6 +499,8 @@ const configHTML = `
 			-webkit-border-radius: 3px;
 			-moz-border-radius: 3px;
 			font-weight: bold;
+			max-width: 800px;
+			width: 100%;
 		}
 		.required{
 			color:red;
