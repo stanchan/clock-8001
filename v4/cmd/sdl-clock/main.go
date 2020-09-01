@@ -215,6 +215,7 @@ func defaultConfig() clockOptions {
 			ListenAddr: "0.0.0.0:1245",
 			Timeout:    1000,
 			Connect:    "255.255.255.255:1245",
+			Ignore:     "ignore",
 			Source1: &clock.SourceOptions{
 				Text:     "",
 				LTC:      true,
