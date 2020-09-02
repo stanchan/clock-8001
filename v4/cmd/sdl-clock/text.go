@@ -30,10 +30,11 @@ var textClock struct {
 	r          [3]outputLine
 }
 
+// Font sizes. Rpi <4 is limited to 2048x2048 texture size.
 const (
-	numberSize = 300
-	labelSize  = 100
-	iconSize   = 300
+	numberSize = 100
+	labelSize  = 200
+	iconSize   = 200
 )
 
 func initTextClock() {
