@@ -196,6 +196,9 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.TimerBG = r.FormValue("TimerBG")
 	errors += validateColor(newOptions.TimerBG, "Text clock timer background color")
 
+	newOptions.BackgroundColor = r.FormValue("BackgroundColor")
+	errors += validateColor(newOptions.BackgroundColor, "Background color")
+
 	if errors != "" {
 		tmpl, err := htmlTemplate.New("config.html").Parse(configHTML)
 		if err != nil {

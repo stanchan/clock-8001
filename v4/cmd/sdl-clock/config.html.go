@@ -85,6 +85,12 @@ const configHTML = `
 					</label>
 					<p>The image needs to be in the correct resolution and either png or jpeg file. Place the
 					image in the fat partition and refer to it as /boot/imagename.png</p>
+
+					<label for="BackgroundColor">
+						<span>Background color, used if no background image is provided</span>
+						<input type="color" id="BackgroundColor" name="BackgroundColor" value="{{.BackgroundColor}}" />
+					</label>
+
 				</fieldset>
 				<fieldset>
 					<legend>Time sources</legend>

@@ -17,9 +17,12 @@ Format12h={{.EngineOptions.Format12h}}
 # Set to true to disable detection of official raspberry pi display for aspect ratio correction
 NoARCorrection={{.NoARCorrection}}
 
-# Experimental background image support. You need to provide the background in
+# Background image support. You need to provide the background in
 # the correct resolution as a png or jpeg image.
 Background={{.Background}}
+
+# Background color, used if no image is provided
+BackgroundColor={{.BackgroundColor}}
 
 # Truetype fonts for the text clock face
 

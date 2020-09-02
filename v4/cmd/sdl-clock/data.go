@@ -30,18 +30,19 @@ type optionsColor struct {
 }
 
 type clockOptions struct {
-	Config         func(s string) error `short:"C" long:"config" description:"read config from a file"`
-	Face           string               `long:"face" description:"Select the clock face to use" default:"round" choice:"round" choice:"dual-round" choice:"small" choice:"text"`
-	Debug          bool                 `long:"debug" description:"Enable debug output"`
-	HTTPPort       string               `long:"http-port" description:"Port to listen on for the http configuration interface" default:":8080"`
-	DisableHTTP    bool                 `long:"disable-http" description:"Disable the web configuration interface"`
-	HTTPUser       string               `long:"http-user" description:"Username for web configuration" default:"admin"`
-	HTTPPassword   string               `long:"http-password" description:"Password for web configuration interface" default:"clockwork"`
-	DumpConfig     bool                 `long:"dump-config" description:"Write configuration to stdout and exit"`
-	Defaults       bool                 `long:"defaults" description:"load defaults"`
-	NoARCorrection bool                 `long:"no-ar-correction" description:"Do not try to detect official raspberry pi display and correct it's aspect ratio"`
-	Background     string               `long:"background" description:"Background image file location."`
-	EngineOptions  *clock.EngineOptions
+	Config          func(s string) error `short:"C" long:"config" description:"read config from a file"`
+	Face            string               `long:"face" description:"Select the clock face to use" default:"round" choice:"round" choice:"dual-round" choice:"small" choice:"text"`
+	Debug           bool                 `long:"debug" description:"Enable debug output"`
+	HTTPPort        string               `long:"http-port" description:"Port to listen on for the http configuration interface" default:":8080"`
+	DisableHTTP     bool                 `long:"disable-http" description:"Disable the web configuration interface"`
+	HTTPUser        string               `long:"http-user" description:"Username for web configuration" default:"admin"`
+	HTTPPassword    string               `long:"http-password" description:"Password for web configuration interface" default:"clockwork"`
+	DumpConfig      bool                 `long:"dump-config" description:"Write configuration to stdout and exit"`
+	Defaults        bool                 `long:"defaults" description:"load defaults"`
+	NoARCorrection  bool                 `long:"no-ar-correction" description:"Do not try to detect official raspberry pi display and correct it's aspect ratio"`
+	Background      string               `long:"background" description:"Background image file location."`
+	BackgroundColor string               `long:"background-color" description:"Background color, used if no background image is supplied" default:"#000000"`
+	EngineOptions   *clock.EngineOptions
 
 	// Round clock stuff
 	Font           string `short:"F" long:"font" description:"Font for event name" default:"fonts/7x13.bdf"`

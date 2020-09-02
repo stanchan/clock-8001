@@ -142,12 +142,8 @@ func composeRoundClocks(state *clock.State) {
 	err := renderer.SetRenderTarget(nil)
 	check(err)
 
-	clearCanvas()
-
-	// Copy the background image as needed
-	if showBackground {
-		renderer.Copy(backgroundTexture, nil, nil)
-	}
+	// Clear output and setup background
+	prepareCanvas()
 
 	source := sdl.Rect{X: 0, Y: 0, W: 1080, H: 1080}
 

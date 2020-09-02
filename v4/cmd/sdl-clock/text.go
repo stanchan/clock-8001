@@ -120,15 +120,8 @@ func drawTextClock(state *clock.State) {
 		}
 	}
 
-	err = renderer.SetRenderTarget(nil)
-	check(err)
-
-	clearCanvas()
-
-	// Copy the background image as needed
-	if showBackground {
-		renderer.Copy(backgroundTexture, nil, nil)
-	}
+	// Clear output and setup background
+	prepareCanvas()
 
 	for i := range textClock.r {
 		y = 25 + (365 * int32(i))

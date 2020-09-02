@@ -10,15 +10,16 @@ import (
 )
 
 var colors struct {
-	static    sdl.Color
-	sec       sdl.Color
-	text      sdl.Color
-	countdown sdl.Color
-	tally     sdl.Color
-	rows      [3]sdl.Color
-	label     sdl.Color
-	timerBG   sdl.Color
-	labelBG   sdl.Color
+	static     sdl.Color
+	sec        sdl.Color
+	text       sdl.Color
+	countdown  sdl.Color
+	tally      sdl.Color
+	rows       [3]sdl.Color
+	label      sdl.Color
+	timerBG    sdl.Color
+	labelBG    sdl.Color
+	background sdl.Color
 }
 
 var window *sdl.Window
@@ -95,6 +96,9 @@ func initColors() {
 	check(err)
 
 	colors.timerBG, err = parseColor(options.TimerBG)
+	check(err)
+
+	colors.background, err = parseColor(options.BackgroundColor)
 	check(err)
 
 	colors.tally = sdl.Color{R: 0, G: 0, B: 0, A: 0}
@@ -311,6 +315,23 @@ func clearCanvas() {
 
 	err = renderer.Clear()
 	check(err)
+}
+
+// prepare the main window canvas with the background
+func prepareCanvas() {
+	err := renderer.SetRenderTarget(nil)
+	check(err)
+
+	err = renderer.SetDrawColor(colors.background.R, colors.background.G, colors.background.B, 255)
+	check(err)
+
+	err = renderer.Clear()
+	check(err)
+
+	// Copy the background image as needed
+	if showBackground {
+		renderer.Copy(backgroundTexture, nil, nil)
+	}
 }
 
 // parseColor parses a string "#XXX or #XXXXXX to a sdl.Color"
