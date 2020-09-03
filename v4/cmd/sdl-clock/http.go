@@ -252,7 +252,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 // delay needs to be shorter than the
 // delayedExit()...
 func delayedReboot() {
-	time.Sleep(time.Second * 0.5)
+	time.Sleep(time.Millisecond * 500)
 	cmd := exec.Command("reboot")
 	cmd.Env = os.Environ()
 	if err := cmd.Run(); err != nil {
