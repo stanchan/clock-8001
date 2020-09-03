@@ -7,7 +7,7 @@ const confirmHTML = `
 	</head>
 	<body>
 		<h1>Settings saved</h1>
-		<p>The clock will now restart</p>
+		<p>The clock will now restart. You can <a href="/">return to configuration editor</a> after the clock has restarted</p>
 	</body>
 </html>
 `

@@ -228,35 +228,31 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 				check(err)
 				f.Close()
 
-				tmpl, err := htmlTemplate.New("confirm.html").Parse(confirmHTML)
-				if err != nil {
-					panic(err)
-				}
-				err = tmpl.Execute(w, nil)
-				if err != nil {
-					panic(err)
-				}
-
 				// reboot the rpi
 				go delayedReboot()
 			}
-		} else {
-			tmpl, err := htmlTemplate.New("confirm.html").Parse(confirmHTML)
-			if err != nil {
-				panic(err)
-			}
-			err = tmpl.Execute(w, nil)
-			if err != nil {
-				panic(err)
-			}
 
-			go delayedExit()
+		}
+		go delayedExit()
+
+		// Render success page
+
+		tmpl, err := htmlTemplate.New("confirm.html").Parse(confirmHTML)
+		if err != nil {
+			panic(err)
+		}
+		err = tmpl.Execute(w, nil)
+		if err != nil {
+			panic(err)
 		}
 	}
 }
 
+// Reboot the pi after a short delay
+// delay needs to be shorter than the
+// delayedExit()...
 func delayedReboot() {
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 0.5)
 	cmd := exec.Command("reboot")
 	cmd.Env = os.Environ()
 	if err := cmd.Run(); err != nil {
