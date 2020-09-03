@@ -142,7 +142,6 @@ func drawTextClock(state *clock.State) {
 		}
 
 		copyIntoRect(textClock.r[i].labelTex, labelR)
-
 		if state.Clocks[i].Mode != clock.LTC {
 			// Clock time
 
@@ -155,6 +154,11 @@ func drawTextClock(state *clock.State) {
 
 		} else {
 			// LTC
+
+			// Maintain little spacing with the box borders
+			numberBox.Y = numberBox.Y + 10
+			numberBox.W = numberBox.W - 20
+
 			copyIntoRect(textClock.r[i].textTex, numberBox)
 		}
 	}
