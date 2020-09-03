@@ -6,6 +6,7 @@ const configHTML = `
 	<title>Clock-8001 configuration</title>
 </head>
 	<body>
+		<h1>Clock configuration editor</h1>
 		{{if .Errors}}
 			<div class="errors">
 				<p>
@@ -15,7 +16,6 @@ const configHTML = `
 			</div>
 		{{end}}
 		<div class="config-form">
-			<h1>Clock configuration editor</h1>
 			<form action="/save" method="post">
 				<fieldset>
 					<legend>General settings</legend>
@@ -64,11 +64,6 @@ const configHTML = `
 						<input type="text" id="IconFont" name="IconFont" value="{{.IconFont}}" />
 					</label>
 
-					<label for="Font">
-						<span>Font filename for round clocks</span>
-						<input type="text" id="Font" name="Font" value="{{.Font}}" />
-					</label>
-
 					<label for="Flash">
 						<span>Flashing interval in milliseconds for ellapsed countdowns</span>
 						<input type="number" min="0" id="Flash" name="Flash" value="{{.EngineOptions.Flash}}" />
@@ -101,13 +96,14 @@ const configHTML = `
 				<p>The round clocks only support timers as the secondary display source, as others can't be compacted to 4 characters.</p>
 
 				<p>The sources choose their displayed time in the following priority if enabled:
-				<ol>
-					<li>LTC</li>
-					<li>UDP protocol from Interspace / stage timer (not yet implemented)</li>
-					<li>Associated timer if it is running</li>
-					<li>Time of day in the selected time zone</li>
-					<li>Blank display</li>
-				</ol>
+					<ol>
+						<li>LTC</li>
+						<li>UDP protocol from Interspace / stage timer (not yet implemented)</li>
+						<li>Associated timer if it is running</li>
+						<li>Time of day in the selected time zone</li>
+						<li>Blank display</li>
+					</ol>
+				</p>
 
 				<fieldset>
 					<legend>Source 1</legend>
@@ -430,9 +426,52 @@ const configHTML = `
 
 
 		<style type="text/css">
+		h1 {
+			color: F072A9;
+			font-weight: bold;
+			text-shadow: 1px 1px 1px #fff;
+		}
+		.errors {
+			border-radius: 10px;
+			-webkit-border-radius: 10px;
+			-moz-border-radius: 10px;
+			margin: 0px 0px 10px 0px;
+			border: 1px solid red;
+			padding: 20px;
+			background: #FFF4F4;
+			box-shadow: inset 0px 0px 15px #FFE5E5;
+			-moz-box-shadow: inset 0px 0px 15px #FFE5E5;
+			-webkit-box-shadow: inset 0px 0px 15px #FFE5E5;
+			max-width: 800px;
+
+		}
 		.config-form{
 			max-width: 800px;
 			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+		}
+		.config-form p{
+			color: #F072A9;
+			font-weight: bold;
+			font-size: 13px;
+			text-shadow: 1px 1px 1px #fff;
+		}
+		.errors p{
+			color: red;
+			font-weight: bold;
+			font-size: 13px;
+			text-shadow: 1px 1px 1px #fff;
+		}
+		.config-form li{
+			color: #F072A9;
+			font-weight: bold;
+			font-size: 13px;
+			text-shadow: 1px 1px 1px #fff;
+		}
+		.errors li{
+			color: red;
+			font-weight: bold;
+			font-size: 13px;
+			text-shadow: 1px 1px 1px #fff;
 		}
 		.config-form label{
 			display:block;
