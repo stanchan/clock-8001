@@ -442,7 +442,7 @@ const configHTML = `
 			box-shadow: inset 0px 0px 15px #FFE5E5;
 			-moz-box-shadow: inset 0px 0px 15px #FFE5E5;
 			-webkit-box-shadow: inset 0px 0px 15px #FFE5E5;
-			max-width: 800px;
+			max-width: 760px;
 
 		}
 		.config-form{
