@@ -52,17 +52,18 @@ type clockOptions struct {
 	CountdownColor string `long:"countdown-color" description:"Color for round clock second circles" default:"#FF0000"`
 
 	// Text clock stuff
-	NumberFont string `long:"number-font" description:"Font for text clock face numbers" default:"Copse-Regular.ttf"`
-	LabelFont  string `long:"label-font" description:"Font for text clock face labels" default:"RobotoMono-VariableFont_wght.ttf"`
-	IconFont   string `long:"icon-font" description:"Font for text clock face icons" default:"MaterialIcons-Regular.ttf"`
-	Row1Color  string `long:"row1-color" description:"Color for text clock row 1" default:"#FF8000"`
-	Row2Color  string `long:"row2-color" description:"Color for text clock row 2" default:"#FF8000"`
-	Row3Color  string `long:"row3-color" description:"Color for text clock row 3" default:"#FF8000"`
-	LabelColor string `long:"label-color" description:"Color for text clock labels" default:"#FF8000"`
-	TimerBG    string `long:"timer-bg-color" description:"Color for optional timer background box" default:"#202020"`
-	LabelBG    string `long:"label-bg-color" description:"Color for optional label background box" default:"#202020"`
-	Rows       int    `long:"text-rows" description:"Number of timer lines to display" default:"3" choice:"0" choice:"1" choice:"2" choice:"3"`
-	DrawBoxes  bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
+	NumberFont     string `long:"number-font" description:"Font for text clock face numbers" default:"Copse-Regular.ttf"`
+	LabelFont      string `long:"label-font" description:"Font for text clock face labels" default:"RobotoMono-VariableFont_wght.ttf"`
+	IconFont       string `long:"icon-font" description:"Font for text clock face icons" default:"MaterialIcons-Regular.ttf"`
+	Row1Color      string `long:"row1-color" description:"Color for text clock row 1" default:"#FF8000"`
+	Row2Color      string `long:"row2-color" description:"Color for text clock row 2" default:"#FF8000"`
+	Row3Color      string `long:"row3-color" description:"Color for text clock row 3" default:"#FF8000"`
+	LabelColor     string `long:"label-color" description:"Color for text clock labels" default:"#FF8000"`
+	TimerBG        string `long:"timer-bg-color" description:"Color for optional timer background box" default:"#202020"`
+	LabelBG        string `long:"label-bg-color" description:"Color for optional label background box" default:"#202020"`
+	Rows           int    `long:"text-rows" description:"Number of timer lines to display" default:"3" choice:"0" choice:"1" choice:"2" choice:"3"`
+	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
+	NumberFontSize int    `long:"numbers-size" default:"200"`
 
 	Raspberry bool   // Is the host a raspberry pi
 	ConfigTxt string // /boot/config.txt contents

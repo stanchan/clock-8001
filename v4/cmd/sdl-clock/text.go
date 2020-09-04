@@ -41,7 +41,7 @@ func initTextClock() {
 	var f *ttf.Font
 	var err error
 
-	if f, err = ttf.OpenFont(options.NumberFont, numberSize); err != nil {
+	if f, err = ttf.OpenFont(options.NumberFont, options.NumberFontSize); err != nil {
 		panic(err)
 	}
 	textClock.numberFont = f
