@@ -156,7 +156,7 @@ func drawTextClock(state *clock.State) {
 			// LTC
 
 			// Maintain little spacing with the box borders
-			numberBox.Y = numberBox.Y + 10
+			numberBox.Y = numberBox.X + 10
 			numberBox.W = numberBox.W - 20
 
 			copyIntoRect(textClock.r[i].textTex, numberBox)
