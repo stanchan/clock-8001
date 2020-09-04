@@ -172,6 +172,9 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	validateNumber(err, "Millumin destination timer")
 	validateTimer(newOptions.EngineOptions.Millumin, "Millumin destination timer")
 
+	newOptions.NumberFontSize, err = strconv.Atoi(r.FormValue("NumberFontSize"))
+	validateNumber(err, "Number font size")
+
 	// Colors
 	newOptions.TextColor = r.FormValue("TextColor")
 	errors += validateColor(newOptions.TextColor, "Round clock text color")

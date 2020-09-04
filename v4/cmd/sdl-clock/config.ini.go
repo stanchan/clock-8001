@@ -139,6 +139,8 @@ timer-bg-color={{.TimerBG}}
 # Label background Color
 label-bg-color={{.LabelBG}}
 
+# Numbers font size
+numbers-size={{.NumberFontSize}}
 
 # Engine internals
 

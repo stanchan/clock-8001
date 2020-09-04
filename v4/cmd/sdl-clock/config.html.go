@@ -340,6 +340,12 @@ const configHTML = `
 						<span>Background color for timers</span>
 						<input type="color" id="TimerBG" name="TimerBG" value="{{.TimerBG}}" />
 					</label>
+
+					<label for="NumberFontSize">
+						<span>Size used to render number text, higher results in smoother letters, but going too high will crash on the rpi</span>
+						<input type="number" min="0" id="NumberFontSize" name="NumberFontSize" value="{{.NumberFontSize}}" />
+					</label>
+
 				</fieldset>
 			</fieldset>
 			<fieldset>
