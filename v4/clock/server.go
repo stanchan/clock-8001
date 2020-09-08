@@ -4,13 +4,20 @@ import (
 	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"log"
+	"regexp"
+	"strconv"
+)
+
+const (
+	timerPattern = `/clock/timer/(\d)/`
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance
 func MakeServer(oscServer *osc.Server) *Server {
 	var server = Server{
-		listeners: make(map[chan Message]struct{}),
-		Debug:     false,
+		listeners:   make(map[chan Message]struct{}),
+		Debug:       false,
+		timerRegexp: regexp.MustCompile(timerPattern),
 	}
 
 	server.setup(oscServer)
@@ -20,8 +27,9 @@ func MakeServer(oscServer *osc.Server) *Server {
 
 // Server is a clock osc server and listens for incoming osc messages
 type Server struct {
-	listeners map[chan Message]struct{}
-	Debug     bool
+	listeners   map[chan Message]struct{}
+	Debug       bool
+	timerRegexp *regexp.Regexp
 }
 
 // Listen adds a new listener for the decoded incoming osc messages
@@ -53,19 +61,6 @@ func (server *Server) handleCount(msg *osc.Message) {
 	}
 }
 
-func (server *Server) handleCountupStart(msg *osc.Message) {
-	debug.Printf("countup start: %#v", msg)
-
-	message := Message{
-		Type: "countup",
-	}
-	server.update(message)
-}
-
-func (server *Server) handleCountupModify(msg *osc.Message) {
-	server.sendCountdownMessage("countupModify", msg)
-}
-
 func (server *Server) handleKill(msg *osc.Message) {
 	debug.Printf("kill: %#v", msg)
 
@@ -75,36 +70,102 @@ func (server *Server) handleKill(msg *osc.Message) {
 	server.update(message)
 }
 
+func (server *Server) handleCountupStart(msg *osc.Message) {
+	log.Printf("countup start: %#v", msg)
+	if msg.Address == "/clock/countup/start" {
+
+		message := Message{
+			Type: "countup",
+		}
+		server.update(message)
+	} else if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		msg := Message{
+			Type:             "timerStart",
+			Counter:          counter,
+			Countdown:        false,
+			CountdownMessage: &CountdownMessage{Seconds: 0},
+		}
+		server.update(msg)
+
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid timer message: %v\n", msg)
+	}
+}
+
 func (server *Server) handleCountdownStart(msg *osc.Message) {
-	server.sendCountdownMessage("countdownStart", msg)
+	log.Printf("handleCountdownStart: %v", msg)
+	if msg.Address == "/clock/countdown/start" {
+		server.sendCountdownMessage("countdownStart", msg)
+	} else if msg.Address == "/clock/countdown2/start" {
+		server.sendCountdownMessage("countdownStart2", msg)
+	} else {
+		server.sendTimerMessage("timerStart", true, msg)
+	}
 }
 
-func (server *Server) handleCountdownStart2(msg *osc.Message) {
-	server.sendCountdownMessage("countdownStart2", msg)
+func (server *Server) handleTimerModify(msg *osc.Message) {
+	if msg.Address == "/clock/countdown/modify" {
+		server.sendCountdownMessage("countdownModify", msg)
+	} else if msg.Address == "/clock/countdown2/modify" {
+		server.sendCountdownMessage("countdownModify2", msg)
+	} else if msg.Address == "/clock/countup/modify" {
+		server.sendCountdownMessage("countupModify", msg)
+	} else {
+		server.sendTimerMessage("timerModify", false, msg)
+	}
 }
 
-func (server *Server) handleCountdownModify(msg *osc.Message) {
-	server.sendCountdownMessage("countdownModify", msg)
-}
-
-func (server *Server) handleCountdownModify2(msg *osc.Message) {
-	server.sendCountdownMessage("countdownModify2", msg)
-}
-
-func (server *Server) handleCountdownStop(msg *osc.Message) {
+func (server *Server) handleTimerStop(msg *osc.Message) {
 	debug.Printf("countdownStop: %#v", msg)
-	message := Message{
-		Type: "countdownStop",
+	if msg.Address == "/clock/countdown/stop" {
+		message := Message{
+			Type: "countdownStop",
+		}
+		server.update(message)
+	} else if msg.Address == "/clock/countdown2/stop" {
+		message := Message{
+			Type: "countdownStop2",
+		}
+		server.update(message)
+	} else if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		msg := Message{
+			Type:    "timerStop",
+			Counter: counter,
+		}
+		server.update(msg)
+
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid timer message: %v\n", msg)
 	}
-	server.update(message)
 }
 
-func (server *Server) handleCountdownStop2(msg *osc.Message) {
-	debug.Printf("countdownStop2: %#v", msg)
-	message := Message{
-		Type: "countdownStop2",
+func (server *Server) sendTimerMessage(cmd string, countdown bool, msg *osc.Message) {
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+		var message CountdownMessage
+
+		if err := message.UnmarshalOSC(msg); err != nil {
+			log.Printf("Unmarshal %v: %v", msg, err)
+		} else {
+			debug.Printf("%s: %#v", cmd, message)
+			msg := Message{
+				Type:             cmd,
+				Counter:          counter,
+				Countdown:        countdown,
+				CountdownMessage: &message,
+			}
+			server.update(msg)
+		}
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid timer message: %v\n", msg)
 	}
-	server.update(message)
 }
 
 func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
@@ -228,19 +289,25 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 }
 
 func (server *Server) setup(oscServer *osc.Server) {
+	registerHandler(oscServer, "/clock/timer/*/countdown", server.handleCountdownStart)
+	registerHandler(oscServer, "/clock/timer/*/countup", server.handleCountupStart)
+	registerHandler(oscServer, "/clock/timer/*/modify", server.handleTimerModify)
+	registerHandler(oscServer, "/clock/timer/*/stop", server.handleTimerStop)
+
+	// Old OSC Api from V3
 	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
 	registerHandler(oscServer, "/clock/tally", server.handleCount)
 	registerHandler(oscServer, "/clock/display", server.handleDisplay)
 	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
-	registerHandler(oscServer, "/clock/countdown2/start", server.handleCountdownStart2)
-	registerHandler(oscServer, "/clock/countdown/modify", server.handleCountdownModify)
-	registerHandler(oscServer, "/clock/countdown2/modify", server.handleCountdownModify2)
-	registerHandler(oscServer, "/clock/countdown/stop", server.handleCountdownStop)
-	registerHandler(oscServer, "/clock/countdown2/stop", server.handleCountdownStop2)
+	registerHandler(oscServer, "/clock/countdown2/start", server.handleCountdownStart)
+	registerHandler(oscServer, "/clock/countdown/modify", server.handleTimerModify)
+	registerHandler(oscServer, "/clock/countdown2/modify", server.handleTimerModify)
+	registerHandler(oscServer, "/clock/countdown/stop", server.handleTimerStop)
+	registerHandler(oscServer, "/clock/countdown2/stop", server.handleTimerStop)
 	registerHandler(oscServer, "/clock/pause", server.handlePause)
 	registerHandler(oscServer, "/clock/resume", server.handleResume)
 	registerHandler(oscServer, "/clock/countup/start", server.handleCountupStart)
-	registerHandler(oscServer, "/clock/countup/modify", server.handleCountupModify)
+	registerHandler(oscServer, "/clock/countup/modify", server.handleTimerModify)
 	registerHandler(oscServer, "/clock/kill", server.handleKill)
 	registerHandler(oscServer, "/clock/normal", server.handleNormal)
 	registerHandler(oscServer, "/clock/seconds/off", server.handleSecondsOff)

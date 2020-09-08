@@ -17,6 +17,8 @@ var clockUnits = []struct {
 // Message is a generic clock message for decoded osc data
 type Message struct {
 	Type             string
+	Counter          int
+	Countdown        bool
 	Data             string
 	CountMessage     *CountMessage
 	CountdownMessage *CountdownMessage

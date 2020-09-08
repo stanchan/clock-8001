@@ -222,7 +222,16 @@ func (engine *Engine) listen() {
 			// New OSC message received
 			debug.Printf("Got new osc data: %v\n", message)
 			switch message.Type {
+			case "timerStart":
+				time := time.Duration(message.CountdownMessage.Seconds) * time.Second
+				engine.StartCounter(message.Counter, message.Countdown, time)
+			case "timerModify":
+				time := time.Duration(message.CountdownMessage.Seconds) * time.Second
+				engine.ModifyCounter(message.Counter, time)
+			case "timerStop":
+				engine.StopCounter(message.Counter)
 			case "count":
+				// LEGACY
 				msg := message.CountMessage
 				engine.oscTally = true
 				engine.message = fmt.Sprintf("%.1s%02d%.1s", msg.Symbol, msg.Count, msg.Unit)
