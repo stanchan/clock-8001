@@ -73,12 +73,10 @@ func (server *Server) handleKill(msg *osc.Message) {
 func (server *Server) handleCountupStart(msg *osc.Message) {
 	log.Printf("countup start: %#v", msg)
 	if msg.Address == "/clock/countup/start" {
+		msg.Address = "/clock/timer/0/countup"
+	}
 
-		message := Message{
-			Type: "countup",
-		}
-		server.update(message)
-	} else if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
 		counter, _ := strconv.Atoi(matches[1])
 
 		msg := Message{
@@ -98,39 +96,33 @@ func (server *Server) handleCountupStart(msg *osc.Message) {
 func (server *Server) handleCountdownStart(msg *osc.Message) {
 	log.Printf("handleCountdownStart: %v", msg)
 	if msg.Address == "/clock/countdown/start" {
-		server.sendCountdownMessage("countdownStart", msg)
+		msg.Address = "/clock/timer/0/start"
 	} else if msg.Address == "/clock/countdown2/start" {
-		server.sendCountdownMessage("countdownStart2", msg)
-	} else {
-		server.sendTimerMessage("timerStart", true, msg)
+		msg.Address = "/clock/timer/1/start"
 	}
+	server.sendTimerMessage("timerStart", true, msg)
 }
 
 func (server *Server) handleTimerModify(msg *osc.Message) {
 	if msg.Address == "/clock/countdown/modify" {
-		server.sendCountdownMessage("countdownModify", msg)
+		msg.Address = "/clock/timer/0/modify"
 	} else if msg.Address == "/clock/countdown2/modify" {
-		server.sendCountdownMessage("countdownModify2", msg)
+		msg.Address = "/clock/timer/1/modify"
 	} else if msg.Address == "/clock/countup/modify" {
-		server.sendCountdownMessage("countupModify", msg)
-	} else {
-		server.sendTimerMessage("timerModify", false, msg)
+		msg.Address = "/clock/timer/0/modify"
 	}
+	server.sendTimerMessage("timerModify", false, msg)
 }
 
 func (server *Server) handleTimerStop(msg *osc.Message) {
 	debug.Printf("countdownStop: %#v", msg)
 	if msg.Address == "/clock/countdown/stop" {
-		message := Message{
-			Type: "countdownStop",
-		}
-		server.update(message)
+		msg.Address = "/clock/timer/0/stop"
 	} else if msg.Address == "/clock/countdown2/stop" {
-		message := Message{
-			Type: "countdownStop2",
-		}
-		server.update(message)
-	} else if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		msg.Address = "/clock/timer/1/stop"
+	}
+
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
 		counter, _ := strconv.Atoi(matches[1])
 
 		msg := Message{
@@ -165,21 +157,6 @@ func (server *Server) sendTimerMessage(cmd string, countdown bool, msg *osc.Mess
 	} else {
 		log.Printf("matches: %v", matches)
 		log.Printf("invalid timer message: %v\n", msg)
-	}
-}
-
-func (server *Server) sendCountdownMessage(cmd string, msg *osc.Message) {
-	var message CountdownMessage
-
-	if err := message.UnmarshalOSC(msg); err != nil {
-		log.Printf("Unmarshal %v: %v", msg, err)
-	} else {
-		debug.Printf("%s: %#v", cmd, message)
-		msg := Message{
-			Type:             cmd,
-			CountdownMessage: &message,
-		}
-		server.update(msg)
 	}
 }
 
