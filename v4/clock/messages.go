@@ -20,19 +20,8 @@ type Message struct {
 	Counter          int
 	Countdown        bool
 	Data             string
-	CountMessage     *CountMessage
 	CountdownMessage *CountdownMessage
 	DisplayMessage   *DisplayMessage
-}
-
-// CountMessage is a legacy message format for /qmsk/clock/count
-type CountMessage struct {
-	ColorRed   float32
-	ColorGreen float32
-	ColorBlue  float32
-	Symbol     string
-	Count      int32
-	Unit       string
 }
 
 // CountdownMessage is for /clock/countdown/start
@@ -117,45 +106,5 @@ func (message *CountdownMessage) UnmarshalOSC(msg *osc.Message) error {
 func (message CountdownMessage) MarshalOSC(addr string) *osc.Message {
 	return osc.NewMessage(addr,
 		message.Seconds,
-	)
-}
-
-// SetTimeRemaining sets the remaining time for CountMessage and formats the unit
-func (message *CountMessage) SetTimeRemaining(seconds float32) {
-	for _, unit := range clockUnits {
-		if seconds/unit.seconds >= 100 {
-			continue
-		}
-
-		message.Unit = unit.unit
-		message.Count = int32(seconds / unit.seconds)
-		return
-	}
-
-	message.Unit = "+"
-	message.Count = 0
-}
-
-// UnmarshalOSC converts a osc.Message to CountMessage
-func (message *CountMessage) UnmarshalOSC(msg *osc.Message) error {
-	return msg.UnmarshalArguments(
-		&message.ColorRed,
-		&message.ColorGreen,
-		&message.ColorBlue,
-		&message.Symbol,
-		&message.Count,
-		&message.Unit,
-	)
-}
-
-// MarshalOSC converts a CountMessage to osc.Message
-func (message CountMessage) MarshalOSC(addr string) *osc.Message {
-	return osc.NewMessage(addr,
-		message.ColorRed,
-		message.ColorGreen,
-		message.ColorBlue,
-		message.Symbol,
-		message.Count,
-		message.Unit,
 	)
 }

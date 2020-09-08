@@ -48,11 +48,6 @@ func (client *Client) SendDisplay(message DisplayMessage) error {
 	return client.send(message.MarshalOSC("/clock/display"))
 }
 
-// SendCount Send a /clock/count message
-func (client *Client) SendCount(message CountMessage) error {
-	return client.send(message.MarshalOSC("/qmsk/clock/count"))
-}
-
 // SendStart Send a /clock/countdown/start message
 func (client *Client) SendStart(message CountdownMessage) error {
 	return client.send(message.MarshalOSC("/clock/countdown/start"))

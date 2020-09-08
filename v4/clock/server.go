@@ -47,20 +47,6 @@ func (server *Server) update(message Message) {
 	}
 }
 
-func (server *Server) handleCount(msg *osc.Message) {
-	var message CountMessage
-
-	if err := message.UnmarshalOSC(msg); err != nil {
-		log.Printf("Unmarshal %v: %v", msg, err)
-	} else {
-		msg := Message{
-			Type:         "count",
-			CountMessage: &message,
-		}
-		server.update(msg)
-	}
-}
-
 func (server *Server) handleKill(msg *osc.Message) {
 	debug.Printf("kill: %#v", msg)
 
@@ -272,8 +258,6 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/timer/*/stop", server.handleTimerStop)
 
 	// Old OSC Api from V3
-	registerHandler(oscServer, "/qmsk/clock/count", server.handleCount)
-	registerHandler(oscServer, "/clock/tally", server.handleCount)
 	registerHandler(oscServer, "/clock/display", server.handleDisplay)
 	registerHandler(oscServer, "/clock/countdown/start", server.handleCountdownStart)
 	registerHandler(oscServer, "/clock/countdown2/start", server.handleCountdownStart)

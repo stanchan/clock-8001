@@ -230,19 +230,6 @@ func (engine *Engine) listen() {
 				engine.ModifyCounter(message.Counter, time)
 			case "timerStop":
 				engine.StopCounter(message.Counter)
-			case "count":
-				// LEGACY
-				msg := message.CountMessage
-				engine.oscTally = true
-				engine.message = fmt.Sprintf("%.1s%02d%.1s", msg.Symbol, msg.Count, msg.Unit)
-				engine.messageColor = &color.RGBA{
-					R: uint8(msg.ColorRed),
-					G: uint8(msg.ColorBlue),
-					B: uint8(msg.ColorGreen),
-					A: 255,
-				}
-
-				tallyTimer.Reset(engine.timeout)
 			case "display":
 				msg := message.DisplayMessage
 				engine.message = msg.Text
