@@ -56,8 +56,28 @@ func (server *Server) handleKill(msg *osc.Message) {
 	server.update(message)
 }
 
+func (server *Server) handleMedia(msg *osc.Message) {
+	debug.Printf("/clock/media/*")
+	message := Message{}
+	if msg.Address == "/clock/media/mitti" {
+		message.Type = "mitti"
+	} else if msg.Address == "/clock/media/millumin" {
+		message.Type = "millumin"
+	} else {
+		log.Printf("Unknown media message: %v", msg)
+		return
+	}
+	mm := MediaMessage{}
+	err := mm.UnmarshalOSC(msg)
+	if err != nil {
+		log.Printf("error unmarshaling media message: %v", err)
+	}
+	message.MediaMessage = &mm
+	server.update(message)
+}
+
 func (server *Server) handleCountupStart(msg *osc.Message) {
-	log.Printf("countup start: %#v", msg)
+	debug.Printf("countup start: %#v", msg)
 	if msg.Address == "/clock/countup/start" {
 		msg.Address = "/clock/timer/0/countup"
 	}
@@ -256,6 +276,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/timer/*/countup", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/timer/*/modify", server.handleTimerModify)
 	registerHandler(oscServer, "/clock/timer/*/stop", server.handleTimerStop)
+	registerHandler(oscServer, "/clock/media/*", server.handleMedia)
 
 	// Old OSC Api from V3
 	registerHandler(oscServer, "/clock/display", server.handleDisplay)

@@ -22,10 +22,10 @@ type Counter struct {
 type mediaState struct {
 	paused    bool
 	looping   bool
-	hours     int
-	minutes   int
-	seconds   int
-	frames    int
+	hours     int32
+	minutes   int32
+	seconds   int32
+	frames    int32
 	progress  float64
 	remaining time.Duration
 }
@@ -89,9 +89,9 @@ func (counter *Counter) mediaOutput() *CounterOutput {
 		Icon:     icon,
 		Paused:   m.paused,
 		Looping:  m.looping,
-		Hours:    m.hours,
-		Minutes:  m.minutes,
-		Seconds:  m.seconds,
+		Hours:    int(m.hours),
+		Minutes:  int(m.minutes),
+		Seconds:  int(m.seconds),
 		Text:     text,
 		Compact:  compact,
 		Progress: counter.media.progress,
@@ -169,7 +169,7 @@ func (counter *Counter) Start(countdown bool, timer time.Duration) {
 }
 
 // SetMedia sets the counter state from a playing media file
-func (counter *Counter) SetMedia(hours, minutes, seconds, frames int, remaining time.Duration, progress float64, paused bool, looping bool) {
+func (counter *Counter) SetMedia(hours, minutes, seconds, frames int32, remaining time.Duration, progress float64, paused bool, looping bool) {
 	// FIXME: .truncate(time.Second) and mitti timers cause blinking on second changes!
 	m := mediaState{
 		hours:     hours,

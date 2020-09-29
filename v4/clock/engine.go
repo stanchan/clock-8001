@@ -170,6 +170,8 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	engine.mittiCounter = engine.Counters[options.Mitti]
 	engine.milluminCounter = engine.Counters[options.Millumin]
 
+	log.Printf("Media counters - Mitti: %d, Millumin %d", options.Mitti, options.Millumin)
+
 	sources := make([]*SourceOptions, 4)
 	sources[0] = options.Source1
 	sources[1] = options.Source2
@@ -215,6 +217,9 @@ func (engine *Engine) listen() {
 	tallyTimer.Stop()
 	ltcTimer := timer.NewTimer(engine.timeout)
 	ltcTimer.Stop() // Needed to prevent a timeout at the start
+
+	mittiTimer := timer.NewTimer(updateTimeout)
+	milluminTimer := timer.NewTimer(updateTimeout)
 
 	for {
 		select {
@@ -266,9 +271,24 @@ func (engine *Engine) listen() {
 				}
 			case "dualText":
 				engine.DualText = fmt.Sprintf("%-.8s", message.Data)
+			case "mitti":
+				mittiTimer.Reset(updateTimeout)
+
+				m := message.MediaMessage
+				engine.mittiCounter.SetMedia(m.hours, m.minutes, m.seconds, m.frames, time.Duration(m.remaining)*time.Second, m.progress, m.paused, m.looping)
+			case "millumin:":
+				milluminTimer.Reset(updateTimeout)
+
+				m := message.MediaMessage
+				engine.milluminCounter.SetMedia(m.hours, m.minutes, m.seconds, m.frames, time.Duration(m.remaining)*time.Second, m.progress, m.paused, m.looping)
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
+
+		case <-mittiTimer.C:
+			engine.mittiCounter.ResetMedia()
+		case <-milluminTimer.C:
+			engine.milluminCounter.ResetMedia()
 		case <-tallyTimer.C:
 			// OSC message timeout
 			engine.message = ""

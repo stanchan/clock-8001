@@ -22,6 +22,47 @@ type Message struct {
 	Data             string
 	CountdownMessage *CountdownMessage
 	DisplayMessage   *DisplayMessage
+	MediaMessage     *MediaMessage
+}
+
+// MediaMessage contains data from media players
+type MediaMessage struct {
+	hours     int32
+	minutes   int32
+	seconds   int32
+	frames    int32
+	remaining int32
+	progress  float64
+	paused    bool
+	looping   bool
+}
+
+// UnmarshalOSC converts a osc.Message to MediaMessage
+func (message *MediaMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.hours,
+		&message.minutes,
+		&message.seconds,
+		&message.frames,
+		&message.remaining,
+		&message.progress,
+		&message.paused,
+		&message.looping,
+	)
+}
+
+// MarshalOSC converts a MediaMessage to osc.Message
+func (message MediaMessage) MarshalOSC(addr string) *osc.Message {
+	return osc.NewMessage(addr,
+		message.hours,
+		message.minutes,
+		message.seconds,
+		message.frames,
+		message.remaining,
+		message.progress,
+		message.paused,
+		message.looping,
+	)
 }
 
 // CountdownMessage is for /clock/countdown/start
