@@ -21,6 +21,9 @@ NoARCorrection={{.NoARCorrection}}
 # the correct resolution as a png or jpeg image.
 Background={{.Background}}
 
+# Background image path for OSC background selection
+BackgroundPath={{.BackgroundPath}}
+
 # Background color, used if no image is provided
 BackgroundColor={{.BackgroundColor}}
 

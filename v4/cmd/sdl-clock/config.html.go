@@ -81,6 +81,14 @@ const configHTML = `
 					<p>The image needs to be in the correct resolution and either png or jpeg file. Place the
 					image in the fat partition and refer to it as /boot/imagename.png</p>
 
+					<label for="BackgroundPath">
+						<span>Path for OSC selectable background images/span>
+						<input type="text" id="BackgroundPath" name="BackgroundPath" value="{{.BackgroundPath}}" />
+					</label>
+					<p>The OSC command /clock/background/ can be used to select a numbered background image from this path.
+					Files should be named with the number (eg 1.png or 01.jpeg). Supported filetypes are BMP, PNG and JPEG.</p>
+
+
 					<label for="BackgroundColor">
 						<span>Background color, used if no background image is provided</span>
 						<input type="color" id="BackgroundColor" name="BackgroundColor" value="{{.BackgroundColor}}" />

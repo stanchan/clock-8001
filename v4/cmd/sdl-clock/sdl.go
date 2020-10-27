@@ -288,9 +288,9 @@ func drawBitmask(bitmask [][]bool, color sdl.Color, r int, c int) {
 }
 
 // loadBackground loads and processes the background image into sdl.Texture
-func loadBackground() {
+func loadBackground(file string) {
 	var err error
-	backgroundImage, err := img.Load(options.Background)
+	backgroundImage, err := img.Load(file)
 	if err == nil {
 		// Create texture from surface
 		backgroundTexture, err = renderer.CreateTextureFromSurface(backgroundImage)

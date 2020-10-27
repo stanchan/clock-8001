@@ -105,7 +105,7 @@ func main() {
 	err = clockTextures[1].SetBlendMode(sdl.BLENDMODE_BLEND)
 	check(err)
 
-	loadBackground()
+	loadBackground(options.Background)
 
 	log.Printf("Entering main loop\n")
 	for {

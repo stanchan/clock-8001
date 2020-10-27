@@ -251,6 +251,21 @@ func (server *Server) handleLTC(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleBackground(msg *osc.Message) {
+	debug.Printf("background: %v", msg)
+	var bg int32
+	err := msg.UnmarshalArguments(&bg)
+	if err != nil {
+		log.Printf("Background msg error: %v", err)
+		return
+	}
+	m := Message{
+		Type:    "background",
+		Counter: int(bg),
+	}
+	server.update(m)
+}
+
 func (server *Server) handleDualText(msg *osc.Message) {
 	var message TextMessage
 	if err := message.UnmarshalOSC(msg); err != nil {
@@ -277,6 +292,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/timer/*/modify", server.handleTimerModify)
 	registerHandler(oscServer, "/clock/timer/*/stop", server.handleTimerStop)
 	registerHandler(oscServer, "/clock/media/*", server.handleMedia)
+	registerHandler(oscServer, "/clock/background", server.handleBackground)
 
 	// Old OSC Api from V3
 	registerHandler(oscServer, "/clock/display", server.handleDisplay)

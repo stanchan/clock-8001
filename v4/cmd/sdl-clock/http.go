@@ -120,6 +120,8 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	errors += validateFile(newOptions.IconFont, "Icon font")
 	newOptions.Background = r.FormValue("Background")
 	// Missing BG is totally OK
+	newOptions.BackgroundPath = r.FormValue("BackgroundPath")
+	// Missing BG path is totally OK
 	newOptions.Font = r.FormValue("Font")
 	errors += validateFile(newOptions.Font, "Font for round clocks")
 

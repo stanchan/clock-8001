@@ -17,11 +17,11 @@ import (
 )
 
 // Version is the current clock engine version
-const Version = "3.16.2"
+const Version = "4.0.0"
 
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
-var gitTag = "v3.16.2"
+var gitTag = "v4.0.0"
 
 // SourceOptions contains all options for clock display sources.
 type SourceOptions struct {
@@ -112,6 +112,7 @@ type Engine struct {
 	ignoreRegexp    *regexp.Regexp
 	mittiCounter    *Counter
 	milluminCounter *Counter
+	background      int
 }
 
 // Clock contains the state of a single component clock / timer
@@ -135,6 +136,7 @@ type State struct {
 	Flash          bool        // Flash cycle state
 	DisplaySeconds bool        // Show seconds in text and in the ring for ToD display
 	Caption        string      // Caption for all of the clocks, formely DualText
+	Background     int         // User selected background number
 }
 
 // MakeEngine creates a clock engine
@@ -281,6 +283,9 @@ func (engine *Engine) listen() {
 
 				m := message.MediaMessage
 				engine.milluminCounter.SetMedia(m.hours, m.minutes, m.seconds, m.frames, time.Duration(m.remaining)*time.Second, m.progress, m.paused, m.looping)
+			case "background":
+				// FIXME: non semantic ugliness
+				engine.background = message.Counter
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -411,6 +416,7 @@ func (engine *Engine) State() *State {
 		DisplaySeconds: engine.displaySeconds,
 		TallyColor:     &color.RGBA{},
 		Caption:        engine.DualText,
+		Background:     engine.background,
 	}
 
 	if engine.oscTally {
