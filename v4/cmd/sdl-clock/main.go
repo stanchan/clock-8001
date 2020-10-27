@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v4/clock"
@@ -10,6 +11,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"text/template"
 	"time"
 )
@@ -107,6 +109,8 @@ func main() {
 
 	loadBackground(options.Background)
 
+	var backgroundNumber int
+
 	log.Printf("Entering main loop\n")
 	for {
 		select {
@@ -127,6 +131,25 @@ func main() {
 
 			// Get the clock state snapshot
 			state := engine.State()
+
+			// Check for background changes
+			if backgroundNumber != state.Background {
+				backgroundNumber = state.Background
+				p := make([]string, 3)
+				filemask := fmt.Sprintf("%d.*", state.Background)
+				path := options.BackgroundPath
+				p[0] = filepath.Join(path, filemask)
+				p[1] = filepath.Join(path, "0"+filemask)
+				p[2] = filepath.Join(path, "00"+filemask)
+				for _, pattern := range p {
+					files, _ := filepath.Glob(pattern)
+					if files != nil {
+						log.Printf("Loading background: %s", files[0])
+						loadBackground(files[0])
+					}
+				}
+				log.Printf("Could not find background for number: %d", textClock.bg)
+			}
 
 			if options.textClock {
 				drawTextClock(state)

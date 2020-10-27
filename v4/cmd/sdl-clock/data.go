@@ -41,7 +41,7 @@ type clockOptions struct {
 	Defaults        bool                 `long:"defaults" description:"load defaults"`
 	NoARCorrection  bool                 `long:"no-ar-correction" description:"Do not try to detect official raspberry pi display and correct it's aspect ratio"`
 	Background      string               `long:"background" description:"Background image file location."`
-	BackgroundPath  string               `long:"background-path" description:"path to load OSC backgrounds from" default:"/boot/bg"`
+	BackgroundPath  string               `long:"background-path" description:"path to load OSC backgrounds from" default:"/boot"`
 	BackgroundColor string               `long:"background-color" description:"Background color, used if no background image is supplied" default:"#000000"`
 	EngineOptions   *clock.EngineOptions
 

@@ -7,7 +7,6 @@ import (
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"log"
-	"path/filepath"
 )
 
 type outputLine struct {
@@ -64,24 +63,6 @@ func initTextClock() {
 func drawTextClock(state *clock.State) {
 	var err error
 	var x, y int32
-
-	// Check for background changes
-	if textClock.bg != state.Background {
-		textClock.bg = state.Background
-		p := make([]string, 3)
-		p[0] = fmt.Sprintf("%s/%d.*", options.BackgroundPath, state.Background)
-		p[1] = fmt.Sprintf("%s/0%d.*", options.BackgroundPath, state.Background)
-		p[2] = fmt.Sprintf("%s/00%d.*", options.BackgroundPath, state.Background)
-		for _, pattern := range p {
-			files, _ := filepath.Glob(pattern)
-			if files != nil {
-				log.Printf("Loading background: %s", files[0])
-				loadBackground(files[0])
-				return
-			}
-		}
-		log.Printf("Could not find background for number: %d", textClock.bg)
-	}
 
 	for i := range textClock.r {
 		clk := state.Clocks[i]
