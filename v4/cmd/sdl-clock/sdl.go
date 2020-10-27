@@ -292,8 +292,12 @@ func loadBackground(file string) {
 	var err error
 	backgroundImage, err := img.Load(file)
 	if err == nil {
+		if backgroundTexture != nil {
+			backgroundTexture.Destroy()
+		}
 		// Create texture from surface
 		backgroundTexture, err = renderer.CreateTextureFromSurface(backgroundImage)
+		backgroundImage.Free()
 		check(err)
 
 		err = backgroundTexture.SetBlendMode(sdl.BLENDMODE_NONE)
@@ -301,7 +305,7 @@ func loadBackground(file string) {
 		showBackground = true
 		return
 	}
-
+	backgroundImage.Free()
 	// Failed to load background image, continue without it
 	log.Printf("Error loading background image: %v %v\n", options.Background, err)
 	log.Printf("Disabling background image.")

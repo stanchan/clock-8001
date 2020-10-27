@@ -59,6 +59,9 @@ type clockOptions struct {
 	Row1Color      string `long:"row1-color" description:"Color for text clock row 1" default:"#FF8000"`
 	Row2Color      string `long:"row2-color" description:"Color for text clock row 2" default:"#FF8000"`
 	Row3Color      string `long:"row3-color" description:"Color for text clock row 3" default:"#FF8000"`
+	Row1Hide       bool   `long:"row1-hide" description:"Hide timer row 1"`
+	Row2Hide       bool   `long:"row2-hide" description:"Hide timer row 2"`
+	Row3Hide       bool   `long:"row3-hide" description:"Hide timer row 3"`
 	LabelColor     string `long:"label-color" description:"Color for text clock labels" default:"#FF8000"`
 	TimerBG        string `long:"timer-bg-color" description:"Color for optional timer background box" default:"#202020"`
 	LabelBG        string `long:"label-bg-color" description:"Color for optional label background box" default:"#202020"`
