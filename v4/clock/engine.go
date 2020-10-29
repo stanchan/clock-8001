@@ -32,6 +32,7 @@ type SourceOptions struct {
 	Timer    bool   `long:"timer" description:"Enable timer counter as a source"`
 	Tod      bool   `long:"tod" description:"Enable time-of-day as a source"`
 	TimeZone string `long:"timezone" description:"Time zone to use for ToD display" default:"Europe/Helsinki"`
+	Hidden   bool   `long:"hidden" description:"Hide this time source"`
 }
 
 // EngineOptions contains all common options for clock.Engines
@@ -125,6 +126,7 @@ type Clock struct {
 	Mode     int     // Display type
 	Paused   bool    // Is the clock/timer paused?
 	Progress float64 // Progress of the total timer 0-1
+	Hidden   bool    // The timer should not be rendered if true
 }
 
 // State is a snapshot of the clock representation on the time State() was called
@@ -286,6 +288,15 @@ func (engine *Engine) listen() {
 			case "background":
 				// FIXME: non semantic ugliness
 				engine.background = message.Counter
+			case "sourceHide":
+				if message.Counter >= 0 && message.Counter < len(engine.sources) {
+					engine.sources[message.Counter].hidden = true
+				}
+			case "sourceShow":
+				if message.Counter >= 0 && message.Counter < len(engine.sources) {
+					engine.sources[message.Counter].hidden = false
+				}
+
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -357,6 +368,7 @@ func (engine *Engine) State() *State {
 			Label:   s.title,
 			Icon:    "",
 			Expired: false,
+			Hidden:  s.hidden,
 		}
 		if s.off {
 			c.Mode = Off
@@ -608,6 +620,7 @@ func (engine *Engine) initSources(sources []*SourceOptions) error {
 			udp:     s.UDP,
 			tz:      tz,
 			title:   s.Text,
+			hidden:  s.Hidden,
 		}
 	}
 	log.Printf("Initialized %d clock display sources", len(engine.sources))

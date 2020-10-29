@@ -66,6 +66,8 @@ source1.counter={{.EngineOptions.Source1.Counter}}
 source1.tod={{.EngineOptions.Source1.Tod}}
 # Time zone for the time of day input
 source1.timezone={{.EngineOptions.Source1.TimeZone}}
+# Initially hide this source, can be toggled via OSC
+source1.hidden={{.EngineOptions.Source1.Hidden}}
 
 source2.text={{.EngineOptions.Source2.Text}}
 source2.ltc={{.EngineOptions.Source2.LTC}}
@@ -74,6 +76,7 @@ source2.timer={{.EngineOptions.Source2.Timer}}
 source2.counter={{.EngineOptions.Source2.Counter}}
 source2.tod={{.EngineOptions.Source2.Tod}}
 source2.timezone={{.EngineOptions.Source2.TimeZone}}
+source2.hidden={{.EngineOptions.Source2.Hidden}}
 
 source3.text={{.EngineOptions.Source3.Text}}
 source3.ltc={{.EngineOptions.Source3.LTC}}
@@ -82,6 +85,7 @@ source3.timer={{.EngineOptions.Source3.Timer}}
 source3.counter={{.EngineOptions.Source3.Counter}}
 source3.tod={{.EngineOptions.Source3.Tod}}
 source3.timezone={{.EngineOptions.Source3.TimeZone}}
+source3.hidden={{.EngineOptions.Source3.Hidden}}
 
 source4.text={{.EngineOptions.Source4.Text}}
 source4.ltc={{.EngineOptions.Source4.LTC}}
@@ -90,6 +94,7 @@ source4.timer={{.EngineOptions.Source4.Timer}}
 source4.counter={{.EngineOptions.Source4.Counter}}
 source4.tod={{.EngineOptions.Source4.Tod}}
 source4.timezone={{.EngineOptions.Source4.TimeZone}}
+source4.hidden={{.EngineOptions.Source4.Hidden}}
 
 # Counter number for Mitti OSC feedback
 mitti={{.EngineOptions.Mitti}}

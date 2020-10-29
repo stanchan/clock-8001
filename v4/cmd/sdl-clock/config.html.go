@@ -150,6 +150,11 @@ const configHTML = `
 						<span>Timezone for the time of day input</span>
 						<input type="text" id="source1-timezone" name="source1-timezone" value="{{.EngineOptions.Source1.TimeZone}}" />
 					</label>
+
+					<label for="source1-hidden">
+						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
+						<input type="checkbox" id="source1-hidden" name="source1-hidden" {{if .EngineOptions.Source1.Hidden}} checked {{end}} />
+					</label>
 				</fieldset>
 				<fieldset>
 					<legend>Source 2</legend>
@@ -187,6 +192,11 @@ const configHTML = `
 					<label for="source2-timezone">
 						<span>Timezone for the time of day input</span>
 						<input type="text" id="source2-timezone" name="source2-timezone" value="{{.EngineOptions.Source2.TimeZone}}" />
+					</label>
+
+					<label for="source2-hidden">
+						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
+						<input type="checkbox" id="source2-hidden" name="source2-hidden" {{if .EngineOptions.Source2.Hidden}} checked {{end}} />
 					</label>
 				</fieldset>
 				<fieldset>
@@ -226,6 +236,11 @@ const configHTML = `
 						<span>Timezone for the time of day input</span>
 						<input type="text" id="source3-timezone" name="source3-timezone" value="{{.EngineOptions.Source3.TimeZone}}" />
 					</label>
+
+					<label for="source3-hidden">
+						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
+						<input type="checkbox" id="source3-hidden" name="source3-hidden" {{if .EngineOptions.Source3.Hidden}} checked {{end}} />
+					</label>
 				</fieldset>
 				<fieldset>
 					<legend>Source 4</legend>
@@ -263,6 +278,11 @@ const configHTML = `
 					<label for="source4-timezone">
 						<span>Time zone for the time of day input</span>
 						<input type="text" id="source4-timezone" name="source4-timezone" value="{{.EngineOptions.Source4.TimeZone}}" />
+					</label>
+
+					<label for="source4-hidden">
+						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
+						<input type="checkbox" id="source4-hidden" name="source4-hidden" {{if .EngineOptions.Source4.Hidden}} checked {{end}} />
 					</label>
 				</fieldset>
 			</fieldset>

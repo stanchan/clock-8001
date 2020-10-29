@@ -9,15 +9,17 @@ import (
 )
 
 const (
-	timerPattern = `/clock/timer/(\d)/`
+	timerPattern  = `/clock/timer/(\d)/`
+	sourcePattern = `/clock/source/(\d)/`
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance
 func MakeServer(oscServer *osc.Server) *Server {
 	var server = Server{
-		listeners:   make(map[chan Message]struct{}),
-		Debug:       false,
-		timerRegexp: regexp.MustCompile(timerPattern),
+		listeners:    make(map[chan Message]struct{}),
+		Debug:        false,
+		timerRegexp:  regexp.MustCompile(timerPattern),
+		sourceRegexp: regexp.MustCompile(sourcePattern),
 	}
 
 	server.setup(oscServer)
@@ -27,9 +29,10 @@ func MakeServer(oscServer *osc.Server) *Server {
 
 // Server is a clock osc server and listens for incoming osc messages
 type Server struct {
-	listeners   map[chan Message]struct{}
-	Debug       bool
-	timerRegexp *regexp.Regexp
+	listeners    map[chan Message]struct{}
+	Debug        bool
+	timerRegexp  *regexp.Regexp
+	sourceRegexp *regexp.Regexp
 }
 
 // Listen adds a new listener for the decoded incoming osc messages
@@ -74,6 +77,31 @@ func (server *Server) handleMedia(msg *osc.Message) {
 	}
 	message.MediaMessage = &mm
 	server.update(message)
+}
+
+func (server *Server) parseSourceMsg(msg *osc.Message, cmd string) {
+	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		msg := Message{
+			Type:    cmd,
+			Counter: counter - 1,
+		}
+		server.update(msg)
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid source message: %v\n", msg)
+	}
+}
+
+func (server *Server) handleHide(msg *osc.Message) {
+	debug.Printf("handleHide: %v", msg)
+	server.parseSourceMsg(msg, "sourceHide")
+}
+
+func (server *Server) handleShow(msg *osc.Message) {
+	debug.Printf("handleShow: %v", msg)
+	server.parseSourceMsg(msg, "sourceShow")
 }
 
 func (server *Server) handleCountupStart(msg *osc.Message) {
@@ -291,6 +319,8 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/timer/*/countup", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/timer/*/modify", server.handleTimerModify)
 	registerHandler(oscServer, "/clock/timer/*/stop", server.handleTimerStop)
+	registerHandler(oscServer, "/clock/source/*/hide", server.handleHide)
+	registerHandler(oscServer, "/clock/source/*/show", server.handleShow)
 	registerHandler(oscServer, "/clock/media/*", server.handleMedia)
 	registerHandler(oscServer, "/clock/background", server.handleBackground)
 

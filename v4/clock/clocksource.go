@@ -14,9 +14,10 @@ type source struct {
 	tz      *time.Location // timezone to use
 
 	// Booleans controlling what might be displayed by this clock data source
-	ltc   bool // LTC timecode decoded from sound input
-	udp   bool // UDP time packets from the stagetimer protocol
-	timer bool // Countdown / up timer
-	tod   bool // Time of day, lowest priority
-	off   bool // Master control to turn output off
+	ltc    bool // LTC timecode decoded from sound input
+	udp    bool // UDP time packets from the stagetimer protocol
+	timer  bool // Countdown / up timer
+	tod    bool // Time of day, lowest priority
+	off    bool // Display is off, but row not hidden
+	hidden bool // Master control to turn output off
 }

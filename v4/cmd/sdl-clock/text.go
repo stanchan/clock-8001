@@ -66,7 +66,9 @@ func drawTextClock(state *clock.State) {
 
 	for i := range textClock.r {
 		clk := state.Clocks[i]
-
+		if clk.Hidden {
+			continue
+		}
 		// Icon would need better unicode support from the fonts
 
 		// text := fmt.Sprintf("%s %s", state.Clocks[i].Icon, state.Clocks[i].Text)
@@ -125,6 +127,9 @@ func drawTextClock(state *clock.State) {
 	prepareCanvas()
 
 	for i := range textClock.r {
+		if state.Clocks[i].Hidden {
+			continue
+		}
 		y = 25 + (365 * int32(i))
 		x = 530
 		numberBox := sdl.Rect{X: x, Y: y, W: 1380, H: 300}
