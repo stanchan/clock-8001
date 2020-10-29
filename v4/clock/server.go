@@ -10,7 +10,7 @@ import (
 
 const (
 	timerPattern  = `/clock/timer/(\d)/`
-	sourcePattern = `/clock/source/(\d)/`
+	sourcePattern = `/clock/source/([1-4])/`
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance
