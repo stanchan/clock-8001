@@ -38,6 +38,9 @@ LabelFont={{.LabelFont}}
 # Font for icons
 IconFont={{.IconFont}}
 
+# Show clock info for X seconds at startup
+info-timer={{.EngineOptions.ShowInfo}}
+
 # Time sources
 #
 # The single round clock uses source 1 as the main display and source 2 as a secondary timer

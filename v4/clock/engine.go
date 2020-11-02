@@ -7,6 +7,7 @@ import (
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"image/color"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"regexp"
@@ -50,6 +51,7 @@ type EngineOptions struct {
 	Mitti           int    `long:"mitti" description:"Counter number for Mitti OSC feedback" default:"8"`
 	Millumin        int    `long:"millumin" description:"Counter number for Millumin OSC feedback" default:"9"`
 	Ignore          string `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
+	ShowInfo        int    `long:"info-timer" description:"Show clock status for x seconds on startup" default:"30"`
 
 	Source1 *SourceOptions `group:"1st clock display source" namespace:"source1"`
 	Source2 *SourceOptions `group:"2nd clock display source" namespace:"source2"`
@@ -114,6 +116,9 @@ type Engine struct {
 	mittiCounter    *Counter
 	milluminCounter *Counter
 	background      int
+	info            string // Version, ip address etc
+	showInfo        bool
+	infoTimer       *timer.Timer
 }
 
 // Clock contains the state of a single component clock / timer
@@ -139,6 +144,7 @@ type State struct {
 	DisplaySeconds bool        // Show seconds in text and in the ring for ToD display
 	Caption        string      // Caption for all of the clocks, formely DualText
 	Background     int         // User selected background number
+	Info           string      // Clock information, version, ip-address etc. Should be displayed if not empty
 }
 
 // MakeEngine creates a clock engine
@@ -199,7 +205,31 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	}
 	engine.ignoreRegexp = regexp
 
+	engine.prepareInfo()
+
+	engine.infoTimer = timer.NewTimer(time.Duration(options.ShowInfo) * time.Second)
+	go engine.infoTimeout()
+	engine.showInfo = true
+	fmt.Printf(engine.info)
+
 	return &engine, nil
+}
+
+func (engine *Engine) prepareInfo() {
+	info := fmt.Sprintf("Clock-8001 version: %v\n\n", gitTag)
+	info += fmt.Sprintf("IP-addresses:\n%s", clockAddresses())
+
+	if engine.oscServer.Addr != "" {
+		info += fmt.Sprintf("OSC-listen: %s\n", engine.oscServer.Addr)
+	}
+
+	engine.info = info
+}
+
+func (engine *Engine) infoTimeout() {
+	for range engine.infoTimer.C {
+		engine.showInfo = false
+	}
 }
 
 func (engine *Engine) runOSC() {
@@ -296,7 +326,9 @@ func (engine *Engine) listen() {
 				if message.Counter >= 0 && message.Counter < len(engine.sources) {
 					engine.sources[message.Counter].hidden = false
 				}
-
+			case "showInfo":
+				engine.showInfo = true
+				engine.infoTimer.Reset(time.Duration(message.Counter) * time.Second)
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -429,6 +461,11 @@ func (engine *Engine) State() *State {
 		TallyColor:     &color.RGBA{},
 		Caption:        engine.DualText,
 		Background:     engine.background,
+	}
+
+	if engine.showInfo {
+		engine.prepareInfo()
+		state.Info = engine.info
 	}
 
 	if engine.oscTally {
@@ -659,6 +696,27 @@ func (engine *Engine) activateSourceByCounter(c int) {
 			s.off = false
 		}
 	}
+}
+
+func clockAddresses() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		log.Printf("Failed to get interface addresses")
+		return ""
+	}
+	var ret string
+	for _, addr := range addrs {
+		ip, _, err := net.ParseCIDR(addr.String())
+		if err != nil {
+			continue
+		}
+		if ip.IsLoopback() {
+			continue
+		} else if ip.To4() != nil {
+			ret += fmt.Sprintf("%v\n", ip)
+		}
+	}
+	return ret
 }
 
 func formatDuration(diff time.Duration) string {

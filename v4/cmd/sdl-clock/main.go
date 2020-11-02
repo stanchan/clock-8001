@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -111,6 +112,8 @@ func main() {
 	loadBackground(options.Background)
 
 	log.Printf("Entering main loop\n")
+	var info string
+
 	for {
 		select {
 		case <-sigChan:
@@ -132,11 +135,18 @@ func main() {
 			state := engine.State()
 
 			checkBackgroundUpdate(state)
-
 			if options.textClock {
 				drawTextClock(state)
 			} else {
 				drawRoundClocks(state)
+			}
+
+			if state.Info != "" {
+				if state.Info != info {
+					info = state.Info
+					updateInfoScreen(info)
+				}
+				drawInfoScreen()
 			}
 
 			// Update the canvas
@@ -144,6 +154,48 @@ func main() {
 			// debug.Printf("Frame time: %d ms\n", time.Now().Sub(startTime).Milliseconds())
 		}
 	}
+}
+
+func updateInfoScreen(info string) {
+	var err error
+	if infoTexture != nil {
+		infoTexture.Destroy()
+	}
+	lines := strings.Split(info, "\n")
+
+	height := infoFont.LineSkip() * len(lines)
+	infoTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1024, int32(height))
+	infoTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	check(err)
+
+	err = renderer.SetRenderTarget(infoTexture)
+	check(err)
+	renderer.SetDrawColor(0, 0, 0, 128)
+	renderer.Clear()
+
+	var rowTexture *sdl.Texture
+	rowTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	h := int32(0)
+	for _, l := range lines {
+		rowTexture = renderText(l, infoFont, sdl.Color{R: 255, G: 255, B: 255, A: 128})
+		rowTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+		_, _, texW, texH, _ := rowTexture.Query()
+
+		err := renderer.Copy(rowTexture, nil, &sdl.Rect{X: 20, Y: h, H: texH, W: texW})
+		check(err)
+
+		h += texH
+		rowTexture.Destroy()
+	}
+
+	log.Printf("Updated info texture:\n%s", info)
+}
+
+func drawInfoScreen() {
+	_, _, texW, texH, _ := infoTexture.Query()
+	renderer.SetRenderTarget(nil)
+	err := renderer.Copy(infoTexture, nil, &sdl.Rect{X: 0, Y: 0, H: texH, W: texW})
+	check(err)
 }
 
 func checkBackgroundUpdate(state *clock.State) {

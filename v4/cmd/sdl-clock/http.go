@@ -177,6 +177,8 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.EngineOptions.Millumin, err = strconv.Atoi(r.FormValue("millumin"))
 	validateNumber(err, "Millumin destination timer")
 	validateTimer(newOptions.EngineOptions.Millumin, "Millumin destination timer")
+	newOptions.EngineOptions.ShowInfo, err = strconv.Atoi(r.FormValue("ShowInfo"))
+	validateNumber(err, "Time to show clock info on startup")
 
 	newOptions.NumberFontSize, err = strconv.Atoi(r.FormValue("NumberFontSize"))
 	validateNumber(err, "Number font size")

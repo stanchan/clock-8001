@@ -69,9 +69,14 @@ const configHTML = `
 						<input type="number" min="0" id="Flash" name="Flash" value="{{.EngineOptions.Flash}}" />
 					</label>
 
-					<label for="Flash">
+					<label for="Timeout">
 						<span>Timeout for clearing OSC text display messages, milliseconds</span>
 						<input type="number" min="0" id="Timeout" name="Timeout" value="{{.EngineOptions.Timeout}}" />
+					</label>
+
+					<label for="ShowInfo">
+						<span>Time to show clock information on startup, seconds</span>
+						<input type="number" min="0" id="ShowInfo" name="ShowInfo" value="{{.EngineOptions.ShowInfo}}" />
 					</label>
 
 					<label for="Background">

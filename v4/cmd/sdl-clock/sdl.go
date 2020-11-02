@@ -33,6 +33,9 @@ var secTexture *sdl.Texture
 var backgroundTexture *sdl.Texture
 var clockTextures []*sdl.Texture
 
+var infoTexture *sdl.Texture
+var infoFont *ttf.Font
+
 // initSDL initializes the SDL library, creates a window and a hw accelerated renderer
 func initSDL() {
 	var err error
@@ -62,6 +65,9 @@ func initSDL() {
 	rendererInfo, err := renderer.GetInfo()
 	check(err)
 	log.Printf("Renderer: %v\n", rendererInfo.Name)
+
+	infoFont, err = ttf.OpenFont(options.LabelFont, 50)
+	check(err)
 }
 
 // initColors takes the color options from flags and translates them to sdl.Color variables
