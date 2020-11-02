@@ -308,6 +308,22 @@ func (server *Server) handleDualText(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleInfo(msg *osc.Message) {
+	debug.Printf("handleInfo")
+	var bg int32
+	err := msg.UnmarshalArguments(&bg)
+	if err != nil {
+		log.Printf("Info msg error: %v", err)
+		return
+	}
+	m := Message{
+		Type:    "showInfo",
+		Counter: int(bg),
+	}
+	server.update(m)
+
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -323,6 +339,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/source/*/show", server.handleShow)
 	registerHandler(oscServer, "/clock/media/*", server.handleMedia)
 	registerHandler(oscServer, "/clock/background", server.handleBackground)
+	registerHandler(oscServer, "/clock/info", server.handleInfo)
 
 	// Old OSC Api from V3
 	registerHandler(oscServer, "/clock/display", server.handleDisplay)
