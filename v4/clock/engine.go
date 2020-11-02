@@ -713,7 +713,7 @@ func clockAddresses() string {
 		if ip.IsLoopback() {
 			continue
 		} else if ip.To4() != nil {
-			ret += fmt.Sprintf("%v\n", ip)
+			ret += fmt.Sprintf("    %v\n", ip)
 		}
 	}
 	return ret
