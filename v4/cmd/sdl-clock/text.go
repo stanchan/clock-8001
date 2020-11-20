@@ -168,6 +168,23 @@ func drawTextClock(state *clock.State) {
 			copyIntoRect(textClock.r[i].textTex, numberBox)
 		}
 	}
+
+	// Draw possible OSC text message
+	if state.Tally != "" {
+		tallyColor := sdl.Color{state.TallyColor.R, state.TallyColor.G, state.TallyColor.B, state.TallyColor.A}
+		tallyTexture := renderText(state.Tally, textClock.labelFont, tallyColor)
+		tallyRect := sdl.Rect{X: 10, Y: 25 + (365 * 2), W: 1920 - 20, H: 300}
+
+		renderer.SetDrawColor(
+			state.TallyBG.R,
+			state.TallyBG.G,
+			state.TallyBG.B,
+			state.TallyBG.A)
+		renderer.FillRect(&tallyRect)
+		copyIntoRect(tallyTexture, tallyRect)
+
+		tallyTexture.Destroy()
+	}
 }
 
 func destroyTextures(textures []*sdl.Texture) {

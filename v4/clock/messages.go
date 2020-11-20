@@ -16,13 +16,14 @@ var clockUnits = []struct {
 
 // Message is a generic clock message for decoded osc data
 type Message struct {
-	Type             string
-	Counter          int
-	Countdown        bool
-	Data             string
-	CountdownMessage *CountdownMessage
-	DisplayMessage   *DisplayMessage
-	MediaMessage     *MediaMessage
+	Type               string
+	Counter            int
+	Countdown          bool
+	Data               string
+	CountdownMessage   *CountdownMessage
+	DisplayMessage     *DisplayMessage
+	MediaMessage       *MediaMessage
+	DisplayTextMessage *displayTextMessage
 }
 
 // MediaMessage contains data from media players
@@ -81,6 +82,34 @@ type DisplayMessage struct {
 // TimeMessage is for /clock/settime and /clock/ltc
 type TimeMessage struct {
 	Time string
+}
+
+type displayTextMessage struct {
+	r    int32
+	g    int32
+	b    int32
+	a    int32
+	bgR  int32
+	bgG  int32
+	bgB  int32
+	bgA  int32
+	time int32
+	text string
+}
+
+func (message *displayTextMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.r,
+		&message.g,
+		&message.b,
+		&message.a,
+		&message.bgR,
+		&message.bgG,
+		&message.bgB,
+		&message.bgA,
+		&message.time,
+		&message.text,
+	)
 }
 
 // TextMessage is for text only messages like /clock/dual/text

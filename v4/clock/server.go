@@ -324,6 +324,20 @@ func (server *Server) handleInfo(msg *osc.Message) {
 
 }
 
+func (server *Server) handleDisplayText(msg *osc.Message) {
+	debug.Printf("handleText")
+	var message displayTextMessage
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("handleText unmarshal: %v: %v", msg, err)
+	} else {
+		m := Message{
+			Type:               "displayText",
+			DisplayTextMessage: &message,
+		}
+		server.update(m)
+	}
+}
+
 func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 	if err := server.Handle(addr, handler); err != nil {
 		panic(err)
@@ -340,6 +354,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/media/*", server.handleMedia)
 	registerHandler(oscServer, "/clock/background", server.handleBackground)
 	registerHandler(oscServer, "/clock/info", server.handleInfo)
+	registerHandler(oscServer, "/clock/text", server.handleDisplayText)
 
 	// Old OSC Api from V3
 	registerHandler(oscServer, "/clock/display", server.handleDisplay)

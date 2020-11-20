@@ -96,10 +96,11 @@ type Engine struct {
 	flashPeriod     int
 	clockServer     *Server
 	oscServer       osc.Server
-	timeout         time.Duration        // Timeout for osc tally events
-	oscTally        bool                 // Tally text was from osc event
-	message         string               // Full tally message as received from OSC
-	messageColor    *color.RGBA          // Tally message color from OSC
+	timeout         time.Duration // Timeout for osc tally events
+	oscTally        bool          // Tally text was from osc event
+	message         string        // Full tally message as received from OSC
+	messageColor    *color.RGBA   // Tally message color from OSC
+	messageBG       *color.RGBA
 	oscDests        *feedbackDestination // udp connections to send osc feedback to
 	initialized     bool                 // Show version on startup until ntp synced or receiving OSC control
 	ltc             *ltcData             // LTC time code status
@@ -140,6 +141,7 @@ type State struct {
 	Clocks         []*Clock    // All configured clocks / timers
 	Tally          string      // Tally message text
 	TallyColor     *color.RGBA // Tally message color
+	TallyBG        *color.RGBA // Tally message background color
 	Flash          bool        // Flash cycle state
 	DisplaySeconds bool        // Show seconds in text and in the ring for ToD display
 	Caption        string      // Caption for all of the clocks, formely DualText
@@ -271,6 +273,8 @@ func (engine *Engine) listen() {
 				engine.StopCounter(message.Counter)
 			case "display":
 				msg := message.DisplayMessage
+				log.Printf("Setting tally message to: %s", msg.Text)
+
 				engine.message = msg.Text
 				engine.messageColor = &color.RGBA{
 					R: uint8(msg.ColorRed),
@@ -279,11 +283,38 @@ func (engine *Engine) listen() {
 					A: 255,
 				}
 
+				engine.messageBG = &color.RGBA{
+					R: 0,
+					G: 0,
+					B: 0,
+					A: 255,
+				}
+
 				// Mark the OSC message state as active
 				engine.oscTally = true
 
 				// Reset the timer that will clear the message when it expires
 				tallyTimer.Reset(engine.timeout)
+
+			case "displayText":
+				msg := message.DisplayTextMessage
+				log.Printf("Displaying text: %v", msg)
+
+				engine.message = msg.text
+				engine.messageColor = &color.RGBA{
+					R: uint8(msg.r),
+					G: uint8(msg.g),
+					B: uint8(msg.b),
+					A: uint8(msg.a),
+				}
+				engine.messageBG = &color.RGBA{
+					R: uint8(msg.bgR),
+					G: uint8(msg.bgG),
+					B: uint8(msg.bgB),
+					A: uint8(msg.bgA),
+				}
+				engine.oscTally = true
+				tallyTimer.Reset(time.Duration(msg.time) * time.Second)
 			case "pause":
 				engine.Pause()
 			case "resume":
@@ -469,8 +500,10 @@ func (engine *Engine) State() *State {
 	}
 
 	if engine.oscTally {
+		fmt.Printf("f\n")
 		state.Tally = engine.message
 		state.TallyColor = engine.messageColor
+		state.TallyBG = engine.messageBG
 	}
 
 	// Send OSC feedback
