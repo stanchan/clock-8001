@@ -65,6 +65,7 @@ type clockOptions struct {
 	Rows           int    `long:"text-rows" description:"Number of timer lines to display" default:"3" choice:"0" choice:"1" choice:"2" choice:"3"`
 	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
 	NumberFontSize int    `long:"numbers-size" default:"250"`
+	FontPath       string `long:"font-path" description:"Path for loading font choices into web config" default:"."`
 
 	Raspberry bool   // Is the host a raspberry pi
 	ConfigTxt string // /boot/config.txt contents
@@ -74,6 +75,7 @@ type clockOptions struct {
 	dualClock  bool
 	textClock  bool
 	Errors     htmlTemplate.HTML // For passing errors to the html template
+	Fonts      []string          // For passing list of font files to html template
 }
 
 var options clockOptions

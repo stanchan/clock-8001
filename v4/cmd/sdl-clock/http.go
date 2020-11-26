@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"text/template"
@@ -46,6 +47,17 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		options.ConfigTxt = string(bytes)
 	}
 
+	options.Fonts = make([]string, 0, 200)
+	err = filepath.Walk(options.FontPath, func(path string, info os.FileInfo, err error) error {
+		if matched, err := filepath.Match("*.ttf", filepath.Base(path)); err != nil {
+			return err
+		} else if matched {
+			options.Fonts = append(options.Fonts, path)
+		}
+		return nil
+	})
+
+	log.Printf("fonts: %v", options.Fonts)
 	err = tmpl.Execute(w, options)
 	if err != nil {
 		panic(err)

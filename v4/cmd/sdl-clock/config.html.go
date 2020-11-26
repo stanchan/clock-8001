@@ -49,19 +49,25 @@ const configHTML = `
 						<input type="text" id="Font" name="Font" value="{{.Font}}" />
 					</label>
 
+					<datalist id="FontList">
+						{{ range $font := .Fonts }}
+							<option>{{$font}}</option>
+						{{ end }}
+					</datalist>
+
 					<label for="NumberFont">
 						<span>Font filename for text clock numbers</span>
-						<input type="text" id="NumberFont" name="NumberFont" value="{{.NumberFont}}" />
+						<input list="FontList" type="text" id="NumberFont" name="NumberFont" value="{{.NumberFont}}" />
 					</label>
 
 					<label for="LabelFont">
 						<span>Font filename for text clock labels</span>
-						<input type="text" id="LabelFont" name="LabelFont" value="{{.LabelFont}}" />
+						<input list="FontList" type="text" id="LabelFont" name="LabelFont" value="{{.LabelFont}}" />
 					</label>
 
 					<label for="IconFont">
 						<span>Font filename for text clock icons</span>
-						<input type="text" id="IconFont" name="IconFont" value="{{.IconFont}}" />
+						<input list="FontList" type="text" id="IconFont" name="IconFont" value="{{.IconFont}}" />
 					</label>
 
 					<label for="Flash">
