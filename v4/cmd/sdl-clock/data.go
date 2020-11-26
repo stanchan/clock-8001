@@ -64,7 +64,7 @@ type clockOptions struct {
 	LabelBG        string `long:"label-bg-color" description:"Color for optional label background box" default:"#202020"`
 	Rows           int    `long:"text-rows" description:"Number of timer lines to display" default:"3" choice:"0" choice:"1" choice:"2" choice:"3"`
 	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
-	NumberFontSize int    `long:"numbers-size" default:"200"`
+	NumberFontSize int    `long:"numbers-size" default:"250"`
 
 	Raspberry bool   // Is the host a raspberry pi
 	ConfigTxt string // /boot/config.txt contents
