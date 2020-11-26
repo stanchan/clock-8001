@@ -388,12 +388,18 @@ func (engine *Engine) sendState(state *State) error {
 
 	var hours, minutes, seconds string
 
-	// HH:MM:SS(:FF for LTC)
-	parts := strings.Split(state.Clocks[0].Text, ":")
-	if len(parts) > 2 {
-		hours = parts[0]
-		minutes = parts[1]
-		seconds = parts[2]
+	if !state.Clocks[0].Expired {
+		// HH:MM:SS(:FF for LTC)
+		parts := strings.Split(state.Clocks[0].Text, ":")
+		if len(parts) > 2 {
+			hours = parts[0]
+			minutes = parts[1]
+			seconds = parts[2]
+		}
+	} else {
+		hours = "00"
+		minutes = "00"
+		seconds = "00"
 	}
 	mode := state.Clocks[0].Mode
 	pause := int32(0)
