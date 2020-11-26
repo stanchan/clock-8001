@@ -28,9 +28,7 @@ func main() {
 	parseOptions()
 
 	if options.Defaults {
-		dump := options.DumpConfig
-		options = defaultConfig()
-		options.DumpConfig = dump
+		defaultSourceConfig()
 	}
 
 	// Dump the current config to stdout
@@ -268,73 +266,43 @@ func createRings() {
 	}
 }
 
-func defaultConfig() clockOptions {
-	o := clockOptions{
-		Face:            "round",
-		Font:            "fonts/7x13.bdf",
-		NumberFont:      "Copse-Regular.ttf",
-		LabelFont:       "RobotoMono-VariableFont_wght.ttf",
-		IconFont:        "MaterialIcons-Regular.ttf",
-		TextColor:       "#FF8000",
-		StaticColor:     "#505000",
-		SecondColor:     "#C80000",
-		CountdownColor:  "#FF0000",
-		LabelColor:      "#FF8000",
-		Row1Color:       "#FF8000",
-		Row2Color:       "#FF8000",
-		Row3Color:       "#FF8000",
-		TimerBG:         "#202020",
-		LabelBG:         "#202020",
-		BackgroundColor: "#000000",
-		HTTPPort:        ":80",
-		HTTPUser:        "admin",
-		HTTPPassword:    "clockwork",
-		Background:      "",
-		EngineOptions: &clock.EngineOptions{
-			Flash:      500,
-			ListenAddr: "0.0.0.0:1245",
-			Timeout:    1000,
-			Connect:    "255.255.255.255:1245",
-			Ignore:     "ignore",
-			Source1: &clock.SourceOptions{
-				Text:     "",
-				LTC:      true,
-				UDP:      true,
-				Timer:    true,
-				Counter:  0,
-				Tod:      true,
-				TimeZone: "Europe/Helsinki",
-			},
-			Source2: &clock.SourceOptions{
-				Text:     "",
-				LTC:      true,
-				UDP:      true,
-				Timer:    true,
-				Counter:  1,
-				Tod:      true,
-				TimeZone: "Europe/Helsinki",
-			},
-			Source3: &clock.SourceOptions{
-				Text:     "",
-				LTC:      true,
-				UDP:      true,
-				Timer:    true,
-				Counter:  2,
-				Tod:      true,
-				TimeZone: "Europe/Helsinki",
-			},
-			Source4: &clock.SourceOptions{
-				Text:     "",
-				LTC:      true,
-				UDP:      true,
-				Timer:    true,
-				Counter:  3,
-				Tod:      true,
-				TimeZone: "Europe/Helsinki",
-			},
-		},
+func defaultSourceConfig() {
+	options.EngineOptions.Source1 = &clock.SourceOptions{
+		Text:     "",
+		LTC:      true,
+		UDP:      true,
+		Timer:    true,
+		Counter:  0,
+		Tod:      true,
+		TimeZone: "Europe/Helsinki",
 	}
-	return o
+	options.EngineOptions.Source2 = &clock.SourceOptions{
+		Text:     "",
+		LTC:      true,
+		UDP:      true,
+		Timer:    true,
+		Counter:  1,
+		Tod:      true,
+		TimeZone: "Europe/Helsinki",
+	}
+	options.EngineOptions.Source3 = &clock.SourceOptions{
+		Text:     "",
+		LTC:      true,
+		UDP:      true,
+		Timer:    true,
+		Counter:  2,
+		Tod:      true,
+		TimeZone: "Europe/Helsinki",
+	}
+	options.EngineOptions.Source4 = &clock.SourceOptions{
+		Text:     "",
+		LTC:      true,
+		UDP:      true,
+		Timer:    true,
+		Counter:  3,
+		Tod:      true,
+		TimeZone: "Europe/Helsinki",
+	}
 }
 
 func check(err error) {
