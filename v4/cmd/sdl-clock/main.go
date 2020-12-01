@@ -61,7 +61,7 @@ func main() {
 	initColors()
 	createRings()
 
-	if options.dualClock || options.textClock {
+	if options.dualClock || options.textClock || options.countdown {
 		// FIXME: rpi display scaling fix
 		// Dual clock
 		x, y, _ := renderer.GetOutputSize()
@@ -81,6 +81,10 @@ func main() {
 	initTextures()
 	if options.textClock {
 		initTextClock()
+	}
+
+	if options.countdown {
+		initCountdown()
 	}
 
 	// Trap SIGINT aka Ctrl-C
@@ -135,6 +139,8 @@ func main() {
 			checkBackgroundUpdate(state)
 			if options.textClock {
 				drawTextClock(state)
+			} else if options.countdown {
+				drawCountdown()
 			} else {
 				drawRoundClocks(state)
 			}
@@ -242,6 +248,8 @@ func parseOptions() {
 		options.small = true
 	case "text":
 		options.textClock = true
+	case "countdown":
+		options.countdown = true
 	}
 }
 
