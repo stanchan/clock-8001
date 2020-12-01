@@ -28,7 +28,6 @@ var textClock struct {
 	labelColor sdl.Color
 	labelBG    sdl.Color
 	r          [3]outputLine
-	bg         int
 }
 
 // Font sizes. Rpi <4 is limited to 2048x2048 texture size.
