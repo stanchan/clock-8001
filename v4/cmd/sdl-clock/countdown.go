@@ -60,6 +60,13 @@ func drawCountdown() {
 	days := hours / 24
 	hours -= math.Floor(days) * 24
 
+	if t.Seconds() < 0 {
+		days = 0.0
+		hours = 0.0
+		minutes = 0.0
+		seconds = 0.0
+	}
+
 	dayTex := renderText(fmt.Sprintf("%.0f", days), countdown.largeFont, countdown.color)
 	defer dayTex.Destroy()
 
