@@ -36,12 +36,12 @@ func initCountdown() {
 	}
 	countdown.largeFont = f
 
-	countdown.target, err = time.Parse("2006-01-02 15:04:05", options.CountdownTarget)
+	countdown.loc, err = time.LoadLocation(options.EngineOptions.Source1.TimeZone)
+	check(err)
+
+	countdown.target, err = time.ParseInLocation("2006-01-02 15:04:05", options.CountdownTarget, countdown.loc)
 	check(err)
 	log.Printf("Target: %v", countdown.target)
-
-	countdown.loc, err = time.LoadLocation("UTC")
-	check(err)
 
 	countdown.color = sdl.Color{R: 255, G: 255, B: 255, A: 255}
 	countdown.bgColor = sdl.Color{R: 0, G: 0, B: 0, A: 255}
