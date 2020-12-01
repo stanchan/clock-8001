@@ -83,7 +83,7 @@ create_config_4:
     script:
      - cd v4
      - go build gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
-     - ./sdl-clock --defaults --dump-config > clock_port80.ini
+     - ./sdl-clock --http-port :80 --defaults --dump-config > clock_port80.ini
     artifacts:
         paths:
             - v4/clock_port80.ini
