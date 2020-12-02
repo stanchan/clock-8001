@@ -57,8 +57,8 @@ func drawCountdown() {
 	hours := t.Truncate(time.Hour).Hours()
 	minutes := t.Truncate(time.Minute).Minutes() - (hours * 60)
 	seconds := t.Truncate(time.Second).Seconds() - (hours * 60 * 60) - (minutes * 60)
-	days := hours / 24
-	hours -= math.Floor(days) * 24
+	days := math.Floor(hours / 24)
+	hours -= days * 24
 
 	if t.Seconds() < 0 {
 		days = 0.0
