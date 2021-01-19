@@ -564,7 +564,11 @@ func (engine *Engine) TargetCounter(counter int, target string) {
 	if match && err == nil {
 		tz := engine.sources[0].tz
 		now := time.Now().In(tz)
-		t, _ := time.ParseInLocation("15:04:05", target, tz)
+		t, err := time.ParseInLocation("15:04:05", target, tz)
+		if err != nil {
+			log.Printf("TargetCounter error: %v", err)
+			return
+		}
 		target := time.Date(
 			now.Year(),
 			now.Month(),
