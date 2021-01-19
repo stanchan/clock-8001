@@ -171,6 +171,25 @@ func (server *Server) handleTimerStop(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleCountdownTarget(msg *osc.Message) {
+	debug.Printf("handleTimerTarget: %v", msg)
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+		var target string
+		err := msg.UnmarshalArguments(&target)
+		if err != nil {
+			log.Printf("handleTimerTarget error: %v", err)
+			return
+		}
+		m := Message{
+			Type:    "timerTarget",
+			Counter: counter,
+			Data:    target,
+		}
+		server.update(m)
+	}
+}
+
 func (server *Server) sendTimerMessage(cmd string, countdown bool, msg *osc.Message) {
 	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
 		counter, _ := strconv.Atoi(matches[1])
@@ -345,6 +364,7 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 }
 
 func (server *Server) setup(oscServer *osc.Server) {
+	registerHandler(oscServer, "/clock/timer/*/countdown/target", server.handleCountdownTarget)
 	registerHandler(oscServer, "/clock/timer/*/countdown", server.handleCountdownStart)
 	registerHandler(oscServer, "/clock/timer/*/countup", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/timer/*/modify", server.handleTimerModify)

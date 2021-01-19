@@ -271,6 +271,8 @@ func (engine *Engine) listen() {
 				engine.ModifyCounter(message.Counter, time)
 			case "timerStop":
 				engine.StopCounter(message.Counter)
+			case "timerTarget":
+				engine.TargetCounter(message.Counter, message.Data)
 			case "display":
 				msg := message.DisplayMessage
 				log.Printf("Setting tally message to: %s", msg.Text)
@@ -550,6 +552,38 @@ func (engine *Engine) StopCounter(counter int) {
 	}
 
 	engine.Counters[counter].Stop()
+}
+
+// TargetCounter sets the target time and date for a counter
+func (engine *Engine) TargetCounter(counter int, target string) {
+	if counter < 0 || counter >= numCounters {
+		log.Printf("engine.TargetCounter: illegal counter number %d (have %d counters)\n", counter, numCounters)
+	}
+
+	match, err := regexp.MatchString("^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$", target)
+	if match && err == nil {
+		tz := engine.sources[0].tz
+		now := time.Now().In(tz)
+		t, _ := time.ParseInLocation("15:04:05", target, tz)
+		target := time.Date(
+			now.Year(),
+			now.Month(),
+			now.Day(),
+			t.Hour(),
+			t.Minute(),
+			t.Second(),
+			0,
+			tz)
+
+		if target.Before(now) {
+			target = target.Add(24 * time.Hour)
+		}
+
+		engine.Counters[counter].Target(target)
+		debug.Printf("Counter target set!")
+	} else {
+		log.Printf("Illegal timer target string, string: %v, err: %v", target, err)
+	}
 }
 
 /* Legacy handlers */

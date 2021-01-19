@@ -168,6 +168,18 @@ func (counter *Counter) Start(countdown bool, timer time.Duration) {
 	counter.active = true
 }
 
+// Target sets the target date and time for a counter
+func (counter *Counter) Target(target time.Time) {
+	timer := target.Sub(time.Now())
+	if timer < 0 {
+		timer = -timer
+		counter.Start(false, timer)
+		counter.Modify(timer)
+	} else {
+		counter.Start(true, timer)
+	}
+}
+
 // SetMedia sets the counter state from a playing media file
 func (counter *Counter) SetMedia(hours, minutes, seconds, frames int32, remaining time.Duration, progress float64, paused bool, looping bool) {
 	// FIXME: .truncate(time.Second) and mitti timers cause blinking on second changes!
