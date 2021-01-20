@@ -171,10 +171,9 @@ func (counter *Counter) Start(countdown bool, timer time.Duration) {
 // Target sets the target date and time for a counter
 func (counter *Counter) Target(target time.Time) {
 	timer := target.Sub(time.Now())
+	fmt.Printf("target: %v timer: %v\n", target, timer)
 	if timer < 0 {
-		timer = -timer
 		counter.Start(false, timer)
-		counter.Modify(timer)
 	} else {
 		counter.Start(true, timer)
 	}

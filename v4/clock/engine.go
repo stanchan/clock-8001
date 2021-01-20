@@ -272,7 +272,7 @@ func (engine *Engine) listen() {
 			case "timerStop":
 				engine.StopCounter(message.Counter)
 			case "timerTarget":
-				engine.TargetCounter(message.Counter, message.Data)
+				engine.TargetCounter(message.Counter, message.Data, message.Countdown)
 			case "display":
 				msg := message.DisplayMessage
 				log.Printf("Setting tally message to: %s", msg.Text)
@@ -555,7 +555,7 @@ func (engine *Engine) StopCounter(counter int) {
 }
 
 // TargetCounter sets the target time and date for a counter
-func (engine *Engine) TargetCounter(counter int, target string) {
+func (engine *Engine) TargetCounter(counter int, target string, countdown bool) {
 	if counter < 0 || counter >= numCounters {
 		log.Printf("engine.TargetCounter: illegal counter number %d (have %d counters)\n", counter, numCounters)
 	}
@@ -579,8 +579,10 @@ func (engine *Engine) TargetCounter(counter int, target string) {
 			0,
 			tz)
 
-		if target.Before(now) {
+		if target.Before(now) && countdown {
 			target = target.Add(24 * time.Hour)
+		} else if target.After(now) && !countdown {
+			target = target.Add(-24 * time.Hour)
 		}
 
 		engine.Counters[counter].Target(target)

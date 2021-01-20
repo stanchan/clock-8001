@@ -106,6 +106,12 @@ func (server *Server) handleShow(msg *osc.Message) {
 
 func (server *Server) handleCountupStart(msg *osc.Message) {
 	debug.Printf("countup start: %#v", msg)
+
+	if len(msg.Arguments) != 0 {
+		log.Printf("handleCountupStart: too many arguments")
+		return
+	}
+
 	if msg.Address == "/clock/countup/start" {
 		msg.Address = "/clock/timer/0/countup"
 	}
@@ -172,7 +178,15 @@ func (server *Server) handleTimerStop(msg *osc.Message) {
 }
 
 func (server *Server) handleCountdownTarget(msg *osc.Message) {
-	debug.Printf("handleTimerTarget: %v", msg)
+	server.sendTargetMessage(msg, true)
+}
+
+func (server *Server) handleCountupTarget(msg *osc.Message) {
+	server.sendTargetMessage(msg, false)
+}
+
+func (server *Server) sendTargetMessage(msg *osc.Message, countdown bool) {
+	debug.Printf("sendTargetMessage: %v %v", countdown, msg)
 	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
 		counter, _ := strconv.Atoi(matches[1])
 		var target string
@@ -182,9 +196,10 @@ func (server *Server) handleCountdownTarget(msg *osc.Message) {
 			return
 		}
 		m := Message{
-			Type:    "timerTarget",
-			Counter: counter,
-			Data:    target,
+			Type:      "timerTarget",
+			Countdown: countdown,
+			Counter:   counter,
+			Data:      target,
 		}
 		server.update(m)
 	}
@@ -365,8 +380,9 @@ func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
 
 func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "/clock/timer/*/countdown/target", server.handleCountdownTarget)
-	registerHandler(oscServer, "/clock/timer/*/countdown", server.handleCountdownStart)
-	registerHandler(oscServer, "/clock/timer/*/countup", server.handleCountupStart)
+	registerHandler(oscServer, "/clock/timer/*/countdown$", server.handleCountdownStart)
+	registerHandler(oscServer, "/clock/timer/*/countup/target", server.handleCountupTarget)
+	registerHandler(oscServer, "/clock/timer/*/countup$", server.handleCountupStart)
 	registerHandler(oscServer, "/clock/timer/*/modify", server.handleTimerModify)
 	registerHandler(oscServer, "/clock/timer/*/stop", server.handleTimerStop)
 	registerHandler(oscServer, "/clock/source/*/hide", server.handleHide)
