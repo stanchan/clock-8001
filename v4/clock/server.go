@@ -162,19 +162,17 @@ func (server *Server) handleTimerStop(msg *osc.Message) {
 		msg.Address = "/clock/timer/1/stop"
 	}
 
-	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
-		counter, _ := strconv.Atoi(matches[1])
+	server.sendTimerCommand("timerStop", msg)
+}
 
-		msg := Message{
-			Type:    "timerStop",
-			Counter: counter,
-		}
-		server.update(msg)
+func (server *Server) handleTimerPause(msg *osc.Message) {
+	debug.Printf("handleTimerPause: %v", msg)
+	server.sendTimerCommand("timerPause", msg)
+}
 
-	} else {
-		log.Printf("matches: %v", matches)
-		log.Printf("invalid timer message: %v\n", msg)
-	}
+func (server *Server) handleTimerResume(msg *osc.Message) {
+	debug.Printf("handlTimerResume: %v", msg)
+	server.sendTimerCommand("timerResume", msg)
 }
 
 func (server *Server) handleCountdownTarget(msg *osc.Message) {
@@ -202,6 +200,22 @@ func (server *Server) sendTargetMessage(msg *osc.Message, countdown bool) {
 			Data:      target,
 		}
 		server.update(m)
+	}
+}
+
+func (server *Server) sendTimerCommand(cmd string, msg *osc.Message) {
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		msg := Message{
+			Type:    cmd,
+			Counter: counter,
+		}
+		server.update(msg)
+
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid timer message: %v\n", msg)
 	}
 }
 
@@ -385,6 +399,8 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/timer/*/countup$", server.handleCountupStart)
 	registerHandler(oscServer, "^/clock/timer/*/modify", server.handleTimerModify)
 	registerHandler(oscServer, "^/clock/timer/*/stop", server.handleTimerStop)
+	registerHandler(oscServer, "^/clock/timer/*/pause", server.handleTimerPause)
+	registerHandler(oscServer, "^/clock/timer/*/resume", server.handleTimerResume)
 	registerHandler(oscServer, "^/clock/source/*/hide", server.handleHide)
 	registerHandler(oscServer, "^/clock/source/*/show", server.handleShow)
 	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
