@@ -325,10 +325,10 @@ func (engine *Engine) listen() {
 				engine.Pause()
 			case "resume":
 				engine.Resume()
-			case "kill":
-				engine.Kill()
-			case "normal":
-				engine.Normal()
+			case "hideAll":
+				engine.hideAll()
+			case "showAll":
+				engine.showAll()
 			case "secondsOff":
 				engine.displaySeconds = false
 			case "secondsOn":
@@ -616,35 +616,35 @@ func (engine *Engine) TargetCounter(counter int, target string, countdown bool) 
 	}
 }
 
-/* Legacy handlers */
-
-// Normal returns main display to normal clock
-func (engine *Engine) Normal() {
+// showAll returns main display to normal clock
+func (engine *Engine) showAll() {
 	for _, s := range engine.sources {
 		s.off = false
 	}
 }
 
-// Kill blanks the clock display
-func (engine *Engine) Kill() {
+// hideAll blanks the clock display
+func (engine *Engine) hideAll() {
 	for _, s := range engine.sources {
 		s.off = true
 	}
 }
 
-// Pause pauses both countdowns
+// Pause pauses all timers
 func (engine *Engine) Pause() {
 	for _, c := range engine.Counters {
 		c.Pause()
 	}
 }
 
-// Resume resumes both countdowns if they have been paused
+// Resume resumes all timers
 func (engine *Engine) Resume() {
 	for _, c := range engine.Counters {
 		c.Resume()
 	}
 }
+
+/* Legacy handlers */
 
 // DisplaySeconds returns true if the clock should display seconds
 func (engine *Engine) DisplaySeconds() bool {

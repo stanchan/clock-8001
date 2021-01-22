@@ -50,11 +50,19 @@ func (server *Server) update(message Message) {
 	}
 }
 
-func (server *Server) handleKill(msg *osc.Message) {
-	debug.Printf("kill: %#v", msg)
+func (server *Server) handleHideAll(msg *osc.Message) {
+	debug.Printf("handleHide: %#v", msg)
 
 	message := Message{
-		Type: "kill",
+		Type: "hideAll",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleShowAll(msg *osc.Message) {
+	debug.Printf("handleShowAll: %#v", msg)
+	message := Message{
+		Type: "showAll",
 	}
 	server.update(message)
 }
@@ -257,14 +265,6 @@ func (server *Server) sendTimerMessage(cmd string, countdown bool, msg *osc.Mess
 	}
 }
 
-func (server *Server) handleNormal(msg *osc.Message) {
-	debug.Printf("normal: %#v", msg)
-	message := Message{
-		Type: "normal",
-	}
-	server.update(message)
-}
-
 func (server *Server) handlePause(msg *osc.Message) {
 	debug.Printf("pause: %#v", msg)
 	message := Message{
@@ -423,8 +423,23 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/background", server.handleBackground)
 	registerHandler(oscServer, "^/clock/info", server.handleInfo)
 	registerHandler(oscServer, "^/clock/text", server.handleDisplayText)
+	registerHandler(oscServer, "^/clock/hide", server.handleHideAll)
+	registerHandler(oscServer, "^/clock/show", server.handleShowAll)
 
 	// Old OSC Api from V3
+	registerHandler(oscServer, "^/clock/pause", server.handlePause)
+	registerHandler(oscServer, "^/clock/resume", server.handleResume)
+	registerHandler(oscServer, "^/clock/seconds/off", server.handleSecondsOff)
+	registerHandler(oscServer, "^/clock/seconds/on", server.handleSecondsOn)
+	registerHandler(oscServer, "^/clock/time/set", server.handleTimeSet)
+	registerHandler(oscServer, "^/clock/ltc", server.handleLTC)
+
+	// Deprecated
+	registerHandler(oscServer, "^/clock/dual/text", server.handleDualText)
+	registerHandler(oscServer, "^/clock/kill", server.handleHideAll)
+	registerHandler(oscServer, "^/clock/normal", server.handleShowAll)
+	registerHandler(oscServer, "^/clock/countup/start", server.handleCountupStart)
+	registerHandler(oscServer, "^/clock/countup/modify", server.handleTimerModify)
 	registerHandler(oscServer, "^/clock/display", server.handleDisplay)
 	registerHandler(oscServer, "^/clock/countdown/start", server.handleCountdownStart)
 	registerHandler(oscServer, "^/clock/countdown2/start", server.handleCountdownStart)
@@ -432,15 +447,4 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/countdown2/modify", server.handleTimerModify)
 	registerHandler(oscServer, "^/clock/countdown/stop", server.handleTimerStop)
 	registerHandler(oscServer, "^/clock/countdown2/stop", server.handleTimerStop)
-	registerHandler(oscServer, "^/clock/pause", server.handlePause)
-	registerHandler(oscServer, "^/clock/resume", server.handleResume)
-	registerHandler(oscServer, "^/clock/countup/start", server.handleCountupStart)
-	registerHandler(oscServer, "^/clock/countup/modify", server.handleTimerModify)
-	registerHandler(oscServer, "^/clock/kill", server.handleKill)
-	registerHandler(oscServer, "^/clock/normal", server.handleNormal)
-	registerHandler(oscServer, "^/clock/seconds/off", server.handleSecondsOff)
-	registerHandler(oscServer, "^/clock/seconds/on", server.handleSecondsOn)
-	registerHandler(oscServer, "^/clock/time/set", server.handleTimeSet)
-	registerHandler(oscServer, "^/clock/ltc", server.handleLTC)
-	registerHandler(oscServer, "^/clock/dual/text", server.handleDualText)
 }
