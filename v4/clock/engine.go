@@ -347,11 +347,15 @@ func (engine *Engine) listen() {
 
 				m := message.MediaMessage
 				engine.mittiCounter.SetMedia(m.hours, m.minutes, m.seconds, m.frames, time.Duration(m.remaining)*time.Second, m.progress, m.paused, m.looping)
+			case "mittiReset":
+				engine.mittiCounter.ResetMedia()
 			case "millumin:":
 				milluminTimer.Reset(updateTimeout)
 
 				m := message.MediaMessage
 				engine.milluminCounter.SetMedia(m.hours, m.minutes, m.seconds, m.frames, time.Duration(m.remaining)*time.Second, m.progress, m.paused, m.looping)
+			case "milluminReset":
+				engine.milluminCounter.ResetMedia()
 			case "background":
 				// FIXME: non semantic ugliness
 				engine.background = message.Counter

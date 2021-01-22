@@ -56,8 +56,14 @@ func (engine *Engine) updateMilluminClock(state millumin.State) error {
 		engine.milluminCounter.SetMedia(hours, minutes, seconds, 0, remaining, progress, layerState.Paused, false)
 		engine.sendMedia("millumin", hours, minutes, seconds, 0, int32(layerState.Remaining()+1), progress, layerState.Paused, false)
 
-		break
+		return nil
 	}
+	// No playing media found
+	engine.milluminCounter.ResetMedia()
+
+	// FIXME: send no media to others
+	engine.sendResetMedia("millumin")
+
 	return err
 }
 
@@ -144,4 +150,24 @@ func (engine *Engine) sendMedia(player string, hours, minutes, seconds, frames, 
 	engine.oscDests.Write(data)
 
 	return nil
+}
+
+func (engine *Engine) sendResetMedia(player string) error {
+	if engine.oscDests == nil {
+		// No osc connection
+		return nil
+	}
+
+	address := fmt.Sprintf("/clock/resetmedia/%s", player)
+
+	packet := osc.NewMessage(address)
+
+	data, err := packet.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	engine.oscDests.Write(data)
+
+	return nil
+
 }

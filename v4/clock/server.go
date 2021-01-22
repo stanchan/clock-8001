@@ -60,7 +60,7 @@ func (server *Server) handleKill(msg *osc.Message) {
 }
 
 func (server *Server) handleMedia(msg *osc.Message) {
-	debug.Printf("/clock/media/*")
+	debug.Printf("handleMedia: %v", msg)
 	message := Message{}
 	if msg.Address == "/clock/media/mitti" {
 		message.Type = "mitti"
@@ -77,6 +77,21 @@ func (server *Server) handleMedia(msg *osc.Message) {
 	}
 	message.MediaMessage = &mm
 	server.update(message)
+}
+
+func (server *Server) handleResetMedia(msg *osc.Message) {
+	debug.Printf("handleResetMedia: %v", msg)
+	message := Message{}
+	if msg.Address == "/clock/resetmedia/mitti" {
+		message.Type = "mittiReset"
+	} else if msg.Address == "/clock/resetmedia/millumin" {
+		message.Type = "milluminReset"
+	} else {
+		log.Printf("Unknown resetMedia message: %v", msg)
+		return
+	}
+	server.update(message)
+
 }
 
 func (server *Server) parseSourceMsg(msg *osc.Message, cmd string) {
@@ -404,6 +419,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/source/*/hide", server.handleHide)
 	registerHandler(oscServer, "^/clock/source/*/show", server.handleShow)
 	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
+	registerHandler(oscServer, "^/clock/resetmedia/*", server.handleResetMedia)
 	registerHandler(oscServer, "^/clock/background", server.handleBackground)
 	registerHandler(oscServer, "^/clock/info", server.handleInfo)
 	registerHandler(oscServer, "^/clock/text", server.handleDisplayText)
