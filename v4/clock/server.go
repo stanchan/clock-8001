@@ -50,147 +50,9 @@ func (server *Server) update(message Message) {
 	}
 }
 
-func (server *Server) handleHideAll(msg *osc.Message) {
-	debug.Printf("handleHide: %#v", msg)
-
-	message := Message{
-		Type: "hideAll",
-	}
-	server.update(message)
-}
-
-func (server *Server) handleShowAll(msg *osc.Message) {
-	debug.Printf("handleShowAll: %#v", msg)
-	message := Message{
-		Type: "showAll",
-	}
-	server.update(message)
-}
-
-func (server *Server) handleMedia(msg *osc.Message) {
-	debug.Printf("handleMedia: %v", msg)
-	message := Message{}
-	if msg.Address == "/clock/media/mitti" {
-		message.Type = "mitti"
-	} else if msg.Address == "/clock/media/millumin" {
-		message.Type = "millumin"
-	} else {
-		log.Printf("Unknown media message: %v", msg)
-		return
-	}
-	mm := MediaMessage{}
-	err := mm.UnmarshalOSC(msg)
-	if err != nil {
-		log.Printf("error unmarshaling media message: %v", err)
-	}
-	message.MediaMessage = &mm
-	server.update(message)
-}
-
-func (server *Server) handleResetMedia(msg *osc.Message) {
-	debug.Printf("handleResetMedia: %v", msg)
-	message := Message{}
-	if msg.Address == "/clock/resetmedia/mitti" {
-		message.Type = "mittiReset"
-	} else if msg.Address == "/clock/resetmedia/millumin" {
-		message.Type = "milluminReset"
-	} else {
-		log.Printf("Unknown resetMedia message: %v", msg)
-		return
-	}
-	server.update(message)
-
-}
-
-func (server *Server) parseSourceMsg(msg *osc.Message, cmd string) {
-	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
-		counter, _ := strconv.Atoi(matches[1])
-
-		msg := Message{
-			Type:    cmd,
-			Counter: counter - 1,
-		}
-		server.update(msg)
-	} else {
-		log.Printf("matches: %v", matches)
-		log.Printf("invalid source message: %v\n", msg)
-	}
-}
-
-func (server *Server) handleHide(msg *osc.Message) {
-	debug.Printf("handleHide: %v", msg)
-	server.parseSourceMsg(msg, "sourceHide")
-}
-
-func (server *Server) handleShow(msg *osc.Message) {
-	debug.Printf("handleShow: %v", msg)
-	server.parseSourceMsg(msg, "sourceShow")
-}
-
-func (server *Server) handleSourceTitle(msg *osc.Message) {
-	debug.Printf("handleSourceTitle: %v", msg)
-
-	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
-		counter, _ := strconv.Atoi(matches[1])
-
-		var label string
-		err := msg.UnmarshalArguments(&label)
-		if err != nil {
-			log.Printf("handleSourceTitle error: %v", err)
-			return
-		}
-
-		msg := Message{
-			Type:    "sourceTitle",
-			Counter: counter - 1,
-			Data:    label,
-		}
-		server.update(msg)
-	} else {
-		log.Printf("matches: %v", matches)
-		log.Printf("invalid source message: %v\n", msg)
-	}
-
-}
-
-func (server *Server) handleCountupStart(msg *osc.Message) {
-	debug.Printf("countup start: %#v", msg)
-
-	if len(msg.Arguments) != 0 {
-		log.Printf("handleCountupStart: too many arguments")
-		return
-	}
-
-	if msg.Address == "/clock/countup/start" {
-		msg.Address = "/clock/timer/0/countup"
-	}
-
-	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
-		counter, _ := strconv.Atoi(matches[1])
-
-		msg := Message{
-			Type:             "timerStart",
-			Counter:          counter,
-			Countdown:        false,
-			CountdownMessage: &CountdownMessage{Seconds: 0},
-		}
-		server.update(msg)
-
-	} else {
-		log.Printf("matches: %v", matches)
-		log.Printf("invalid timer message: %v\n", msg)
-	}
-}
-
-func (server *Server) handleCountdownStart(msg *osc.Message) {
-	log.Printf("handleCountdownStart: %v", msg)
-	if msg.Address == "/clock/countdown/start" {
-		msg.Address = "/clock/timer/0/start"
-	} else if msg.Address == "/clock/countdown2/start" {
-		msg.Address = "/clock/timer/1/start"
-	}
-	server.sendTimerMessage("timerStart", true, msg)
-}
+/*
+ * Timer related handlers
+ */
 
 func (server *Server) handleTimerModify(msg *osc.Message) {
 	if msg.Address == "/clock/countdown/modify" {
@@ -307,20 +169,132 @@ func (server *Server) handleResume(msg *osc.Message) {
 	server.update(message)
 }
 
-func (server *Server) handleDisplay(msg *osc.Message) {
-	var message DisplayMessage
+/*
+ * Source related handlers
+ */
+func (server *Server) parseSourceMsg(msg *osc.Message, cmd string) {
+	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		msg := Message{
+			Type:    cmd,
+			Counter: counter - 1,
+		}
+		server.update(msg)
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid source message: %v\n", msg)
+	}
+}
+
+func (server *Server) handleHideAll(msg *osc.Message) {
+	debug.Printf("handleHide: %#v", msg)
+
+	message := Message{
+		Type: "hideAll",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleShowAll(msg *osc.Message) {
+	debug.Printf("handleShowAll: %#v", msg)
+	message := Message{
+		Type: "showAll",
+	}
+	server.update(message)
+}
+
+func (server *Server) handleHide(msg *osc.Message) {
+	debug.Printf("handleHide: %v", msg)
+	server.parseSourceMsg(msg, "sourceHide")
+}
+
+func (server *Server) handleShow(msg *osc.Message) {
+	debug.Printf("handleShow: %v", msg)
+	server.parseSourceMsg(msg, "sourceShow")
+}
+
+func (server *Server) handleSourceTitle(msg *osc.Message) {
+	debug.Printf("handleSourceTitle: %v", msg)
+
+	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		var label string
+		err := msg.UnmarshalArguments(&label)
+		if err != nil {
+			log.Printf("handleSourceTitle error: %v", err)
+			return
+		}
+
+		msg := Message{
+			Type:    "sourceTitle",
+			Counter: counter - 1,
+			Data:    label,
+		}
+		server.update(msg)
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid source message: %v\n", msg)
+	}
+}
+
+/*
+ * Clock sync handlers
+ */
+
+func (server *Server) handleMedia(msg *osc.Message) {
+	debug.Printf("handleMedia: %v", msg)
+	message := Message{}
+	if msg.Address == "/clock/media/mitti" {
+		message.Type = "mitti"
+	} else if msg.Address == "/clock/media/millumin" {
+		message.Type = "millumin"
+	} else {
+		log.Printf("Unknown media message: %v", msg)
+		return
+	}
+	mm := MediaMessage{}
+	err := mm.UnmarshalOSC(msg)
+	if err != nil {
+		log.Printf("error unmarshaling media message: %v", err)
+	}
+	message.MediaMessage = &mm
+	server.update(message)
+}
+
+func (server *Server) handleResetMedia(msg *osc.Message) {
+	debug.Printf("handleResetMedia: %v", msg)
+	message := Message{}
+	if msg.Address == "/clock/resetmedia/mitti" {
+		message.Type = "mittiReset"
+	} else if msg.Address == "/clock/resetmedia/millumin" {
+		message.Type = "milluminReset"
+	} else {
+		log.Printf("Unknown resetMedia message: %v", msg)
+		return
+	}
+	server.update(message)
+}
+
+func (server *Server) handleLTC(msg *osc.Message) {
+	var message TimeMessage
 
 	if err := message.UnmarshalOSC(msg); err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
 	} else {
-		debug.Printf("display: %#v", message)
-		msg := Message{
-			Type:           "display",
-			DisplayMessage: &message,
+		debug.Printf("LTC: %v\n", message.Time)
+		m := Message{
+			Type: "LTC",
+			Data: message.Time,
 		}
-		server.update(msg)
+		server.update(m)
 	}
 }
+
+/*
+ * Misc commands
+ */
 
 func (server *Server) handleSecondsOff(msg *osc.Message) {
 	debug.Printf("Second display off: %v\n", msg)
@@ -353,21 +327,6 @@ func (server *Server) handleTimeSet(msg *osc.Message) {
 	}
 }
 
-func (server *Server) handleLTC(msg *osc.Message) {
-	var message TimeMessage
-
-	if err := message.UnmarshalOSC(msg); err != nil {
-		log.Printf("Unmarshal %v: %v", msg, err)
-	} else {
-		debug.Printf("LTC: %v\n", message.Time)
-		m := Message{
-			Type: "LTC",
-			Data: message.Time,
-		}
-		server.update(m)
-	}
-}
-
 func (server *Server) handleBackground(msg *osc.Message) {
 	debug.Printf("background: %v", msg)
 	var bg int32
@@ -381,20 +340,6 @@ func (server *Server) handleBackground(msg *osc.Message) {
 		Counter: int(bg),
 	}
 	server.update(m)
-}
-
-func (server *Server) handleDualText(msg *osc.Message) {
-	var message TextMessage
-	if err := message.UnmarshalOSC(msg); err != nil {
-		log.Printf("Unmarshal %v: %v", msg, err)
-	} else {
-		debug.Printf("Dual clock text: %v\n", message.Text)
-		m := Message{
-			Type: "dualText",
-			Data: message.Text,
-		}
-		server.update(m)
-	}
 }
 
 func (server *Server) handleInfo(msg *osc.Message) {
@@ -413,6 +358,10 @@ func (server *Server) handleInfo(msg *osc.Message) {
 
 }
 
+/*
+ * Deprecated message handlers awaiting removal
+ */
+
 func (server *Server) handleDisplayText(msg *osc.Message) {
 	debug.Printf("handleText")
 	var message displayTextMessage
@@ -427,13 +376,77 @@ func (server *Server) handleDisplayText(msg *osc.Message) {
 	}
 }
 
-func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
-	if err := server.Handle(addr, handler); err != nil {
-		panic(err)
+func (server *Server) handleCountupStart(msg *osc.Message) {
+	debug.Printf("countup start: %#v", msg)
+
+	if len(msg.Arguments) != 0 {
+		log.Printf("handleCountupStart: too many arguments")
+		return
+	}
+
+	if msg.Address == "/clock/countup/start" {
+		msg.Address = "/clock/timer/0/countup"
+	}
+
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		msg := Message{
+			Type:             "timerStart",
+			Counter:          counter,
+			Countdown:        false,
+			CountdownMessage: &CountdownMessage{Seconds: 0},
+		}
+		server.update(msg)
+
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid timer message: %v\n", msg)
 	}
 }
 
+func (server *Server) handleCountdownStart(msg *osc.Message) {
+	log.Printf("handleCountdownStart: %v", msg)
+	if msg.Address == "/clock/countdown/start" {
+		msg.Address = "/clock/timer/0/start"
+	} else if msg.Address == "/clock/countdown2/start" {
+		msg.Address = "/clock/timer/1/start"
+	}
+	server.sendTimerMessage("timerStart", true, msg)
+}
+
+func (server *Server) handleDualText(msg *osc.Message) {
+	var message TextMessage
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		debug.Printf("Dual clock text: %v\n", message.Text)
+		m := Message{
+			Type: "dualText",
+			Data: message.Text,
+		}
+		server.update(m)
+	}
+}
+
+func (server *Server) handleDisplay(msg *osc.Message) {
+	var message DisplayMessage
+
+	if err := message.UnmarshalOSC(msg); err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	} else {
+		debug.Printf("display: %#v", message)
+		msg := Message{
+			Type:           "display",
+			DisplayMessage: &message,
+		}
+		server.update(msg)
+	}
+}
+
+// Le huge registerHandler block
 func (server *Server) setup(oscServer *osc.Server) {
+	// Timer related
 	registerHandler(oscServer, "^/clock/timer/*/countdown/target", server.handleCountdownTarget)
 	registerHandler(oscServer, "^/clock/timer/*/countdown$", server.handleCountdownStart)
 	registerHandler(oscServer, "^/clock/timer/*/countup/target", server.handleCountupTarget)
@@ -442,24 +455,28 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/timer/*/stop", server.handleTimerStop)
 	registerHandler(oscServer, "^/clock/timer/*/pause", server.handleTimerPause)
 	registerHandler(oscServer, "^/clock/timer/*/resume", server.handleTimerResume)
+	registerHandler(oscServer, "^/clock/pause", server.handlePause)
+	registerHandler(oscServer, "^/clock/resume", server.handleResume)
+
+	// Source related
 	registerHandler(oscServer, "^/clock/source/*/hide", server.handleHide)
 	registerHandler(oscServer, "^/clock/source/*/show", server.handleShow)
 	registerHandler(oscServer, "^/clock/source/*/title", server.handleSourceTitle)
-	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
-	registerHandler(oscServer, "^/clock/resetmedia/*", server.handleResetMedia)
-	registerHandler(oscServer, "^/clock/background", server.handleBackground)
-	registerHandler(oscServer, "^/clock/info", server.handleInfo)
-	registerHandler(oscServer, "^/clock/text", server.handleDisplayText)
 	registerHandler(oscServer, "^/clock/hide", server.handleHideAll)
 	registerHandler(oscServer, "^/clock/show", server.handleShowAll)
 
-	// Old OSC Api from V3
-	registerHandler(oscServer, "^/clock/pause", server.handlePause)
-	registerHandler(oscServer, "^/clock/resume", server.handleResume)
+	// Sync messages
+	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
+	registerHandler(oscServer, "^/clock/resetmedia/*", server.handleResetMedia)
+	registerHandler(oscServer, "^/clock/ltc", server.handleLTC)
+
+	// Misc commands
+	registerHandler(oscServer, "^/clock/background", server.handleBackground)
+	registerHandler(oscServer, "^/clock/info", server.handleInfo)
+	registerHandler(oscServer, "^/clock/text", server.handleDisplayText)
 	registerHandler(oscServer, "^/clock/seconds/off", server.handleSecondsOff)
 	registerHandler(oscServer, "^/clock/seconds/on", server.handleSecondsOn)
 	registerHandler(oscServer, "^/clock/time/set", server.handleTimeSet)
-	registerHandler(oscServer, "^/clock/ltc", server.handleLTC)
 
 	// Deprecated
 	registerHandler(oscServer, "^/clock/dual/text", server.handleDualText)
@@ -474,4 +491,10 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/countdown2/modify", server.handleTimerModify)
 	registerHandler(oscServer, "^/clock/countdown/stop", server.handleTimerStop)
 	registerHandler(oscServer, "^/clock/countdown2/stop", server.handleTimerStop)
+}
+
+func registerHandler(server *osc.Server, addr string, handler osc.HandlerFunc) {
+	if err := server.Handle(addr, handler); err != nil {
+		panic(err)
+	}
 }
