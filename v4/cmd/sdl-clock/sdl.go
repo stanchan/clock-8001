@@ -43,7 +43,7 @@ func initSDL() {
 		log.Fatalf("Failed to initialize SDL: %s\n", err)
 	}
 
-	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_OPENGL+sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE); err != nil {
+	if window, err = sdl.CreateWindow(winTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, winWidth, winHeight, sdl.WINDOW_OPENGL+sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE+sdl.WINDOW_ALLOW_HIGHDPI); err != nil {
 		log.Fatalf("Failed to create window: %s\n", err)
 	}
 

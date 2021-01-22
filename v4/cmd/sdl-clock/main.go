@@ -65,7 +65,7 @@ func main() {
 		// FIXME: rpi display scaling fix
 		// Dual clock
 		x, y, _ := renderer.GetOutputSize()
-
+		log.Printf("SDL2 output size: %v, %v", x, y)
 		if x > y {
 			err = renderer.SetLogicalSize(1920, 1080)
 			check(err)
