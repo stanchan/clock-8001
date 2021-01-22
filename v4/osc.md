@@ -69,6 +69,13 @@ Hide the time source.
 
 Show the time source.
 
+### `/clock/source/*/title`
+
+Set the title text for the given source.
+
+Parameters:
+1. string; the label text in utf8 encoding.
+
 ### `/clock/hide`
 
 Hide all time sources.

@@ -367,6 +367,10 @@ func (engine *Engine) listen() {
 				if message.Counter >= 0 && message.Counter < len(engine.sources) {
 					engine.sources[message.Counter].hidden = false
 				}
+			case "sourceTitle":
+				if message.Counter >= 0 && message.Counter < len(engine.sources) {
+					engine.sources[message.Counter].title = message.Data
+				}
 			case "showInfo":
 				engine.showInfo = true
 				engine.infoTimer.Reset(time.Duration(message.Counter) * time.Second)

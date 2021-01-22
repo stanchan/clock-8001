@@ -127,6 +127,32 @@ func (server *Server) handleShow(msg *osc.Message) {
 	server.parseSourceMsg(msg, "sourceShow")
 }
 
+func (server *Server) handleSourceTitle(msg *osc.Message) {
+	debug.Printf("handleSourceTitle: %v", msg)
+
+	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		var label string
+		err := msg.UnmarshalArguments(&label)
+		if err != nil {
+			log.Printf("handleSourceTitle error: %v", err)
+			return
+		}
+
+		msg := Message{
+			Type:    "sourceTitle",
+			Counter: counter - 1,
+			Data:    label,
+		}
+		server.update(msg)
+	} else {
+		log.Printf("matches: %v", matches)
+		log.Printf("invalid source message: %v\n", msg)
+	}
+
+}
+
 func (server *Server) handleCountupStart(msg *osc.Message) {
 	debug.Printf("countup start: %#v", msg)
 
@@ -418,6 +444,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/timer/*/resume", server.handleTimerResume)
 	registerHandler(oscServer, "^/clock/source/*/hide", server.handleHide)
 	registerHandler(oscServer, "^/clock/source/*/show", server.handleShow)
+	registerHandler(oscServer, "^/clock/source/*/title", server.handleSourceTitle)
 	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
 	registerHandler(oscServer, "^/clock/resetmedia/*", server.handleResetMedia)
 	registerHandler(oscServer, "^/clock/background", server.handleBackground)
