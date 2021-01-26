@@ -78,6 +78,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Booleans, no validation on them
 	newOptions.Debug = r.FormValue("Debug") != ""
+	newOptions.SingleLine = r.FormValue("SingleLine") != ""
 	newOptions.DisableHTTP = r.FormValue("DisableHTTP") != ""
 	newOptions.NoARCorrection = r.FormValue("NoARCorrection") != ""
 	newOptions.EngineOptions.DisableOSC = r.FormValue("DisableOSC") != ""

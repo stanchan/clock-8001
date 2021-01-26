@@ -129,6 +129,9 @@ countdown-color={{.CountdownColor}}
 
 # Text clock
 
+# Set to true to render only a single full screen timer
+SingleLine={{.SingleLine}}
+
 # Color for labels
 label-color={{.LabelColor}}
 

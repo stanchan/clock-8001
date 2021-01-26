@@ -125,17 +125,12 @@ func drawTextClock(state *clock.State) {
 	// Clear output and setup background
 	prepareCanvas()
 
-	for i := range textClock.r {
-		if state.Clocks[i].Hidden {
-			continue
-		}
-		y = 25 + (365 * int32(i))
-		x = 530
-		numberBox := sdl.Rect{X: x, Y: y, W: 1380, H: 300}
-		textR := sdl.Rect{X: x + 300, Y: y, W: 1380 - 300, H: 300}
-		iconR := sdl.Rect{X: x, Y: y, W: 300, H: 300}
-		x = 10
-		labelR := sdl.Rect{X: x, Y: y, W: 500, H: 100}
+	if options.SingleLine && !state.Clocks[0].Hidden {
+		labelR := sdl.Rect{X: 25, Y: 115, H: 150, W: 900}
+		// 25px margin bellow label
+		numberBox := sdl.Rect{X: 25, Y: 290, H: 440, W: 1920 - 50}
+		iconR := sdl.Rect{X: 25, Y: 290, H: 440, W: 300}
+		textR := sdl.Rect{X: 375, Y: 290, H: 440, W: 1920 - 425}
 
 		if options.DrawBoxes {
 			// Draw the placeholder boxes for timers and labels
@@ -146,25 +141,70 @@ func drawTextClock(state *clock.State) {
 			renderer.FillRect(&labelR)
 		}
 
-		copyIntoRect(textClock.r[i].labelTex, labelR)
-		if state.Clocks[i].Mode != clock.LTC {
+		copyIntoRect(textClock.r[0].labelTex, labelR)
+		if state.Clocks[0].Mode != clock.LTC {
 			// Clock time
 
-			copyIntoRect(textClock.r[i].textTex, textR)
-			if textClock.r[i].iconTex != nil {
-				copyIntoRect(textClock.r[i].iconTex, iconR)
+			copyIntoRect(textClock.r[0].textTex, textR)
+			if textClock.r[0].iconTex != nil {
+				copyIntoRect(textClock.r[0].iconTex, iconR)
 			} else {
 				debug.Printf("Nil icon texture!")
 			}
-
 		} else {
 			// LTC
-
 			// Maintain little spacing with the box borders
 			numberBox.Y = numberBox.Y + 10
 			numberBox.W = numberBox.W - 20
 
-			copyIntoRect(textClock.r[i].textTex, numberBox)
+			copyIntoRect(textClock.r[0].textTex, numberBox)
+		}
+	} else if options.SingleLine && state.Clocks[0].Hidden {
+		// Nothing to do
+	} else {
+		// 3 rows
+		for i := range textClock.r {
+			if state.Clocks[i].Hidden {
+				// Row is hidden
+				continue
+			}
+			y = 25 + (365 * int32(i))
+			x = 530
+			numberBox := sdl.Rect{X: x, Y: y, W: 1380, H: 300}
+			textR := sdl.Rect{X: x + 300, Y: y, W: 1380 - 300, H: 300}
+			iconR := sdl.Rect{X: x, Y: y, W: 300, H: 300}
+			x = 10
+			labelR := sdl.Rect{X: x, Y: y, W: 500, H: 100}
+
+			if options.DrawBoxes {
+				// Draw the placeholder boxes for timers and labels
+				renderer.SetDrawColor(colors.timerBG.R, colors.timerBG.G, colors.timerBG.B, colors.timerBG.A)
+				renderer.FillRect(&numberBox)
+
+				renderer.SetDrawColor(colors.labelBG.R, colors.labelBG.G, colors.labelBG.B, colors.labelBG.A)
+				renderer.FillRect(&labelR)
+			}
+
+			copyIntoRect(textClock.r[i].labelTex, labelR)
+			if state.Clocks[i].Mode != clock.LTC {
+				// Clock time
+
+				copyIntoRect(textClock.r[i].textTex, textR)
+				if textClock.r[i].iconTex != nil {
+					copyIntoRect(textClock.r[i].iconTex, iconR)
+				} else {
+					debug.Printf("Nil icon texture!")
+				}
+
+			} else {
+				// LTC
+
+				// Maintain little spacing with the box borders
+				numberBox.Y = numberBox.Y + 10
+				numberBox.W = numberBox.W - 20
+
+				copyIntoRect(textClock.r[i].textTex, numberBox)
+			}
 		}
 	}
 
@@ -172,7 +212,7 @@ func drawTextClock(state *clock.State) {
 	if state.Tally != "" {
 		tallyColor := sdl.Color{state.TallyColor.R, state.TallyColor.G, state.TallyColor.B, state.TallyColor.A}
 		tallyTexture := renderText(state.Tally, textClock.labelFont, tallyColor)
-		tallyRect := sdl.Rect{X: 10, Y: 25 + (365 * 2), W: 1920 - 20, H: 300}
+		tallyRect := sdl.Rect{X: 25, Y: 25 + (365 * 2), W: 1920 - 50, H: 300}
 
 		renderer.SetDrawColor(
 			state.TallyBG.R,

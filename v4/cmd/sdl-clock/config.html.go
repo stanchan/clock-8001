@@ -29,6 +29,11 @@ const configHTML = `
 						</select><br />
 					</label>
 
+					<label for="SingleLine">
+						<span>Render only one full screen timer in text clock face.</span>
+						<input type="checkbox" id="SingleLine" name="SingleLine" {{if .SingleLine}} checked {{end}}/>
+					</label>
+
 					<label for="Format12h">
 						<span>Use 12 hour format for time-of-day display</span>
 						<input type="checkbox" id="Format12h" name="Format12h" {{if .EngineOptions.Format12h}} checked {{end}}/>

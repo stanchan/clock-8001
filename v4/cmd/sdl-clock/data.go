@@ -66,6 +66,7 @@ type clockOptions struct {
 	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
 	NumberFontSize int    `long:"numbers-size" default:"250"`
 	FontPath       string `long:"font-path" description:"Path for loading font choices into web config" default:"."`
+	SingleLine     bool   `long:"single-line" description:"Only render a single timer in the text clock"`
 
 	CountdownTarget string `long:"countdown-target" default:"2020-12-24 00:00:00"`
 	Raspberry       bool   // Is the host a raspberry pi
