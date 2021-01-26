@@ -355,7 +355,6 @@ func (server *Server) handleInfo(msg *osc.Message) {
 		Counter: int(bg),
 	}
 	server.update(m)
-
 }
 
 /*
