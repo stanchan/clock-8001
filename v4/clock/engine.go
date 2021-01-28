@@ -2,6 +2,7 @@ package clock
 
 import (
 	"fmt"
+	"github.com/denisbrodbeck/machineid"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/v4/debug"
@@ -120,6 +121,7 @@ type Engine struct {
 	info            string // Version, ip address etc
 	showInfo        bool
 	infoTimer       *timer.Timer
+	uuid            string // Clock unique id
 }
 
 // Clock contains the state of a single component clock / timer
@@ -206,7 +208,11 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		log.Fatalf("Invalid --millumin-ignore-layer=%v: %v", options.Ignore, err)
 	}
 	engine.ignoreRegexp = regexp
-
+	uuid, err := machineid.ProtectedID("clock-8001")
+	if err != nil {
+		log.Fatalf("Failed to generate unique identifier: %v", err)
+	}
+	engine.uuid = uuid
 	engine.prepareInfo()
 
 	engine.infoTimer = timer.NewTimer(time.Duration(options.ShowInfo) * time.Second)
@@ -219,6 +225,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 
 func (engine *Engine) prepareInfo() {
 	info := fmt.Sprintf("Clock-8001 version: %v\n\n", gitTag)
+	info += fmt.Sprintf("ID: %v\n", engine.uuid[len(engine.uuid)-8:])
 	info += fmt.Sprintf("IP-addresses:\n%s", clockAddresses())
 
 	if engine.oscServer.Addr != "" {

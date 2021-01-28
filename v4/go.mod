@@ -3,6 +3,7 @@ module gitlab.com/Depili/clock-8001/v4
 go 1.13
 
 require (
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/husl-colors/husl-go v2.0.0+incompatible // indirect
