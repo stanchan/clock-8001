@@ -1,6 +1,35 @@
 # OSC API commands
 **The API can change until version 4 leaves beta stage**
 
+## Feedback messages
+
+The clock sends feedback with `/clock/source/*/state` and `/clock/timer/*/state` messages.
+
+### `/clock/source/*/state`
+
+1. string; Clock UUID
+2. bool; is the source hidden
+3. string; source output string, generally HH:MM:SS or HH:MM:SS:FF for timecode
+4. string; source compact output
+5. string; icon for source mode
+6. float; source timer progress, 0-1
+7. boolean; is the source timer expired
+8. boolean; is the source timer paused
+9. string; title for the source
+10. int; source mode
+
+
+### `/clock/timer/*/state`
+
+1. string; Clock UUID
+2. bool; is the timer active
+3. string; timer output, generally HH:MM:SS, but HH:MM:SS:FF for timecode
+4. string; timer compact output
+5. string; icon for the current timer mode
+6. float; timer progress 0-1
+7. boolean; is the timer expired
+8. boolean; is the timer paused
+
 ## Timers
 
 In the following command addresses `*` denotes the timer number, in range of 0 - 9.

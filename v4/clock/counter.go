@@ -102,6 +102,10 @@ func (counter *Counter) mediaOutput() *CounterOutput {
 }
 
 func (counter *Counter) normalOutput(t time.Time) *CounterOutput {
+	if !counter.active {
+		return &CounterOutput{Active: false}
+	}
+
 	var icon string
 	diff := counter.Diff(t).Truncate(time.Second)
 
@@ -141,6 +145,7 @@ func (counter *Counter) normalOutput(t time.Time) *CounterOutput {
 		Progress:  progress,
 		Diff:      diff,
 	}
+
 	return out
 }
 

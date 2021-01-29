@@ -400,8 +400,43 @@ func (engine *Engine) listen() {
 	}
 }
 
-// Send the clock state as /clock/state
+// Sends the OSC feedback messages
 func (engine *Engine) sendState(state *State) error {
+	if engine.oscDests == nil {
+		// No osc connection
+		return nil
+	}
+	t := time.Now()
+	engine.sendLegacyState(state)
+
+	for i, s := range state.Clocks {
+		addr := fmt.Sprintf("/clock/source/%d/state", i)
+
+		packet := osc.NewMessage(addr, engine.uuid, s.Hidden, s.Text, s.Compact, s.Icon, float32(s.Progress), s.Expired, s.Paused, s.Label, int32(s.Mode))
+		data, err := packet.MarshalBinary()
+		if err != nil {
+			return err
+		}
+		engine.oscDests.Write(data)
+	}
+
+	for i, c := range engine.Counters {
+		addr := fmt.Sprintf("/clock/timer/%d/state", i)
+		out := c.Output(t)
+
+		packet := osc.NewMessage(addr, engine.uuid, out.Active, out.Text, out.Compact, out.Icon, float32(out.Progress), out.Expired, out.Paused)
+
+		data, err := packet.MarshalBinary()
+		if err != nil {
+			return err
+		}
+		engine.oscDests.Write(data)
+	}
+	return nil
+}
+
+// Send the clock state as /clock/state
+func (engine *Engine) sendLegacyState(state *State) error {
 	if engine.oscDests == nil {
 		// No osc connection
 		return nil
