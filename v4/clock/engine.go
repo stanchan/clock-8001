@@ -21,6 +21,9 @@ import (
 // Version is the current clock engine version
 const Version = "4.0.0"
 
+// State feedback timer
+const stateTimer = time.Second / 2
+
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
 var gitTag = "v4.0.0"
@@ -263,6 +266,7 @@ func (engine *Engine) listen() {
 
 	mittiTimer := timer.NewTimer(updateTimeout)
 	milluminTimer := timer.NewTimer(updateTimeout)
+	stateTicker := time.NewTicker(stateTimer)
 
 	for {
 		select {
@@ -396,6 +400,12 @@ func (engine *Engine) listen() {
 		case <-ltcTimer.C:
 			// LTC message timeout
 			engine.ltcTimeout = true
+		case <-stateTicker.C:
+			// Send OSC feedback
+			state := engine.State()
+			if err := engine.sendState(state); err != nil {
+				log.Printf("Error sending osc state: %v", err)
+			}
 		}
 	}
 }
@@ -566,11 +576,6 @@ func (engine *Engine) State() *State {
 		state.Tally = engine.message
 		state.TallyColor = engine.messageColor
 		state.TallyBG = engine.messageBG
-	}
-
-	// Send OSC feedback
-	if err := engine.sendState(&state); err != nil {
-		log.Printf("Error sending osc state: %v", err)
 	}
 
 	return &state
