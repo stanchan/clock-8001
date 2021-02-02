@@ -572,7 +572,6 @@ func (engine *Engine) State() *State {
 	}
 
 	if engine.oscTally {
-		fmt.Printf("f\n")
 		state.Tally = engine.message
 		state.TallyColor = engine.messageColor
 		state.TallyBG = engine.messageBG
