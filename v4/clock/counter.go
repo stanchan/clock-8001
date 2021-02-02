@@ -114,6 +114,15 @@ func (counter *Counter) normalOutput(t time.Time) *CounterOutput {
 	seconds := int(diff.Truncate(time.Second).Seconds()) - (((hours * 60) + minutes) * 60)
 
 	progress := (float64(diff) / float64(counter.state.duration))
+	expired := diff.Seconds() < 1
+
+	if expired {
+		hours = 0
+		minutes = 0
+		seconds = 0
+		progress = 1
+	}
+
 	if progress >= 1 {
 		progress = 1
 	} else if progress < 0 {
@@ -135,7 +144,7 @@ func (counter *Counter) normalOutput(t time.Time) *CounterOutput {
 		Active:    counter.active,
 		Countdown: counter.countdown,
 		Paused:    counter.paused,
-		Expired:   diff.Seconds() < 1,
+		Expired:   expired,
 		Hours:     hours,
 		Minutes:   minutes,
 		Seconds:   seconds,
