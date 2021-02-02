@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"gitlab.com/Depili/clock-8001/v4/clock"
@@ -210,16 +211,33 @@ func drawTextClock(state *clock.State) {
 
 	// Draw possible OSC text message
 	if state.Tally != "" {
-		tallyColor := sdl.Color{state.TallyColor.R, state.TallyColor.G, state.TallyColor.B, state.TallyColor.A}
+		tallyColor := sdl.Color{
+			R: state.TallyColor.R,
+			G: state.TallyColor.G,
+			B: state.TallyColor.B,
+			A: state.TallyColor.A,
+		}
+		bgColor := sdl.Color{
+			R: state.TallyBG.R,
+			G: state.TallyBG.G,
+			B: state.TallyBG.B,
+			A: state.TallyBG.A,
+		}
 		tallyTexture := renderText(state.Tally, textClock.labelFont, tallyColor)
+		tallyTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
+		tallyTexture.SetAlphaMod(tallyColor.A)
+
 		tallyRect := sdl.Rect{X: 25, Y: 25 + (365 * 2), W: 1920 - 50, H: 300}
 
-		renderer.SetDrawColor(
-			state.TallyBG.R,
-			state.TallyBG.G,
-			state.TallyBG.B,
-			state.TallyBG.A)
-		renderer.FillRect(&tallyRect)
+		x1 := tallyRect.X
+		y1 := tallyRect.Y
+
+		x2 := x1 + tallyRect.W
+		y2 := y1 + tallyRect.H
+
+		gfx.BoxColor(renderer, x1, y1, x2, y2, bgColor)
+
+		// renderer.FillRect(&tallyRect)
 		copyIntoRect(tallyTexture, tallyRect)
 
 		tallyTexture.Destroy()
