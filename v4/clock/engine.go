@@ -331,7 +331,9 @@ func (engine *Engine) listen() {
 					A: uint8(msg.bgA),
 				}
 				engine.oscTally = true
-				tallyTimer.Reset(time.Duration(msg.time) * time.Second)
+				if msg.time != 0 {
+					tallyTimer.Reset(time.Duration(msg.time) * time.Second)
+				}
 			case "pause":
 				engine.Pause()
 			case "resume":

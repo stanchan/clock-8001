@@ -131,7 +131,7 @@ Parameters:
 
 ### `/clock/text`
 
-Shows a text message on the clock face.
+Shows a text message on the clock face. Specify duration of 0 for infinite duration.
 
 Parameters:
 1. integer; the red color component for the text color, 0-255
