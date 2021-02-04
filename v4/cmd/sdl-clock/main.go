@@ -280,7 +280,7 @@ func defaultSourceConfig() {
 		LTC:      true,
 		UDP:      true,
 		Timer:    true,
-		Counter:  0,
+		Counter:  1,
 		Tod:      true,
 		TimeZone: "Europe/Helsinki",
 	}
@@ -289,7 +289,7 @@ func defaultSourceConfig() {
 		LTC:      true,
 		UDP:      true,
 		Timer:    true,
-		Counter:  1,
+		Counter:  2,
 		Tod:      true,
 		TimeZone: "Europe/Helsinki",
 	}
@@ -298,7 +298,7 @@ func defaultSourceConfig() {
 		LTC:      true,
 		UDP:      true,
 		Timer:    true,
-		Counter:  2,
+		Counter:  3,
 		Tod:      true,
 		TimeZone: "Europe/Helsinki",
 	}
@@ -307,7 +307,7 @@ func defaultSourceConfig() {
 		LTC:      true,
 		UDP:      true,
 		Timer:    true,
-		Counter:  3,
+		Counter:  4,
 		Tod:      true,
 		TimeZone: "Europe/Helsinki",
 	}
