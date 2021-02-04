@@ -227,7 +227,11 @@ func drawTextClock(state *clock.State) {
 		tallyTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
 		tallyTexture.SetAlphaMod(tallyColor.A)
 
-		tallyRect := sdl.Rect{X: 25, Y: 25 + (365 * 2), W: 1920 - 50, H: 300}
+		tallyRect := sdl.Rect{X: 10, Y: 25 + (365 * 2), W: 1920 - 20, H: 300}
+		if options.SingleLine {
+			tallyRect.X = 25
+			tallyRect.W = 1920 - 50
+		}
 
 		x1 := tallyRect.X
 		y1 := tallyRect.Y
