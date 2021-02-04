@@ -22,6 +22,8 @@ var font *bdf.Bdf
 var showBackground bool
 var backgroundNumber int
 
+const updateTime = time.Second / 30
+
 func main() {
 	var err error
 
@@ -92,7 +94,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 
 	// Intialize polling timers
-	updateTicker := time.NewTicker(time.Millisecond * 30)
+	updateTicker := time.NewTicker(updateTime)
 	eventTicker := time.NewTicker(time.Millisecond * 5)
 
 	// Create main clock engine
