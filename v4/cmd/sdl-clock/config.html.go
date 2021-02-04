@@ -18,6 +18,14 @@ const configHTML = `
 		<div class="config-form">
 			<form action="/save" method="post">
 				<fieldset>
+					<legend>Project links</legend>
+					<ul>
+						<li><a href="https://gitlab.com/depili/clock-8001/">View the project on gitlab</a></li>
+						<li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=XUMXUL5RX5MWJ&currency_code=EUR">Support development of clock-8001 via Paypal</a></li>
+					</ul>
+				</fieldset>
+
+				<fieldset>
 					<legend>General settings</legend>
 					<label for="Face">
 						<span>Select the clock face to use</span>
@@ -475,7 +483,7 @@ const configHTML = `
 	</div>
 
 
-		<style type="text/css">
+	<style type="text/css">
 		h1 {
 			color: F072A9;
 			font-weight: bold;
@@ -499,7 +507,7 @@ const configHTML = `
 			max-width: 800px;
 			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 		}
-		.config-form p{
+		p{
 			color: #F072A9;
 			font-weight: bold;
 			font-size: 13px;
@@ -608,7 +616,7 @@ const configHTML = `
 			color:red;
 			font-weight:normal;
 		}
-		</style>
-	</body>
+	</style>
+</body>
 </html>
 `
