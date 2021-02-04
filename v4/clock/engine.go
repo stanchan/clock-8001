@@ -509,6 +509,7 @@ func (engine *Engine) State() *State {
 		}
 		if s.off {
 			c.Mode = Off
+			c.Hidden = true
 		} else if s.ltc && engine.ltcActive {
 			c.Expired = engine.ltcTimeout
 			c.Mode = LTC

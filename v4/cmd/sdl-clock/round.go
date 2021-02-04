@@ -45,7 +45,7 @@ func drawRoundClocks(state *clock.State) {
 				}
 				colors.tally = colors.text
 
-			} else {
+			} else if !mainClock.Hidden {
 				parts := strings.Split(mainClock.Text, ":")
 				hours = parts[0]
 				minutes = parts[1]
@@ -97,7 +97,7 @@ func drawRoundClocks(state *clock.State) {
 				tally = fmt.Sprintf("%-.4s", state.Tally)
 				colors.tally = sdl.Color{R: state.TallyColor.R, G: state.TallyColor.G, B: state.TallyColor.B, A: 255}
 
-			} else if auxClock.Mode != clock.Normal {
+			} else if auxClock.Mode != clock.Normal && !auxClock.Hidden {
 				if auxClock.Expired {
 					if state.Flash {
 						tally = " 00"
