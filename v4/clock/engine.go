@@ -6,6 +6,7 @@ import (
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/v4/debug"
+	"gitlab.com/Depili/clock-8001/v4/udptime"
 	"image/color"
 	"log"
 	"net"
@@ -50,6 +51,9 @@ type EngineOptions struct {
 	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC feedback"`
 	DisableLTC      bool   `long:"disable-ltc" description:"Disable LTC display mode"`
 	LTCSeconds      bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
+	DisableUDPTime  bool   `long:"disable-udp-time" description:"Disable sending of UDP time messages"`
+	UDPTimer1       int    `long:"udp-timer-1" description:"Timer to send as UDP timer 1 (port 36700)" default:"1"`
+	UDPTimer2       int    `long:"udp-timer-2" description:"Timer to send as UDP timer 2 (port 36701)" default:"2"`
 	LTCFollow       bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
 	Format12h       bool   `long:"format-12h" description:"Use 12 hour format for time-of-day display"`
 	Mitti           int    `long:"mitti" description:"Counter number for Mitti OSC feedback" default:"8"`
@@ -105,18 +109,19 @@ type Engine struct {
 	message         string        // Full tally message as received from OSC
 	messageColor    *color.RGBA   // Tally message color from OSC
 	messageBG       *color.RGBA
-	oscDests        *feedbackDestination // udp connections to send osc feedback to
-	initialized     bool                 // Show version on startup until ntp synced or receiving OSC control
-	ltc             *ltcData             // LTC time code status
-	ltcShowSeconds  bool                 // Toggles led display on LTC mode between seconds and frames
-	ltcFollow       bool                 // Continue on internal timer if LTC signal is lost
-	ltcEnabled      bool                 // Toggle LTC mode on or off
-	ltcTimeout      bool                 // Set to true if LTC signal is lost by the ltc timer
-	ltcActive       bool                 // Do we have a active LTC to display?
-	udpActive       bool                 // Do we have a active UDP time to display?
-	DualText        string               // Dual clock mode text message, 8 characters
-	format12h       bool                 // Use 12 hour format for time-of-day
-	off             bool                 // Is the engine output off?
+	oscDests        *feedbackDestination   // udp connections to send osc feedback to
+	udpDests        []*feedbackDestination // Stagetimer2 udp time destinations
+	udpCounters     []*Counter
+	initialized     bool     // Show version on startup until ntp synced or receiving OSC control
+	ltc             *ltcData // LTC time code status
+	ltcShowSeconds  bool     // Toggles led display on LTC mode between seconds and frames
+	ltcFollow       bool     // Continue on internal timer if LTC signal is lost
+	ltcEnabled      bool     // Toggle LTC mode on or off
+	ltcTimeout      bool     // Set to true if LTC signal is lost by the ltc timer
+	ltcActive       bool     // Do we have a active LTC to display?
+	DualText        string   // Dual clock mode text message, 8 characters
+	format12h       bool     // Use 12 hour format for time-of-day
+	off             bool     // Is the engine output off?
 	ignoreRegexp    *regexp.Regexp
 	mittiCounter    *Counter
 	milluminCounter *Counter
@@ -168,7 +173,6 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		ltcFollow:      options.LTCFollow,
 		ltcEnabled:     !options.DisableLTC,
 		ltcActive:      false,
-		udpActive:      false,
 		format12h:      options.Format12h,
 		off:            false,
 	}
@@ -222,6 +226,16 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	go engine.infoTimeout()
 	engine.showInfo = true
 	fmt.Printf(engine.info)
+
+	// Stagetimer2 UDP time reception
+	if !options.DisableUDPTime {
+		engine.udpDests = make([]*feedbackDestination, 2)
+		engine.udpDests[0] = initFeedback("255.255.255.255:36700")
+		engine.udpDests[1] = initFeedback("255.255.255.255:36701")
+		engine.udpCounters = make([]*Counter, 2)
+		engine.udpCounters[0] = engine.Counters[options.UDPTimer1]
+		engine.udpCounters[1] = engine.Counters[options.UDPTimer2]
+	}
 
 	return &engine, nil
 }
@@ -444,6 +458,19 @@ func (engine *Engine) sendState(state *State) error {
 		}
 		engine.oscDests.Write(data)
 	}
+
+	for i, conn := range engine.udpDests {
+		c := engine.udpCounters[i].Output(t)
+		msg := udptime.Message{
+			Minutes: c.Minutes,
+			Seconds: c.Seconds,
+			Red:     c.Countdown,
+			Green:   !c.Countdown,
+		}
+		data := udptime.Encode(&msg)
+		conn.Write(data)
+	}
+
 	return nil
 }
 
@@ -528,7 +555,7 @@ func (engine *Engine) State() *State {
 				// Timeout without follow mode
 				c.Text = ""
 			}
-		} else if s.udp && engine.udpActive {
+		} else if s.udp && false {
 			// UDP time reception
 
 		} else if s.timer && s.counter.active {

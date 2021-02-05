@@ -114,6 +114,8 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	newOptions.DrawBoxes = r.FormValue("DrawBoxes") != ""
 
+	newOptions.EngineOptions.DisableUDPTime = r.FormValue("disable-udp-time") != ""
+
 	// Strings, will not be validated
 	newOptions.HTTPUser = r.FormValue("HTTPUser")
 	newOptions.HTTPPassword = r.FormValue("HTTPPassword")
@@ -195,6 +197,12 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	newOptions.NumberFontSize, err = strconv.Atoi(r.FormValue("NumberFontSize"))
 	validateNumber(err, "Number font size")
+
+	newOptions.EngineOptions.UDPTimer1, err = strconv.Atoi(r.FormValue("udp-timer-1"))
+	validateNumber(err, "UDP Timer 1")
+
+	newOptions.EngineOptions.UDPTimer2, err = strconv.Atoi(r.FormValue("udp-timer-2"))
+	validateNumber(err, "UDP Timer 2")
 
 	// Colors
 	newOptions.TextColor = r.FormValue("TextColor")

@@ -329,6 +329,24 @@ const configHTML = `
 					<input type="text" id="millumin-ignore" name="millumin-ignore" value="{{.EngineOptions.Ignore}}" />
 				</label>
 			</fieldset>
+
+			<fieldset>
+				<legend>StageTimer2 UDP messages</legend>
+				<label for="disable-udp-time">
+						<span>Disable StageTimer2 UDP time reception</span>
+						<input type="checkbox" id="disable-udp-time" name="disable-udp-time" {{if .EngineOptions.DisableUDPTime}} checked {{end}} />
+				</label>
+
+				<label for="upd-timer-1">
+					<span>Timer number for StageTimer2 UDP timer 1 from port 36700</span>
+					<input type="number" min="0" max="9" id="udp-timer-1" name="udp-timer-1" value="{{.EngineOptions.UDPTimer1}}" />
+				</label>
+
+				<label for="upd-timer-2">
+					<span>Timer number for StageTimer2 UDP timer 2 from port 36701</span>
+					<input type="number" min="0" max="9" id="udp-timer-2" name="udp-timer-2" value="{{.EngineOptions.UDPTimer2}}" />
+				</label>
+			</fieldset>
 			<fieldset>
 				<legend>Colors</legend>
 

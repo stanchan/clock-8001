@@ -41,6 +41,15 @@ IconFont={{.IconFont}}
 # Show clock info for X seconds at startup
 info-timer={{.EngineOptions.ShowInfo}}
 
+# Disable sending of Stagetimer2 UDP time messages
+disable-udp-time={{.EngineOptions.DisableUDPTime}}
+
+# Timer to send as UDP timer 1 (port 36700)
+udp-timer-1={{.EngineOptions.UDPTimer1}}
+
+# Timer to send as UDP timer 1 (port 36700)
+udp-timer-2={{.EngineOptions.UDPTimer2}}
+
 # Time sources
 #
 # The single round clock uses source 1 as the main display and source 2 as a secondary timer
