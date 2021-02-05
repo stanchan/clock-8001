@@ -53,15 +53,11 @@ func (engine *Engine) updateMilluminClock(state millumin.State) error {
 
 		progress := float64(remaining) / float64(total)
 
-		engine.milluminCounter.SetMedia(hours, minutes, seconds, 0, remaining, progress, layerState.Paused, false)
 		engine.sendMedia("millumin", hours, minutes, seconds, 0, int32(layerState.Remaining()+1), progress, layerState.Paused, false)
 
 		return nil
 	}
 	// No playing media found
-	engine.milluminCounter.ResetMedia()
-
-	// FIXME: send no media to others
 	engine.sendResetMedia("millumin")
 
 	return err
@@ -92,7 +88,6 @@ func (engine *Engine) updateMittiClock(state mitti.State) error {
 	debug.Printf("Mitti update, remaining: %v total: %v\n", remaining.Seconds(), total.Seconds())
 
 	debug.Printf(" -> update state: %02d:%02d:%02d", state.Hours, state.Minutes, state.Seconds)
-	engine.mittiCounter.SetMedia(hours, minutes, seconds, frames, remaining, progress, state.Paused, state.Loop)
 	engine.sendMedia("mitti", hours, minutes, seconds, frames, int32(state.Remaining), progress, state.Paused, state.Loop)
 
 	/* TODO: loop?
@@ -121,7 +116,7 @@ func (engine *Engine) runMittiClockClient(listenChan chan mitti.State) {
 				debug.Printf("Mitti: update clock: %v\n", state)
 			}
 		case <-timeout.C:
-			engine.mittiCounter.ResetMedia()
+			engine.sendResetMedia("mitti")
 		}
 	}
 }
@@ -135,12 +130,16 @@ func (engine *Engine) startClockClient(milluminListener *millumin.Listener, mitt
 
 func (engine *Engine) sendMedia(player string, hours, minutes, seconds, frames, remaining int32, progress float64, paused, looping bool) error {
 	if engine.oscDests == nil {
-		// No osc connection
+		switch player {
+		case "millumin":
+			engine.milluminCounter.SetMedia(hours, minutes, seconds, frames, time.Duration(remaining)*time.Second, progress, paused, looping)
+		case "mitti":
+			engine.mittiCounter.SetMedia(hours, minutes, seconds, frames, time.Duration(remaining)*time.Second, progress, paused, looping)
+		}
 		return nil
 	}
 
 	address := fmt.Sprintf("/clock/media/%s", player)
-
 	packet := osc.NewMessage(address, hours, minutes, seconds, frames, remaining, progress, paused, looping)
 
 	data, err := packet.MarshalBinary()
@@ -154,12 +153,16 @@ func (engine *Engine) sendMedia(player string, hours, minutes, seconds, frames, 
 
 func (engine *Engine) sendResetMedia(player string) error {
 	if engine.oscDests == nil {
-		// No osc connection
+		switch player {
+		case "millumin":
+			engine.milluminCounter.ResetMedia()
+		case "mitti":
+			engine.mittiCounter.ResetMedia()
+		}
 		return nil
 	}
 
 	address := fmt.Sprintf("/clock/resetmedia/%s", player)
-
 	packet := osc.NewMessage(address)
 
 	data, err := packet.MarshalBinary()
@@ -169,5 +172,4 @@ func (engine *Engine) sendResetMedia(player string) error {
 	engine.oscDests.Write(data)
 
 	return nil
-
 }
