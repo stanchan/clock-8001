@@ -461,9 +461,17 @@ func (engine *Engine) sendState(state *State) error {
 
 	for i, conn := range engine.udpDests {
 		c := engine.udpCounters[i].Output(t)
+		mins := c.Minutes
+		secs := c.Seconds
+
+		if c.Hours != 0 {
+			// If timer is over an hour send hours and minutes
+			mins = c.Hours
+			secs = c.Minutes
+		}
 		msg := udptime.Message{
-			Minutes: c.Minutes,
-			Seconds: c.Seconds,
+			Minutes: mins,
+			Seconds: secs,
 			Red:     c.Countdown,
 			Green:   !c.Countdown,
 		}
