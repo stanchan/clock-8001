@@ -150,7 +150,7 @@ func (engine *Engine) sendMedia(player string, hours, minutes, seconds, frames, 
 		log.Printf("sendMedia error: %v", err)
 		return err
 	}
-	engine.oscDests.Write(data)
+	engine.oscSendChan <- data
 
 	return nil
 }
@@ -174,7 +174,7 @@ func (engine *Engine) sendResetMedia(player string) error {
 		log.Printf("sendResetMedia error: %v", err)
 		return err
 	}
-	engine.oscDests.Write(data)
+	engine.oscSendChan <- data
 
 	return nil
 }

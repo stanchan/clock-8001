@@ -109,7 +109,8 @@ type Engine struct {
 	message         string        // Full tally message as received from OSC
 	messageColor    *color.RGBA   // Tally message color from OSC
 	messageBG       *color.RGBA
-	oscDests        *feedbackDestination   // udp connections to send osc feedback to
+	oscDests        *feedbackDestination // udp connections to send osc feedback to
+	oscSendChan     chan []byte
 	udpDests        []*feedbackDestination // Stagetimer2 udp time destinations
 	udpCounters     []*Counter
 	initialized     bool     // Show version on startup until ntp synced or receiving OSC control
@@ -456,7 +457,7 @@ func (engine *Engine) sendState(state *State) error {
 	if err != nil {
 		return err
 	}
-	engine.oscDests.Write(data)
+	engine.oscSendChan <- data
 
 	for i, conn := range engine.udpDests {
 		c := engine.udpCounters[i].Output(t)
@@ -516,7 +517,7 @@ func (engine *Engine) sendLegacyState(state *State) error {
 	if err != nil {
 		return err
 	}
-	engine.oscDests.Write(data)
+	engine.oscSendChan <- data
 
 	return nil
 }
@@ -877,6 +878,16 @@ func (engine *Engine) initOSC(options *EngineOptions) {
 		}
 	} else {
 		log.Printf("OSC control and feedback disabled.\n")
+	}
+	engine.oscSendChan = make(chan []byte, 100)
+	go engine.oscSender()
+}
+
+func (engine *Engine) oscSender() {
+	for data := range engine.oscSendChan {
+		if engine.oscDests != nil {
+			engine.oscDests.Write(data)
+		}
 	}
 }
 
