@@ -53,11 +53,13 @@ func (engine *Engine) updateMilluminClock(state millumin.State) error {
 
 		progress := float64(remaining) / float64(total)
 
+		engine.milluminCounter.SetMedia(hours, minutes, seconds, 0, remaining, progress, layerState.Paused, false)
 		engine.sendMedia("millumin", hours, minutes, seconds, 0, int32(layerState.Remaining()+1), progress, layerState.Paused, false)
 
 		return nil
 	}
 	// No playing media found
+	engine.milluminCounter.ResetMedia()
 	engine.sendResetMedia("millumin")
 
 	return err
@@ -88,6 +90,7 @@ func (engine *Engine) updateMittiClock(state mitti.State) error {
 	debug.Printf("Mitti update, remaining: %v total: %v\n", remaining.Seconds(), total.Seconds())
 
 	debug.Printf(" -> update state: %02d:%02d:%02d", state.Hours, state.Minutes, state.Seconds)
+	engine.mittiCounter.SetMedia(hours, minutes, seconds, frames, remaining, progress, state.Paused, state.Loop)
 	engine.sendMedia("mitti", hours, minutes, seconds, frames, int32(state.Remaining), progress, state.Paused, state.Loop)
 
 	/* TODO: loop?
@@ -116,6 +119,7 @@ func (engine *Engine) runMittiClockClient(listenChan chan mitti.State) {
 				debug.Printf("Mitti: update clock: %v\n", state)
 			}
 		case <-timeout.C:
+			engine.mittiCounter.ResetMedia()
 			engine.sendResetMedia("mitti")
 		}
 	}
@@ -138,12 +142,12 @@ func (engine *Engine) sendMedia(player string, hours, minutes, seconds, frames, 
 		}
 		return nil
 	}
-
 	address := fmt.Sprintf("/clock/media/%s", player)
-	packet := osc.NewMessage(address, hours, minutes, seconds, frames, remaining, progress, paused, looping)
+	packet := osc.NewMessage(address, hours, minutes, seconds, frames, remaining, progress, paused, looping, *osc.NewTimetag(time.Now()))
 
 	data, err := packet.MarshalBinary()
 	if err != nil {
+		log.Printf("sendMedia error: %v", err)
 		return err
 	}
 	engine.oscDests.Write(data)
@@ -163,10 +167,11 @@ func (engine *Engine) sendResetMedia(player string) error {
 	}
 
 	address := fmt.Sprintf("/clock/resetmedia/%s", player)
-	packet := osc.NewMessage(address)
+	packet := osc.NewMessage(address, *osc.NewTimetag(time.Now()))
 
 	data, err := packet.MarshalBinary()
 	if err != nil {
+		log.Printf("sendResetMedia error: %v", err)
 		return err
 	}
 	engine.oscDests.Write(data)

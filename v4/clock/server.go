@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 const (
@@ -33,6 +34,7 @@ type Server struct {
 	Debug        bool
 	timerRegexp  *regexp.Regexp
 	sourceRegexp *regexp.Regexp
+	lastMedia    time.Time
 }
 
 // Listen adds a new listener for the decoded incoming osc messages
@@ -259,8 +261,11 @@ func (server *Server) handleMedia(msg *osc.Message) {
 	if err != nil {
 		log.Printf("error unmarshaling media message: %v", err)
 	}
-	message.MediaMessage = &mm
-	server.update(message)
+	if server.lastMedia.Before(mm.timeStamp.Time()) {
+		server.lastMedia = mm.timeStamp.Time()
+		message.MediaMessage = &mm
+		server.update(message)
+	}
 }
 
 func (server *Server) handleResetMedia(msg *osc.Message) {
