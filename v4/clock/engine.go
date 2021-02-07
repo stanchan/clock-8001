@@ -435,15 +435,13 @@ func (engine *Engine) sendState(state *State) error {
 	t := time.Now()
 	engine.sendLegacyState(state)
 
+	bundle := osc.NewBundle(time.Now())
+
 	for i, s := range state.Clocks {
 		addr := fmt.Sprintf("/clock/source/%d/state", i+1)
 
 		packet := osc.NewMessage(addr, engine.uuid, s.Hidden, s.Text, s.Compact, s.Icon, float32(s.Progress), s.Expired, s.Paused, s.Label, int32(s.Mode))
-		data, err := packet.MarshalBinary()
-		if err != nil {
-			return err
-		}
-		engine.oscDests.Write(data)
+		bundle.Append(packet)
 	}
 
 	for i, c := range engine.Counters {
@@ -451,13 +449,14 @@ func (engine *Engine) sendState(state *State) error {
 		out := c.Output(t)
 
 		packet := osc.NewMessage(addr, engine.uuid, out.Active, out.Text, out.Compact, out.Icon, float32(out.Progress), out.Expired, out.Paused)
-
-		data, err := packet.MarshalBinary()
-		if err != nil {
-			return err
-		}
-		engine.oscDests.Write(data)
+		bundle.Append(packet)
 	}
+
+	data, err := bundle.MarshalBinary()
+	if err != nil {
+		return err
+	}
+	engine.oscDests.Write(data)
 
 	for i, conn := range engine.udpDests {
 		c := engine.udpCounters[i].Output(t)

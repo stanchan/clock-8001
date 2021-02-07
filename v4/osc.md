@@ -1,9 +1,8 @@
 # OSC API commands
-**The API can change until version 4 leaves beta stage**
 
 ## Feedback messages
 
-The clock sends feedback with `/clock/source/*/state` and `/clock/timer/*/state` messages.
+The clock sends feedback with `/clock/source/*/state` and `/clock/timer/*/state` messages. The messages are sent as one OSC bundle
 
 ### `/clock/source/*/state`
 
