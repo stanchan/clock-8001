@@ -263,11 +263,9 @@ func (server *Server) handleMedia(msg *osc.Message) {
 	if err != nil {
 		log.Printf("error unmarshaling media message: %v", err)
 	}
-	log.Printf("Ours:    %v", server.uuid)
-	log.Printf("Theirs: %v", mm.uuid)
+
 	if mm.uuid == server.uuid {
 		// Our own message, ignore
-		log.Printf("asd")
 		return
 	}
 
