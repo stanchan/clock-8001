@@ -143,7 +143,7 @@ func (engine *Engine) sendMedia(player string, hours, minutes, seconds, frames, 
 		return nil
 	}
 	address := fmt.Sprintf("/clock/media/%s", player)
-	packet := osc.NewMessage(address, hours, minutes, seconds, frames, remaining, progress, paused, looping, *osc.NewTimetag(time.Now()))
+	packet := osc.NewMessage(address, hours, minutes, seconds, frames, remaining, progress, paused, looping, *osc.NewTimetag(time.Now()), engine.uuid)
 
 	data, err := packet.MarshalBinary()
 	if err != nil {
@@ -167,7 +167,7 @@ func (engine *Engine) sendResetMedia(player string) error {
 	}
 
 	address := fmt.Sprintf("/clock/resetmedia/%s", player)
-	packet := osc.NewMessage(address, *osc.NewTimetag(time.Now()))
+	packet := osc.NewMessage(address, *osc.NewTimetag(time.Now()), engine.uuid)
 
 	data, err := packet.MarshalBinary()
 	if err != nil {

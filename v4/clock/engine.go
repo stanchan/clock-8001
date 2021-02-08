@@ -177,6 +177,11 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		format12h:      options.Format12h,
 		off:            false,
 	}
+	uuid, err := machineid.ProtectedID("clock-8001")
+	if err != nil {
+		log.Fatalf("Failed to generate unique identifier: %v", err)
+	}
+	engine.uuid = uuid
 
 	log.Printf("Source1: %v", options.Source1)
 	log.Printf("Source2: %v", options.Source2)
@@ -216,11 +221,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		log.Fatalf("Invalid --millumin-ignore-layer=%v: %v", options.Ignore, err)
 	}
 	engine.ignoreRegexp = regexp
-	uuid, err := machineid.ProtectedID("clock-8001")
-	if err != nil {
-		log.Fatalf("Failed to generate unique identifier: %v", err)
-	}
-	engine.uuid = uuid
+
 	engine.prepareInfo()
 
 	engine.infoTimer = timer.NewTimer(time.Duration(options.ShowInfo) * time.Second)
@@ -861,7 +862,7 @@ func (engine *Engine) initOSC(options *EngineOptions) {
 		engine.oscServer = osc.Server{
 			Addr: options.ListenAddr,
 		}
-		engine.clockServer = MakeServer(&engine.oscServer)
+		engine.clockServer = MakeServer(&engine.oscServer, engine.uuid)
 		log.Printf("OSC control: listening on %v", engine.oscServer.Addr)
 
 		go engine.runOSC()

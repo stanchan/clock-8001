@@ -36,7 +36,8 @@ type MediaMessage struct {
 	progress  float64
 	paused    bool
 	looping   bool
-	timeStamp osc.Timetag
+	timeStamp *osc.Timetag
+	uuid      string
 }
 
 // UnmarshalOSC converts a osc.Message to MediaMessage
@@ -51,6 +52,7 @@ func (message *MediaMessage) UnmarshalOSC(msg *osc.Message) error {
 		&message.paused,
 		&message.looping,
 		&message.timeStamp,
+		&message.uuid,
 	)
 }
 

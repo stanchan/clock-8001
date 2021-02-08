@@ -15,12 +15,13 @@ const (
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance
-func MakeServer(oscServer *osc.Server) *Server {
+func MakeServer(oscServer *osc.Server, uuid string) *Server {
 	var server = Server{
 		listeners:    make(map[chan Message]struct{}),
 		Debug:        false,
 		timerRegexp:  regexp.MustCompile(timerPattern),
 		sourceRegexp: regexp.MustCompile(sourcePattern),
+		uuid:         uuid,
 	}
 
 	server.setup(oscServer)
@@ -35,6 +36,7 @@ type Server struct {
 	timerRegexp  *regexp.Regexp
 	sourceRegexp *regexp.Regexp
 	lastMedia    time.Time
+	uuid         string
 }
 
 // Listen adds a new listener for the decoded incoming osc messages
@@ -261,6 +263,14 @@ func (server *Server) handleMedia(msg *osc.Message) {
 	if err != nil {
 		log.Printf("error unmarshaling media message: %v", err)
 	}
+	log.Printf("Ours:    %v", server.uuid)
+	log.Printf("Theirs: %v", mm.uuid)
+	if mm.uuid == server.uuid {
+		// Our own message, ignore
+		log.Printf("asd")
+		return
+	}
+
 	if server.lastMedia.Before(mm.timeStamp.Time()) {
 		server.lastMedia = mm.timeStamp.Time()
 		message.MediaMessage = &mm
@@ -269,6 +279,9 @@ func (server *Server) handleMedia(msg *osc.Message) {
 }
 
 func (server *Server) handleResetMedia(msg *osc.Message) {
+	var uuid string
+	var timeStamp *osc.Timetag
+
 	debug.Printf("handleResetMedia: %v", msg)
 	message := Message{}
 	if msg.Address == "/clock/resetmedia/mitti" {
@@ -279,7 +292,20 @@ func (server *Server) handleResetMedia(msg *osc.Message) {
 		log.Printf("Unknown resetMedia message: %v", msg)
 		return
 	}
-	server.update(message)
+
+	err := msg.UnmarshalArguments(&timeStamp, &uuid)
+	if err != nil {
+		log.Printf("Unmarshal %v: %v", msg, err)
+	}
+
+	if uuid == server.uuid {
+		return
+	}
+
+	if server.lastMedia.Before(timeStamp.Time()) {
+		server.lastMedia = timeStamp.Time()
+		server.update(message)
+	}
 }
 
 func (server *Server) handleLTC(msg *osc.Message) {
