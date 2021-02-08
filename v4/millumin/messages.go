@@ -1,7 +1,7 @@
 package millumin
 
 import (
-	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/go-osc/osc"
 )
 
 // MediaInfo contains the information of a given media file in Millumin playback state

@@ -1,7 +1,7 @@
 package clock
 
 import (
-	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/go-osc/osc"
 )
 
 var clockUnits = []struct {

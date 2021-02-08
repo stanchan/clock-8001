@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/hypebeast/go-osc/osc"
 	"github.com/jessevdk/go-flags"
 	"gitlab.com/Depili/clock-8001/v4/clock"
+	"gitlab.com/Depili/go-osc/osc"
 	"log"
 )
 

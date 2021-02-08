@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/denisbrodbeck/machineid"
 	"github.com/desertbit/timer"
-	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"gitlab.com/Depili/clock-8001/v4/udptime"
+	"gitlab.com/Depili/go-osc/osc"
 	"image/color"
 	"log"
 	"net"
@@ -880,7 +880,7 @@ func (engine *Engine) initOSC(options *EngineOptions) {
 	} else {
 		log.Printf("OSC control and feedback disabled.\n")
 	}
-	engine.oscSendChan = make(chan []byte, 100)
+	engine.oscSendChan = make(chan []byte)
 	go engine.oscSender()
 }
 

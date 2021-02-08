@@ -2,7 +2,7 @@ package clock
 
 import (
 	"fmt"
-	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/go-osc/osc"
 )
 
 // ClientOptions common options for client instances

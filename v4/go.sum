@@ -24,6 +24,10 @@ github.com/veandco/go-sdl2 v0.4.1 h1:HmSBvVmKWI8LAOeCfTTM8R33rMyPcs6U3o8n325c9Qg
 github.com/veandco/go-sdl2 v0.4.1/go.mod h1:FB+kTpX9YTE+urhYiClnRzpOXbiWgaU3+5F2AB78DPg=
 gitlab.com/Depili/clock-8001 v3.7.2+incompatible h1:Wa6BoclZQ+IxBVaoJTLia1/N46IioafubXcpP2x1oKo=
 gitlab.com/Depili/clock-8001 v3.7.2+incompatible/go.mod h1:Zq3z8cCJg0SxzLHU8Aq/Cqs0ufCLg4R1u+1XeW8Q86c=
+gitlab.com/Depili/go-osc v0.0.0-20210208180746-fd7217567c18 h1:3Jhk4yDxGg2K6u4+osnCChGq5JkpFx1j4t1T0I1UtME=
+gitlab.com/Depili/go-osc v0.0.0-20210208180746-fd7217567c18/go.mod h1:7SlVMVz6X/TfKHe/EuVJFY+/UZeFhq394PQ2oihGArY=
+gitlab.com/Depili/go-osc v0.0.0-20210208182831-178a95808a85 h1:FcSE/FrOREYECW19sASpZ6fOGg3TQMrTBYm7PF9hp2Q=
+gitlab.com/Depili/go-osc v0.0.0-20210208182831-178a95808a85/go.mod h1:7SlVMVz6X/TfKHe/EuVJFY+/UZeFhq394PQ2oihGArY=
 gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20160725180610-c2da37d64860 h1:bvDKDIyfDDcjTVkDwaTZjavPadKRpqVL3z2GquQPhOY=
 gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20160725180610-c2da37d64860/go.mod h1:VP0pYqq9Ih2ME+RO2+5TLHpMTJgc3A9HIYRc2KDlzoo=
 gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20170204170814-25b63d4baf68 h1:hz00oF+OBvAVMRRYiOliJhUZgDtsA9Vzfw0wDvLzGhA=

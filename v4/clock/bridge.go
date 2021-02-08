@@ -3,10 +3,10 @@ package clock
 import (
 	"fmt"
 	"github.com/desertbit/timer"
-	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"gitlab.com/Depili/clock-8001/v4/millumin"
 	"gitlab.com/Depili/clock-8001/v4/mitti"
+	"gitlab.com/Depili/go-osc/osc"
 	"log"
 	"time"
 )

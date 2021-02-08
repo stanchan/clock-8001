@@ -1,8 +1,8 @@
 package clock
 
 import (
-	"github.com/hypebeast/go-osc/osc"
 	"gitlab.com/Depili/clock-8001/v4/debug"
+	"gitlab.com/Depili/go-osc/osc"
 	"log"
 	"regexp"
 	"strconv"
