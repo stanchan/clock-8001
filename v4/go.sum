@@ -28,6 +28,8 @@ gitlab.com/Depili/go-osc v0.0.0-20210208180746-fd7217567c18 h1:3Jhk4yDxGg2K6u4+o
 gitlab.com/Depili/go-osc v0.0.0-20210208180746-fd7217567c18/go.mod h1:7SlVMVz6X/TfKHe/EuVJFY+/UZeFhq394PQ2oihGArY=
 gitlab.com/Depili/go-osc v0.0.0-20210208182831-178a95808a85 h1:FcSE/FrOREYECW19sASpZ6fOGg3TQMrTBYm7PF9hp2Q=
 gitlab.com/Depili/go-osc v0.0.0-20210208182831-178a95808a85/go.mod h1:7SlVMVz6X/TfKHe/EuVJFY+/UZeFhq394PQ2oihGArY=
+gitlab.com/Depili/go-osc v0.0.0-20210208185228-dd2b4c8eac31 h1:KxeU4gNKBF0zct7rs+Of9mfPcWMnLznVU0YiwpBUpmQ=
+gitlab.com/Depili/go-osc v0.0.0-20210208185228-dd2b4c8eac31/go.mod h1:7SlVMVz6X/TfKHe/EuVJFY+/UZeFhq394PQ2oihGArY=
 gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20160725180610-c2da37d64860 h1:bvDKDIyfDDcjTVkDwaTZjavPadKRpqVL3z2GquQPhOY=
 gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20160725180610-c2da37d64860/go.mod h1:VP0pYqq9Ih2ME+RO2+5TLHpMTJgc3A9HIYRc2KDlzoo=
 gitlab.com/Depili/go-rgb-led-matrix v0.0.0-20170204170814-25b63d4baf68 h1:hz00oF+OBvAVMRRYiOliJhUZgDtsA9Vzfw0wDvLzGhA=

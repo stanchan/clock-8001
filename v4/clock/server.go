@@ -474,6 +474,11 @@ func (server *Server) handleDisplay(msg *osc.Message) {
 
 // Le huge registerHandler block
 func (server *Server) setup(oscServer *osc.Server) {
+	// Sync messages
+	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
+	registerHandler(oscServer, "^/clock/resetmedia/*", server.handleResetMedia)
+	registerHandler(oscServer, "^/clock/ltc", server.handleLTC)
+
 	// Timer related
 	registerHandler(oscServer, "^/clock/timer/*/countdown/target", server.handleCountdownTarget)
 	registerHandler(oscServer, "^/clock/timer/*/countdown$", server.handleCountdownStart)
@@ -492,11 +497,6 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/source/*/title", server.handleSourceTitle)
 	registerHandler(oscServer, "^/clock/hide", server.handleHideAll)
 	registerHandler(oscServer, "^/clock/show", server.handleShowAll)
-
-	// Sync messages
-	registerHandler(oscServer, "^/clock/media/*", server.handleMedia)
-	registerHandler(oscServer, "^/clock/resetmedia/*", server.handleResetMedia)
-	registerHandler(oscServer, "^/clock/ltc", server.handleLTC)
 
 	// Misc commands
 	registerHandler(oscServer, "^/clock/background", server.handleBackground)
