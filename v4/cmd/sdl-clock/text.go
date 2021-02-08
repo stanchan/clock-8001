@@ -8,6 +8,7 @@ import (
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -35,8 +36,7 @@ var textClock struct {
 	labelColor sdl.Color
 	labelBG    sdl.Color
 	r          [3]outputLine
-	ltcText    string
-	ltcTex     [2]*sdl.Texture
+	timeRegexp *regexp.Regexp
 }
 
 // Font sizes. Rpi <4 is limited to 2048x2048 texture size.
@@ -65,7 +65,7 @@ func initTextClock() {
 	}
 	textClock.iconFont = f
 
-	textClock.ltcText = "00:00:00:00"
+	textClock.timeRegexp = regexp.MustCompile(`^\d\d:\d\d:(?:\d\d:)?\d\d$`)
 
 	log.Printf("Precalcs!")
 	for j := range textClock.r {
@@ -114,7 +114,8 @@ func drawTextClock(state *clock.State) {
 				textClock.r[i].textTex.Destroy()
 			}
 
-			if parts := strings.Split(text, ":"); len(parts) > 1 {
+			if textClock.timeRegexp.MatchString(text) {
+				parts := strings.Split(text, ":")
 				// Compose multipart texture
 				l := int32(len(parts))
 				texW := l * textClock.r[i].fragmentRect.W * 2
