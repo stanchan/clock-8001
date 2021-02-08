@@ -119,6 +119,8 @@ func drawTextClock(state *clock.State) {
 				check(err)
 				err = textClock.r[i].iconTex.SetBlendMode(sdl.BLENDMODE_BLEND)
 				check(err)
+				err = textClock.r[i].iconTex.SetAlphaMod(0)
+				check(err)
 			}
 		}
 	}
