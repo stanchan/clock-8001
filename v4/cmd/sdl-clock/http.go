@@ -27,6 +27,7 @@ func runHTTP() {
 
 	http.HandleFunc("/save", basicAuth(saveHandler))
 	http.HandleFunc("/", basicAuth(indexHandler))
+	log.Printf("HTTP config: listening on %v", options.HTTPPort)
 	log.Fatal(http.ListenAndServe(options.HTTPPort, nil))
 }
 
