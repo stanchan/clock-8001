@@ -29,6 +29,8 @@ var textClock struct {
 	labelColor sdl.Color
 	labelBG    sdl.Color
 	r          [3]outputLine
+	ltcText    string
+	ltcTex     [2]*sdl.Texture
 }
 
 // Font sizes. Rpi <4 is limited to 2048x2048 texture size.
@@ -57,6 +59,7 @@ func initTextClock() {
 	}
 	textClock.iconFont = f
 
+	textClock.ltcText = "00:00:00:00"
 	log.Printf("Text clock face intialized.")
 }
 
@@ -88,11 +91,45 @@ func drawTextClock(state *clock.State) {
 
 		if textClock.r[i].text != text {
 			textClock.r[i].text = text
-			if textClock.r[i].textTex != nil {
-				textClock.r[i].textTex.Destroy()
-			}
+			if clk.Mode != clock.LTC {
+				if textClock.r[i].textTex != nil {
+					textClock.r[i].textTex.Destroy()
+				}
 
-			textClock.r[i].textTex = renderText(text, textClock.numberFont, colors.rows[i])
+				textClock.r[i].textTex = renderText(text, textClock.numberFont, colors.rows[i])
+			} else {
+				if textClock.r[i].textTex != nil {
+					textClock.r[i].textTex.Destroy()
+				}
+
+				if textClock.ltcText[0:9] != text[0:9] {
+					if textClock.ltcTex[0] != nil {
+						textClock.ltcTex[0].Destroy()
+					}
+					textClock.ltcTex[0] = renderText(text[0:9], textClock.numberFont, colors.rows[i])
+				} else if textClock.ltcText[9:11] != text[9:11] {
+					if textClock.ltcTex[1] != nil {
+						textClock.ltcTex[1].Destroy()
+					}
+					textClock.ltcTex[1] = renderText(text[9:11], textClock.numberFont, colors.rows[i])
+				}
+				textClock.ltcText = text
+				_, _, width1, height1, _ := textClock.ltcTex[0].Query()
+				_, _, width2, height2, _ := textClock.ltcTex[1].Query()
+				height := height1
+				if height2 > height {
+					height = height2
+				}
+				textClock.r[i].textTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, width1+width2, height)
+				textClock.r[i].textTex.SetBlendMode(sdl.BLENDMODE_BLEND)
+				check(err)
+				renderer.SetRenderTarget(textClock.r[i].textTex)
+				renderer.SetDrawColor(0, 0, 0, 0)
+				renderer.Clear()
+				renderer.Copy(textClock.ltcTex[0], nil, &sdl.Rect{X: 0, Y: 0, W: width1, H: height1})
+				renderer.Copy(textClock.ltcTex[1], nil, &sdl.Rect{X: width1, Y: 0, W: width2, H: height2})
+				renderer.SetRenderTarget(nil)
+			}
 		}
 
 		label := fmt.Sprintf("%.10s", clk.Label)
