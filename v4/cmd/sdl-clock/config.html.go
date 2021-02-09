@@ -316,7 +316,7 @@ const configHTML = `
 						<span>Disable StageTimer2 UDP time reception</span>
 						<select name="udp-time" id="udp-time">
 							<option value="off" {{if eq .EngineOptions.UDPTime "off"}} selected {{end}}>Off</option>
-							<option value="send" {{if eq .EnginePptions.UDPTime "send"}} selected {{end}}>Send timers</option>
+							<option value="send" {{if eq .EngineOptions.UDPTime "send"}} selected {{end}}>Send timers</option>
 							<option value="receive" {{if eq .EngineOptions.UDPTime "receive"}} selected {{end}}>Receive timers</option>
 						</select>
 				</label>
