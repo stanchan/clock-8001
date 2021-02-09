@@ -41,7 +41,9 @@ IconFont={{.IconFont}}
 # Show clock info for X seconds at startup
 info-timer={{.EngineOptions.ShowInfo}}
 
-# Stagetimer2 UDP timer protocol, set to off, send or receive
+# InterSpace Industries Countdown2 UDP timer protocol
+# (also supported by Stagetimer2 and Irisdown):
+# set to off, send or receive
 udp-time={{.EngineOptions.UDPTime}}
 
 # Timer to send / receive as UDP timer 1 (port 36700)

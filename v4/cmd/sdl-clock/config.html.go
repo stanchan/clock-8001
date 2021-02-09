@@ -311,9 +311,10 @@ const configHTML = `
 			</fieldset>
 
 			<fieldset>
-				<legend>StageTimer2 UDP messages</legend>
+				<legend>InterSpace Industries Countdown2 UDP</legend>
+				<p>StageTimer2 and Irisdown also support sending data with this protocol.</p>
 				<label for="udp-time">
-						<span>Disable StageTimer2 UDP time reception</span>
+						<span>Countdown2 UDP mode</span>
 						<select name="udp-time" id="udp-time">
 							<option value="off" {{if eq .EngineOptions.UDPTime "off"}} selected {{end}}>Off</option>
 							<option value="send" {{if eq .EngineOptions.UDPTime "send"}} selected {{end}}>Send timers</option>
