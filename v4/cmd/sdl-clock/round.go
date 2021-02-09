@@ -47,10 +47,25 @@ func drawRoundClocks(state *clock.State) {
 
 			} else if !mainClock.Hidden {
 				parts := strings.Split(mainClock.Text, ":")
-				hours = parts[0]
-				minutes = parts[1]
-				seconds = parts[2]
-				leds, _ = strconv.Atoi(seconds)
+				if len(parts) == 2 {
+					// "00:00" view
+					hours = "00"
+					minutes = parts[0]
+					seconds = parts[1]
+					leds, _ = strconv.Atoi(minutes)
+				} else if len(parts) == 3 {
+					// "00:00:00" view
+					hours = parts[0]
+					minutes = parts[1]
+					seconds = parts[2]
+					leds, _ = strconv.Atoi(seconds)
+				} else {
+					// Unknown
+					hours = "XX"
+					minutes = "XX"
+					seconds = "XX"
+					leds = 0
+				}
 
 				if !state.DisplaySeconds && mainClock.Mode == clock.Normal {
 					seconds = ""
