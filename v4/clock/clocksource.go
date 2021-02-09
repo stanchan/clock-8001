@@ -15,7 +15,6 @@ type source struct {
 
 	// Booleans controlling what might be displayed by this clock data source
 	ltc    bool // LTC timecode decoded from sound input
-	udp    bool // UDP time packets from the stagetimer protocol
 	timer  bool // Countdown / up timer
 	tod    bool // Time of day, lowest priority
 	off    bool // Display is off, but row not hidden

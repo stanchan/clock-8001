@@ -41,13 +41,13 @@ IconFont={{.IconFont}}
 # Show clock info for X seconds at startup
 info-timer={{.EngineOptions.ShowInfo}}
 
-# Disable sending of Stagetimer2 UDP time messages
-disable-udp-time={{.EngineOptions.DisableUDPTime}}
+# Stagetimer2 UDP timer protocol, set to off, send or receive
+udp-time={{.EngineOptions.UDPTime}}
 
-# Timer to send as UDP timer 1 (port 36700)
+# Timer to send / receive as UDP timer 1 (port 36700)
 udp-timer-1={{.EngineOptions.UDPTimer1}}
 
-# Timer to send as UDP timer 1 (port 36700)
+# Timer to send / receive as UDP timer 1 (port 36700)
 udp-timer-2={{.EngineOptions.UDPTimer2}}
 
 # Time sources
@@ -59,17 +59,14 @@ udp-timer-2={{.EngineOptions.UDPTimer2}}
 #
 # The sources choose their displayed time in the following priority if enabled:
 # 1. LTC
-# 2. Interspace / stage timer UDP protocol (not yet implemented)
-# 3. Associated timer if running
-# 4. Time of day
-# 5. Blank display
+# 2. Associated timer if running
+# 3. Time of day
+# 4. Blank display
 
 # Text label for time source
 source1.text={{.EngineOptions.Source1.Text}}
 # Set to true to enable LTC input on this source
 source1.ltc={{.EngineOptions.Source1.LTC}}
-# Set to true to enable UDP input on this source
-source1.udp={{.EngineOptions.Source1.UDP}}
 # Set to true for countdown / count up timer input on this source
 source1.timer={{.EngineOptions.Source1.Timer}}
 # Counter number for timer support (0-9)
@@ -83,7 +80,6 @@ source1.hidden={{.EngineOptions.Source1.Hidden}}
 
 source2.text={{.EngineOptions.Source2.Text}}
 source2.ltc={{.EngineOptions.Source2.LTC}}
-source2.udp={{.EngineOptions.Source2.UDP}}
 source2.timer={{.EngineOptions.Source2.Timer}}
 source2.counter={{.EngineOptions.Source2.Counter}}
 source2.tod={{.EngineOptions.Source2.Tod}}
@@ -92,7 +88,6 @@ source2.hidden={{.EngineOptions.Source2.Hidden}}
 
 source3.text={{.EngineOptions.Source3.Text}}
 source3.ltc={{.EngineOptions.Source3.LTC}}
-source3.udp={{.EngineOptions.Source3.UDP}}
 source3.timer={{.EngineOptions.Source3.Timer}}
 source3.counter={{.EngineOptions.Source3.Counter}}
 source3.tod={{.EngineOptions.Source3.Tod}}
@@ -101,7 +96,6 @@ source3.hidden={{.EngineOptions.Source3.Hidden}}
 
 source4.text={{.EngineOptions.Source4.Text}}
 source4.ltc={{.EngineOptions.Source4.LTC}}
-source4.udp={{.EngineOptions.Source4.UDP}}
 source4.timer={{.EngineOptions.Source4.Timer}}
 source4.counter={{.EngineOptions.Source4.Counter}}
 source4.tod={{.EngineOptions.Source4.Tod}}

@@ -34,11 +34,11 @@ type SourceOptions struct {
 	Text     string `long:"text" description:"Title text for the time source"`
 	Counter  int    `long:"counter" description:"Counter number to associate with this source, leave empty to disable it as a suorce" default:"0"`
 	LTC      bool   `long:"ltc" description:"Enable LTC as a source"`
-	UDP      bool   `long:"udp" description:"Enable UDP as a source"`
 	Timer    bool   `long:"timer" description:"Enable timer counter as a source"`
 	Tod      bool   `long:"tod" description:"Enable time-of-day as a source"`
 	TimeZone string `long:"timezone" description:"Time zone to use for ToD display" default:"Europe/Helsinki"`
 	Hidden   bool   `long:"hidden" description:"Hide this time source"`
+	UDP      bool
 }
 
 // EngineOptions contains all common options for clock.Engines
@@ -51,7 +51,7 @@ type EngineOptions struct {
 	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC feedback"`
 	DisableLTC      bool   `long:"disable-ltc" description:"Disable LTC display mode"`
 	LTCSeconds      bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
-	DisableUDPTime  bool   `long:"disable-udp-time" description:"Disable sending of UDP time messages"`
+	UDPTime         string `long:"udp-time" description:"Stagetimer2 UDP protocol support" choice:"off" choice:"send" choice:"receive" default:"receive"`
 	UDPTimer1       int    `long:"udp-timer-1" description:"Timer to send as UDP timer 1 (port 36700)" default:"1"`
 	UDPTimer2       int    `long:"udp-timer-2" description:"Timer to send as UDP timer 2 (port 36701)" default:"2"`
 	LTCFollow       bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
@@ -230,16 +230,47 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	fmt.Printf(engine.info)
 
 	// Stagetimer2 UDP time reception
-	if !options.DisableUDPTime {
-		engine.udpDests = make([]*feedbackDestination, 2)
-		engine.udpDests[0] = initFeedback("255.255.255.255:36700")
-		engine.udpDests[1] = initFeedback("255.255.255.255:36701")
+	if options.UDPTime != "off" {
 		engine.udpCounters = make([]*Counter, 2)
 		engine.udpCounters[0] = engine.Counters[options.UDPTimer1]
 		engine.udpCounters[1] = engine.Counters[options.UDPTimer2]
+
+		if options.UDPTime == "send" {
+			log.Printf("Initializing UDP time sender")
+			// Send timers
+			engine.udpDests = make([]*feedbackDestination, 2)
+			engine.udpDests[0] = initFeedback("255.255.255.255:36700")
+			engine.udpDests[1] = initFeedback("255.255.255.255:36701")
+		} else {
+			log.Printf("Initializing UDP time receiver")
+			// Receive timers
+			go engine.listenUDPTime()
+		}
 	}
 
 	return &engine, nil
+}
+
+func (engine *Engine) listenUDPTime() {
+	chan1, err := udptime.Listen("0.0.0.0:36700")
+	if err != nil {
+		log.Printf("UDPTime listen error: %v", err)
+		return
+	}
+	chan2, err := udptime.Listen("0.0.0.0:36701")
+	if err != nil {
+		log.Printf("UDPTime listen error: %v", err)
+		return
+	}
+
+	for {
+		select {
+		case msg := <-chan1:
+			engine.udpCounters[0].SetSlave(0, msg.Minutes, msg.Seconds, true, "")
+		case msg := <-chan2:
+			engine.udpCounters[1].SetSlave(0, msg.Minutes, msg.Seconds, true, "")
+		}
+	}
 }
 
 func (engine *Engine) prepareInfo() {
@@ -564,9 +595,6 @@ func (engine *Engine) State() *State {
 				// Timeout without follow mode
 				c.Text = ""
 			}
-		} else if s.udp && false {
-			// UDP time reception
-
 		} else if s.timer && s.counter.active {
 			// Active timer
 			out := s.counter.Output(t)
@@ -846,7 +874,6 @@ func (engine *Engine) initSources(sources []*SourceOptions) error {
 			tod:     s.Tod,
 			timer:   s.Timer,
 			ltc:     s.LTC,
-			udp:     s.UDP,
 			tz:      tz,
 			title:   s.Text,
 			hidden:  s.Hidden,

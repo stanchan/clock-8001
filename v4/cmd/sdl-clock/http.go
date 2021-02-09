@@ -90,32 +90,26 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.EngineOptions.Format12h = r.FormValue("Format12h") != ""
 
 	newOptions.EngineOptions.Source1.LTC = r.FormValue("source1-ltc") != ""
-	newOptions.EngineOptions.Source1.UDP = r.FormValue("source1-udp") != ""
 	newOptions.EngineOptions.Source1.Timer = r.FormValue("source1-timer") != ""
 	newOptions.EngineOptions.Source1.Tod = r.FormValue("source1-tod") != ""
 	newOptions.EngineOptions.Source1.Hidden = r.FormValue("source1-hidden") != ""
 
 	newOptions.EngineOptions.Source2.LTC = r.FormValue("source2-ltc") != ""
-	newOptions.EngineOptions.Source2.UDP = r.FormValue("source2-udp") != ""
 	newOptions.EngineOptions.Source2.Timer = r.FormValue("source2-timer") != ""
 	newOptions.EngineOptions.Source2.Tod = r.FormValue("source2-tod") != ""
 	newOptions.EngineOptions.Source2.Hidden = r.FormValue("source2-hidden") != ""
 
 	newOptions.EngineOptions.Source3.LTC = r.FormValue("source3-ltc") != ""
-	newOptions.EngineOptions.Source3.UDP = r.FormValue("source3-udp") != ""
 	newOptions.EngineOptions.Source3.Timer = r.FormValue("source3-timer") != ""
 	newOptions.EngineOptions.Source3.Tod = r.FormValue("source3-tod") != ""
 	newOptions.EngineOptions.Source3.Hidden = r.FormValue("source3-hidden") != ""
 
 	newOptions.EngineOptions.Source4.LTC = r.FormValue("source4-ltc") != ""
-	newOptions.EngineOptions.Source4.UDP = r.FormValue("source4-udp") != ""
 	newOptions.EngineOptions.Source4.Timer = r.FormValue("source4-timer") != ""
 	newOptions.EngineOptions.Source4.Tod = r.FormValue("source4-tod") != ""
 	newOptions.EngineOptions.Source4.Hidden = r.FormValue("source4-hidden") != ""
 
 	newOptions.DrawBoxes = r.FormValue("DrawBoxes") != ""
-
-	newOptions.EngineOptions.DisableUDPTime = r.FormValue("disable-udp-time") != ""
 
 	// Strings, will not be validated
 	newOptions.HTTPUser = r.FormValue("HTTPUser")
@@ -129,6 +123,12 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.Face = r.FormValue("Face")
 	if f := newOptions.Face; (f != "round") && (f != "dual-round") && (f != "text") && (f != "small") {
 		errors += fmt.Sprintf("<li>Clock face selection is invalid (%s)</li>", newOptions.Face)
+	}
+
+	// UDPTime
+	newOptions.EngineOptions.UDPTime = r.FormValue("udp-time")
+	if f := newOptions.EngineOptions.UDPTime; (f != "off") && (f != "send") && (f != "receive") {
+		errors += fmt.Sprintf("<li>UDP time selection is invalid (%s)</li>", newOptions.EngineOptions.UDPTime)
 	}
 
 	// Filenames

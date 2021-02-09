@@ -14,9 +14,18 @@ import (
 type Counter struct {
 	state     *counterState
 	media     *mediaState
+	slave     *slaveState
 	active    bool // Is this counter active?
 	countdown bool // Count up / down from the target
 	paused    bool // Is the counter paused?
+}
+
+type slaveState struct {
+	hours     int
+	minutes   int
+	seconds   int
+	icon      string
+	hideHours bool
 }
 
 type mediaState struct {
@@ -56,10 +65,15 @@ type CounterOutput struct {
 
 // Output generates the static output of the counter for use in clock displays
 func (counter *Counter) Output(t time.Time) *CounterOutput {
-	if counter.media == nil {
-		return counter.normalOutput(t)
+	if counter.slave != nil {
+		return counter.slaveOutput()
 	}
-	return counter.mediaOutput()
+
+	if counter.media != nil {
+		return counter.mediaOutput()
+	}
+
+	return counter.normalOutput(t)
 }
 
 func (counter *Counter) mediaOutput() *CounterOutput {
@@ -158,6 +172,34 @@ func (counter *Counter) normalOutput(t time.Time) *CounterOutput {
 	return out
 }
 
+func (counter *Counter) slaveOutput() *CounterOutput {
+	hours := counter.slave.hours
+	minutes := counter.slave.minutes
+	seconds := counter.slave.seconds
+
+	text := fmt.Sprintf("%02d:%02d:%02d", hours, abs(minutes), abs(seconds))
+	if counter.slave.hideHours {
+		text = fmt.Sprintf("%02d:%02d", minutes, abs(seconds))
+	}
+
+	out := &CounterOutput{
+		Active:    true,
+		Countdown: true,
+		Paused:    false,
+		Expired:   false,
+		Hours:     hours,
+		Minutes:   minutes,
+		Seconds:   seconds,
+		Text:      text,
+		Compact:   "",
+		Icon:      counter.slave.icon,
+		Progress:  0,
+		Diff:      0,
+	}
+
+	return out
+}
+
 func secsToCompact(rawSecs int64) string {
 	for _, unit := range clockUnits {
 		if rawSecs/int64(unit.seconds) >= 100 {
@@ -191,6 +233,23 @@ func (counter *Counter) Target(target time.Time) {
 	} else {
 		counter.Start(true, timer)
 	}
+}
+
+// SetSlave sets the counter state as a slave from external source
+func (counter *Counter) SetSlave(hours, minutes, seconds int, hideHours bool, icon string) {
+	counter.slave = &slaveState{
+		hours:     hours,
+		minutes:   minutes,
+		seconds:   seconds,
+		hideHours: hideHours,
+		icon:      icon,
+	}
+	counter.active = true
+}
+
+// ResetSlave removes slave state from external source
+func (counter *Counter) ResetSlave() {
+	counter.slave = nil
 }
 
 // SetMedia sets the counter state from a playing media file

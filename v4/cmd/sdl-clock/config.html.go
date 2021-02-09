@@ -130,7 +130,6 @@ const configHTML = `
 				<p>The sources choose their displayed time in the following priority if enabled:
 					<ol>
 						<li>LTC</li>
-						<li>UDP protocol from Interspace / stage timer (not yet implemented)</li>
 						<li>Associated timer if it is running</li>
 						<li>Time of day in the selected time zone</li>
 						<li>Blank display</li>
@@ -148,11 +147,6 @@ const configHTML = `
 					<label for="source1-ltc">
 						<span>Enable LTC input on this source</span>
 						<input type="checkbox" id="source1-ltc" name="source1-ltc" {{if .EngineOptions.Source1.LTC}} checked {{end}} />
-					</label>
-
-					<label for="source1-udp">
-						<span>Enable UDP input on this source</span>
-						<input type="checkbox" id="source1-udp" name="source1-udp" {{if .EngineOptions.Source1.UDP}} checked {{end}} />
 					</label>
 
 					<label for="source1-timer">
@@ -193,11 +187,6 @@ const configHTML = `
 						<input type="checkbox" id="source2-ltc" name="source2-ltc" {{if .EngineOptions.Source2.LTC}} checked {{end}} />
 					</label>
 
-					<label for="source2-udp">
-						<span>Enable UDP input on this source</span>
-						<input type="checkbox" id="source2-udp" name="source2-udp" {{if .EngineOptions.Source2.UDP}} checked {{end}} />
-					</label>
-
 					<label for="source2-timer">
 						<span>Enable input from the associated timer</span>
 						<input type="checkbox" id="source2-timer" name="source2-timer" {{if .EngineOptions.Source2.Timer}} checked {{end}} />
@@ -234,11 +223,6 @@ const configHTML = `
 					<label for="source3-ltc">
 						<span>Enable LTC input on this source</span>
 						<input type="checkbox" id="source3-ltc" name="source3-ltc" {{if .EngineOptions.Source3.LTC}} checked {{end}} />
-					</label>
-
-					<label for="source3-udp">
-						<span>Enable UDP input on this source</span>
-						<input type="checkbox" id="source3-udp" name="source3-udp" {{if .EngineOptions.Source3.UDP}} checked {{end}} />
 					</label>
 
 					<label for="source3-timer">
@@ -279,11 +263,6 @@ const configHTML = `
 						<input type="checkbox" id="source4-ltc" name="source4-ltc" {{if .EngineOptions.Source4.LTC}} checked {{end}} />
 					</label>
 
-					<label for="source4-udp">
-						<span>Enable UDP input on this source</span>
-						<input type="checkbox" id="source4-udp" name="source4-udp" {{if .EngineOptions.Source4.UDP}} checked {{end}} />
-					</label>
-
 					<label for="source4-timer">
 						<span>Enable input from the associated timer on this source</span>
 						<input type="checkbox" id="source4-timer" name="source4-timer" {{if .EngineOptions.Source4.Timer}} checked {{end}} />
@@ -310,6 +289,7 @@ const configHTML = `
 					</label>
 				</fieldset>
 			</fieldset>
+
 			<fieldset>
 				<legend>Mitti and Millumin</legend>
 
@@ -332,9 +312,13 @@ const configHTML = `
 
 			<fieldset>
 				<legend>StageTimer2 UDP messages</legend>
-				<label for="disable-udp-time">
+				<label for="udp-time">
 						<span>Disable StageTimer2 UDP time reception</span>
-						<input type="checkbox" id="disable-udp-time" name="disable-udp-time" {{if .EngineOptions.DisableUDPTime}} checked {{end}} />
+						<select name="udp-time" id="udp-time">
+							<option value="off" {{if eq .EngineOptions.UDPTime "off"}} selected {{end}}>Off</option>
+							<option value="send" {{if eq .EnginePptions.UDPTime "send"}} selected {{end}}>Send timers</option>
+							<option value="receive" {{if eq .EngineOptions.UDPTime "receive"}} selected {{end}}>Receive timers</option>
+						</select>
 				</label>
 
 				<label for="upd-timer-1">
