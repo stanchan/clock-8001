@@ -223,6 +223,7 @@ func checkBackgroundUpdate(state *clock.State) {
 			}
 		}
 		log.Printf("Couldn't find background for number: %d", backgroundNumber)
+		showBackground = false
 	}
 }
 
@@ -280,7 +281,6 @@ func defaultSourceConfig() {
 	options.EngineOptions.Source1 = &clock.SourceOptions{
 		Text:     "",
 		LTC:      true,
-		UDP:      true,
 		Timer:    true,
 		Counter:  1,
 		Tod:      true,
@@ -289,7 +289,6 @@ func defaultSourceConfig() {
 	options.EngineOptions.Source2 = &clock.SourceOptions{
 		Text:     "",
 		LTC:      true,
-		UDP:      true,
 		Timer:    true,
 		Counter:  2,
 		Tod:      true,
@@ -298,7 +297,6 @@ func defaultSourceConfig() {
 	options.EngineOptions.Source3 = &clock.SourceOptions{
 		Text:     "",
 		LTC:      true,
-		UDP:      true,
 		Timer:    true,
 		Counter:  3,
 		Tod:      true,
@@ -307,7 +305,6 @@ func defaultSourceConfig() {
 	options.EngineOptions.Source4 = &clock.SourceOptions{
 		Text:     "",
 		LTC:      true,
-		UDP:      true,
 		Timer:    true,
 		Counter:  4,
 		Tod:      true,
