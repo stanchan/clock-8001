@@ -99,9 +99,9 @@ func drawTextClock(state *clock.State) {
 	// Clear output and setup background
 	prepareCanvas()
 
-	if options.SingleLine && !state.Clocks[0].Hidden {
+	if options.singleLine && !state.Clocks[0].Hidden {
 		drawSingleLineClock(state)
-	} else if !options.SingleLine {
+	} else if !options.singleLine {
 		draw3TextClocks(state)
 	}
 
@@ -365,7 +365,7 @@ func drawTally(state *clock.State) {
 		tallyTexture.SetAlphaMod(tallyColor.A)
 
 		tallyRect := sdl.Rect{X: 10, Y: 25 + (365 * 2), W: 1920 - 20, H: 300}
-		if options.SingleLine {
+		if options.singleLine {
 			tallyRect.X = 25
 			tallyRect.W = 1920 - 50
 		}

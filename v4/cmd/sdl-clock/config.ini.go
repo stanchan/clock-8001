@@ -4,7 +4,7 @@ const configTemplate = `# Example configuration file for clock-8001
 # Lines starting with '#' are comments and
 # are ignored by clock-8001
 
-# Clock face to use. (round, dual-round, text or small)
+# Clock face to use. (round, dual-round, text, single or small)
 Face={{.Face}}
 
 # Username and password for the web configuration interface
@@ -133,9 +133,6 @@ second-color={{.SecondColor}}
 countdown-color={{.CountdownColor}}
 
 # Text clock
-
-# Set to true to render only a single full screen timer
-SingleLine={{.SingleLine}}
 
 # Color for labels
 label-color={{.LabelColor}}

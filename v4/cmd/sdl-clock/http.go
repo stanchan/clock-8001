@@ -81,7 +81,6 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Booleans, no validation on them
 	newOptions.Debug = r.FormValue("Debug") != ""
-	newOptions.SingleLine = r.FormValue("SingleLine") != ""
 	newOptions.DisableHTTP = r.FormValue("DisableHTTP") != ""
 	newOptions.NoARCorrection = r.FormValue("NoARCorrection") != ""
 	newOptions.EngineOptions.DisableOSC = r.FormValue("DisableOSC") != ""
@@ -123,7 +122,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Clock face type
 	newOptions.Face = r.FormValue("Face")
-	if f := newOptions.Face; (f != "round") && (f != "dual-round") && (f != "text") && (f != "small") {
+	if f := newOptions.Face; (f != "round") && (f != "dual-round") && (f != "text") && (f != "small") && (f != "single") {
 		errors += fmt.Sprintf("<li>Clock face selection is invalid (%s)</li>", newOptions.Face)
 	}
 

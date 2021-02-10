@@ -251,6 +251,9 @@ func parseOptions() {
 		options.small = true
 	case "text":
 		options.textClock = true
+	case "single":
+		options.textClock = true
+		options.singleLine = true
 	case "countdown":
 		options.countdown = true
 	}

@@ -31,7 +31,7 @@ type optionsColor struct {
 
 type clockOptions struct {
 	Config          func(s string) error `short:"C" long:"config" description:"read config from a file"`
-	Face            string               `long:"face" description:"Select the clock face to use" default:"round" choice:"round" choice:"dual-round" choice:"small" choice:"text" choice:"countdown"`
+	Face            string               `long:"face" description:"Select the clock face to use" default:"round" choice:"round" choice:"dual-round" choice:"small" choice:"text" choice:"single" choice:"countdown"`
 	Debug           bool                 `long:"debug" description:"Enable debug output"`
 	HTTPPort        string               `long:"http-port" description:"Port to listen on for the http configuration interface" default:":8080"`
 	DisableHTTP     bool                 `long:"disable-http" description:"Disable the web configuration interface"`
@@ -66,7 +66,6 @@ type clockOptions struct {
 	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
 	NumberFontSize int    `long:"numbers-size" default:"250"`
 	FontPath       string `long:"font-path" description:"Path for loading font choices into web config" default:"."`
-	SingleLine     bool   `long:"single-line" description:"Only render a single timer in the text clock"`
 
 	CountdownTarget string `long:"countdown-target" default:"2020-12-24 00:00:00"`
 	Raspberry       bool   // Is the host a raspberry pi
@@ -76,6 +75,7 @@ type clockOptions struct {
 	small      bool
 	dualClock  bool
 	textClock  bool
+	singleLine bool
 	countdown  bool
 	Errors     htmlTemplate.HTML // For passing errors to the html template
 	Fonts      []string          // For passing list of font files to html template

@@ -32,14 +32,10 @@ const configHTML = `
 						<select name="Face" id="Face">
 							<option value="round" {{if eq .Face "round"}} selected {{end}}>Single round clock</option>
 							<option value="dual-round" {{if eq .Face "dual-round"}} selected {{end}}>Dual round clocks</option>
-							<option value="text" {{if eq .Face "text"}} selected {{end}}>Text clock</option>
+							<option value="text" {{if eq .Face "text"}} selected {{end}}>Text clock with 3 timers</option>
+							<option value="single" {{if eq .Face "single"}} selected {{end}}>Text clock with 1 timer</option>
 							<option value="small" {{if eq .Face  "small"}} selected {{end}}>Small 192x192px round clock</option>
 						</select><br />
-					</label>
-
-					<label for="SingleLine">
-						<span>Render only one full screen timer in text clock face.</span>
-						<input type="checkbox" id="SingleLine" name="SingleLine" {{if .SingleLine}} checked {{end}}/>
 					</label>
 
 					<label for="Format12h">
