@@ -40,7 +40,7 @@ func (fbDest *feedbackDestination) monitor() {
 
 	for {
 		time.Sleep(interfacePollTime)
-		log.Printf("Updating feedback connections\n")
+		debug.Printf("Updating feedback connections\n")
 
 		if !strings.Contains(fbDest.address, "255.255.255.255") {
 			fbDest.singleAddr()
@@ -51,22 +51,22 @@ func (fbDest *feedbackDestination) monitor() {
 }
 
 func (fbDest *feedbackDestination) singleAddr() {
-	log.Printf(" -> Trying single address: %v\n", fbDest.address)
+	debug.Printf(" -> Trying single address: %v\n", fbDest.address)
 	udpConns := make([]*net.UDPConn, 0)
 
 	if udpAddr, err := net.ResolveUDPAddr("udp", fbDest.address); err != nil {
 		log.Printf(" -> Failed to resolve feedback address: %v", err)
 	} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
-		log.Printf("   -> Failed to open feedback address: %v", err)
+		log.Printf(" -> Failed to open feedback address: %v", err)
 	} else {
-		log.Printf("Feedback: sending to %v", fbDest.address)
+		debug.Printf("Feedback: sending to %v", fbDest.address)
 		udpConns = append(udpConns, udpConn)
 	}
 	fbDest.udpConns = udpConns
 }
 
 func (fbDest *feedbackDestination) broadcastAll(port string) {
-	log.Printf(" -> Broadcasting to all interfaces\n")
+	debug.Printf(" -> Broadcasting to all interfaces\n")
 	udpConns := make([]*net.UDPConn, 0)
 
 	addrs, _ := net.InterfaceAddrs()
@@ -92,7 +92,7 @@ func (fbDest *feedbackDestination) broadcastAll(port string) {
 				} else if udpConn, err := net.DialUDP("udp", nil, udpAddr); err != nil {
 					log.Printf("   -> Failed to open broadcast address %v: %v", dest, err)
 				} else {
-					log.Printf("Feedback: sending to %v", dest)
+					debug.Printf("Feedback: sending to %v", dest)
 					udpConns = append(udpConns, udpConn)
 				}
 			}
