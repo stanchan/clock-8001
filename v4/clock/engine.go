@@ -24,6 +24,7 @@ const Version = "4.0.0"
 
 // State feedback timer
 const stateTimer = time.Second / 2
+const udpTimer = time.Second / 10
 
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
@@ -314,6 +315,7 @@ func (engine *Engine) listen() {
 	mittiTimer := timer.NewTimer(updateTimeout)
 	milluminTimer := timer.NewTimer(updateTimeout)
 	stateTicker := time.NewTicker(stateTimer)
+	udpTicker := time.NewTicker(udpTimer)
 
 	for {
 		select {
@@ -455,6 +457,8 @@ func (engine *Engine) listen() {
 			if err := engine.sendState(state); err != nil {
 				log.Printf("Error sending osc state: %v", err)
 			}
+		case <-udpTicker.C:
+			engine.sendUDPTimers()
 		}
 	}
 }
@@ -490,7 +494,11 @@ func (engine *Engine) sendState(state *State) error {
 		return err
 	}
 	engine.oscSendChan <- data
+	return nil
+}
 
+func (engine *Engine) sendUDPTimers() {
+	t := time.Now()
 	for i, conn := range engine.udpDests {
 		c := engine.udpCounters[i].Output(t)
 		mins := c.Minutes
@@ -510,8 +518,6 @@ func (engine *Engine) sendState(state *State) error {
 		data := udptime.Encode(&msg)
 		conn.Write(data)
 	}
-
-	return nil
 }
 
 // Send the clock state as /clock/state
