@@ -166,7 +166,12 @@ const configHTML = `
 
 					<label for="source1-timezone">
 						<span>Timezone for the time of day input</span>
-						<input type="text" id="source1-timezone" name="source1-timezone" value="{{.EngineOptions.Source1.TimeZone}}" />
+						{{$selected := .EngineOptions.Source1.TimeZone}}
+						<select id="source1-timezone" name="source1-timezone" >
+							{{ range $tz := .Timezones }}
+								<option {{if eq $selected $tz}} selected {{end}}>{{$tz}}</option>
+							{{ end }}
+						</select>
 					</label>
 
 					<label for="source1-hidden">
@@ -204,7 +209,12 @@ const configHTML = `
 
 					<label for="source2-timezone">
 						<span>Timezone for the time of day input</span>
-						<input type="text" id="source2-timezone" name="source2-timezone" value="{{.EngineOptions.Source2.TimeZone}}" />
+						{{$selected = .EngineOptions.Source2.TimeZone}}
+						<select id="source2-timezone" name="source2-timezone" >
+							{{ range $tz := .Timezones }}
+								<option {{if eq $selected $tz}} selected {{end}}>{{$tz}}</option>
+							{{ end }}
+						</select>
 					</label>
 
 					<label for="source2-hidden">
@@ -242,7 +252,12 @@ const configHTML = `
 
 					<label for="source3-timezone">
 						<span>Timezone for the time of day input</span>
-						<input type="text" id="source3-timezone" name="source3-timezone" value="{{.EngineOptions.Source3.TimeZone}}" />
+						{{$selected = .EngineOptions.Source3.TimeZone}}
+						<select id="source3-timezone" name="source3-timezone" >
+							{{ range $tz := .Timezones }}
+								<option {{if eq $selected $tz}} selected {{end}}>{{$tz}}</option>
+							{{ end }}
+						</select>
 					</label>
 
 					<label for="source3-hidden">
@@ -280,7 +295,12 @@ const configHTML = `
 
 					<label for="source4-timezone">
 						<span>Time zone for the time of day input</span>
-						<input type="text" id="source4-timezone" name="source4-timezone" value="{{.EngineOptions.Source4.TimeZone}}" />
+						{{$selected = .EngineOptions.Source4.TimeZone}}
+						<select id="source4-timezone" name="source4-timezone" >
+							{{ range $tz := .Timezones }}
+								<option {{if eq $selected $tz}} selected {{end}}>{{$tz}}</option>
+							{{ end }}
+						</select>
 					</label>
 
 					<label for="source4-hidden">

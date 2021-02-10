@@ -58,6 +58,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
+	options.Timezones = tzList
+
 	log.Printf("fonts: %v", options.Fonts)
 	err = tmpl.Execute(w, options)
 	if err != nil {
