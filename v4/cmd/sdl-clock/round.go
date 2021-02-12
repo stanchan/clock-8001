@@ -196,6 +196,7 @@ func composeRoundClocks(state *clock.State) {
 	if options.dualClock {
 		// Render the dual clock displays
 		dualText := font.TextBitmap(fmt.Sprintf("%-.8s", state.Tally))
+		colors.tally = sdl.Color{R: state.TallyColor.R, G: state.TallyColor.G, B: state.TallyColor.B, A: 255}
 
 		x, y, _ := renderer.GetOutputSize()
 		if x > y {
@@ -211,7 +212,7 @@ func composeRoundClocks(state *clock.State) {
 			for y, row := range dualText {
 				for x, b := range row {
 					if b {
-						setPixel(y, x, colors.text, (1920-1064)/2, 800+50, 19, 16)
+						setPixel(y, x, colors.tally, (1920-1064)/2, 800+50, 19, 16)
 					}
 				}
 			}
@@ -228,7 +229,7 @@ func composeRoundClocks(state *clock.State) {
 			for y, row := range dualText {
 				for x, b := range row {
 					if b {
-						setPixel(y, x, colors.text, (1080-1064)/2, 800+50, 19, 16)
+						setPixel(y, x, colors.tally, (1080-1064)/2, 800+50, 19, 16)
 					}
 				}
 			}
