@@ -36,6 +36,10 @@ var textClock struct {
 	labelBG     sdl.Color
 	r           [3]outputLine
 	glyphRegexp *regexp.Regexp
+	tally       string
+	tallyColor  sdl.Color
+	tallyBG     sdl.Color
+	tallyTex    *sdl.Texture
 }
 
 // Font sizes. Rpi <4 is limited to 2048x2048 texture size.
@@ -105,7 +109,6 @@ func drawTextClock(state *clock.State) {
 		draw3TextClocks(state)
 	}
 
-	// TODO: cache the previous tally texture and reuse if unchanged
 	drawTally(state)
 }
 
@@ -360,9 +363,21 @@ func drawTally(state *clock.State) {
 			B: state.TallyBG.B,
 			A: state.TallyBG.A,
 		}
-		tallyTexture := renderText(state.Tally, textClock.labelFont, tallyColor)
-		tallyTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
-		tallyTexture.SetAlphaMod(tallyColor.A)
+
+		if textClock.tally != state.Tally ||
+			textClock.tallyColor != tallyColor ||
+			textClock.tallyBG != bgColor {
+			if textClock.tallyTex != nil {
+				textClock.tallyTex.Destroy()
+			}
+			textClock.tally = state.Tally
+			textClock.tallyColor = tallyColor
+			textClock.tallyBG = bgColor
+
+			textClock.tallyTex = renderText(state.Tally, textClock.labelFont, textClock.tallyColor)
+			textClock.tallyTex.SetBlendMode(sdl.BLENDMODE_BLEND)
+			textClock.tallyTex.SetAlphaMod(textClock.tallyColor.A)
+		}
 
 		tallyRect := sdl.Rect{X: 10, Y: 25 + (365 * 2), W: 1920 - 20, H: 300}
 		if options.singleLine {
@@ -376,12 +391,8 @@ func drawTally(state *clock.State) {
 		x2 := x1 + tallyRect.W
 		y2 := y1 + tallyRect.H
 
-		gfx.BoxColor(renderer, x1, y1, x2, y2, bgColor)
-
-		// renderer.FillRect(&tallyRect)
-		copyIntoRect(tallyTexture, tallyRect)
-
-		tallyTexture.Destroy()
+		gfx.BoxColor(renderer, x1, y1, x2, y2, textClock.tallyBG)
+		copyIntoRect(textClock.tallyTex, tallyRect)
 	}
 }
 
