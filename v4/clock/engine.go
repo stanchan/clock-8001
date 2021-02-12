@@ -120,7 +120,6 @@ type Engine struct {
 	ltcEnabled      bool     // Toggle LTC mode on or off
 	ltcTimeout      bool     // Set to true if LTC signal is lost by the ltc timer
 	ltcActive       bool     // Do we have a active LTC to display?
-	DualText        string   // Dual clock mode text message, 8 characters
 	format12h       bool     // Use 12 hour format for time-of-day
 	off             bool     // Is the engine output off?
 	ignoreRegexp    *regexp.Regexp
@@ -159,7 +158,6 @@ type State struct {
 	TallyBG        *color.RGBA // Tally message background color
 	Flash          bool        // Flash cycle state
 	DisplaySeconds bool        // Show seconds in text and in the ring for ToD display
-	Caption        string      // Caption for all of the clocks, formely DualText
 	Background     int         // User selected background number
 	Info           string      // Clock information, version, ip-address etc. Should be displayed if not empty
 	TitleColor     color.RGBA
@@ -175,7 +173,6 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		timeout:        time.Duration(options.Timeout) * time.Millisecond,
 		initialized:    false,
 		oscDests:       nil,
-		DualText:       "",
 		ltcShowSeconds: options.LTCSeconds,
 		ltcFollow:      options.LTCFollow,
 		ltcEnabled:     !options.DisableLTC,
@@ -408,7 +405,7 @@ func (engine *Engine) listen() {
 					ltcTimer.Reset(engine.timeout)
 				}
 			case "dualText":
-				engine.DualText = fmt.Sprintf("%-.8s", message.Data)
+				engine.message = fmt.Sprintf("%-.8s", message.Data)
 			case "mitti":
 				mittiTimer.Reset(updateTimeout)
 
@@ -660,7 +657,6 @@ func (engine *Engine) State() *State {
 		Flash:          engine.flash(t),
 		DisplaySeconds: engine.displaySeconds,
 		TallyColor:     &color.RGBA{},
-		Caption:        engine.DualText,
 		Background:     engine.background,
 		TitleColor:     engine.titleTextColor,
 		TitleBGColor:   engine.titleBGColor,

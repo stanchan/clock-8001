@@ -107,7 +107,7 @@ func drawRoundClocks(state *clock.State) {
 			}
 		}
 
-		if mainClock.Mode != clock.LTC {
+		if mainClock.Mode != clock.LTC && !options.dualClock {
 			if state.Tally != "" {
 				tally = fmt.Sprintf("%-.4s", state.Tally)
 				colors.tally = sdl.Color{R: state.TallyColor.R, G: state.TallyColor.G, B: state.TallyColor.B, A: 255}
@@ -166,7 +166,7 @@ func composeRoundClocks(state *clock.State) {
 
 	if options.dualClock {
 		// Render the dual clock displays
-		dualText := font.TextBitmap(state.Caption)
+		dualText := font.TextBitmap(fmt.Sprintf("%-.8s", state.Tally))
 
 		x, y, _ := renderer.GetOutputSize()
 		if x > y {
