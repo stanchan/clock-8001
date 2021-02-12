@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v4/clock"
+	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -12,6 +14,33 @@ import (
 /*
  * Code for the original round clock faces
  */
+
+var font *bdf.Bdf
+
+func initRoundClock() {
+	var err error
+	// Parse font for clock text
+	font, err = bdf.Parse(options.Font)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("BDF font loaded.")
+
+	createRings()
+
+	clockTextures = make([]*sdl.Texture, 2)
+	for i := range clockTextures {
+		clockTextures[i], err = renderer.CreateTexture(
+			sdl.PIXELFORMAT_RGBA8888,
+			sdl.TEXTUREACCESS_TARGET, 1080, 1080)
+		check(err)
+
+		err = clockTextures[i].SetBlendMode(sdl.BLENDMODE_BLEND)
+		check(err)
+	}
+	log.Printf("Round clock initialized")
+}
 
 func drawRoundClocks(state *clock.State) {
 	var err error

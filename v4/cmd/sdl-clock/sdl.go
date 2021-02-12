@@ -185,6 +185,26 @@ func initTextures() {
 	textureSource = sdl.Rect{X: 0, Y: 0, W: textureSize, H: textureSize}
 }
 
+func setupScaling() {
+	if options.dualClock || options.textClock || options.countdown {
+		// FIXME: rpi display scaling fix
+		// Dual clock
+		x, y, _ := renderer.GetOutputSize()
+		log.Printf("SDL2 output size: %v, %v", x, y)
+		if x > y {
+			err := renderer.SetLogicalSize(1920, 1080)
+			check(err)
+		} else {
+			// rotated display
+			err := renderer.SetLogicalSize(1080, 1920)
+			check(err)
+		}
+	} else if !options.NoARCorrection {
+		rpiDisplayCorrection()
+	}
+
+}
+
 // rpiDisplayCorrection detects the official 7" rpi display and applies aspect ratio correction.
 // The official display has non-square pixels...
 func rpiDisplayCorrection() {

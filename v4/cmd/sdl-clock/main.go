@@ -7,7 +7,6 @@ import (
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"gitlab.com/Depili/clock-8001/v4/util"
-	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	"log"
 	"os"
 	"os/signal"
@@ -18,7 +17,6 @@ import (
 )
 
 var parser = flags.NewParser(&options, flags.Default)
-var font *bdf.Bdf
 var showBackground bool
 var backgroundNumber int
 
@@ -26,33 +24,13 @@ const updateTime = time.Second / 30
 
 func main() {
 	var err error
+	var info string
 
 	parseOptions()
-
-	if options.Defaults {
-		defaultSourceConfig()
-	}
-
-	// Dump the current config to stdout
-	if options.DumpConfig {
-		dumpConfig()
-	}
 
 	if !options.DisableHTTP {
 		go runHTTP()
 	}
-
-	if options.Debug {
-		debug.Enabled = true
-	}
-
-	// Parse font for clock text
-	font, err = bdf.Parse(options.Font)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Printf("Fonts loaded.\n")
 
 	// Initialize SDL
 	initSDL()
@@ -60,33 +38,16 @@ func main() {
 	defer window.Destroy()
 	defer renderer.Destroy()
 
+	setupScaling()
 	initColors()
-	createRings()
-
-	if options.dualClock || options.textClock || options.countdown {
-		// FIXME: rpi display scaling fix
-		// Dual clock
-		x, y, _ := renderer.GetOutputSize()
-		log.Printf("SDL2 output size: %v, %v", x, y)
-		if x > y {
-			err = renderer.SetLogicalSize(1920, 1080)
-			check(err)
-		} else {
-			// rotated display
-			err = renderer.SetLogicalSize(1080, 1920)
-			check(err)
-		}
-	} else if !options.NoARCorrection {
-		rpiDisplayCorrection()
-	}
-
 	initTextures()
+
 	if options.textClock {
 		initTextClock()
-	}
-
-	if options.countdown {
+	} else if options.countdown {
 		initCountdown()
+	} else {
+		initRoundClock()
 	}
 
 	// Trap SIGINT aka Ctrl-C
@@ -105,22 +66,9 @@ func main() {
 	}
 	engine.SetTitleColors(toRGBA(colors.label), toRGBA(colors.labelBG))
 
-	clockTextures = make([]*sdl.Texture, 2)
-
-	clockTextures[0], err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
-	check(err)
-	clockTextures[1], err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1080, 1080)
-	check(err)
-
-	err = clockTextures[0].SetBlendMode(sdl.BLENDMODE_BLEND)
-	check(err)
-	err = clockTextures[1].SetBlendMode(sdl.BLENDMODE_BLEND)
-	check(err)
-
 	loadBackground(options.Background)
 
 	log.Printf("Entering main loop\n")
-	var info string
 
 	for {
 		select {
@@ -260,6 +208,19 @@ func parseOptions() {
 		options.singleLine = true
 	case "countdown":
 		options.countdown = true
+	}
+
+	if options.Defaults {
+		defaultSourceConfig()
+	}
+
+	// Dump the current config to stdout
+	if options.DumpConfig {
+		dumpConfig()
+	}
+
+	if options.Debug {
+		debug.Enabled = true
 	}
 }
 
