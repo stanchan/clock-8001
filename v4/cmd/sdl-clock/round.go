@@ -212,8 +212,13 @@ func composeRoundClocks(state *clock.State) {
 
 		if options.small {
 			// Do not scale the small 192x192 px clock
-
-			err := renderer.Copy(clockTextures[0], nil, nil)
+			rect := sdl.Rect{
+				X: 0,
+				Y: 0,
+				H: 192,
+				W: 192,
+			}
+			err := renderer.Copy(clockTextures[0], &rect, &rect)
 			check(err)
 		} else if x > y {
 			dest = sdl.Rect{
