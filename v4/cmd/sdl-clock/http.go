@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	htmlTemplate "html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -27,6 +28,12 @@ func runHTTP() {
 
 	http.HandleFunc("/save", basicAuth(saveHandler))
 	http.HandleFunc("/", basicAuth(indexHandler))
+	http.HandleFunc("/export", func(res http.ResponseWriter, req *http.Request) {
+		res.Header().Add("Content-Disposition", "attachment;filename=clock.ini")
+		http.ServeFile(res, req, options.configFile)
+	})
+	http.HandleFunc("/import", basicAuth(importHandler))
+
 	log.Printf("HTTP config: listening on %v", options.HTTPPort)
 	log.Fatal(http.ListenAndServe(options.HTTPPort, nil))
 }
@@ -62,6 +69,50 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("fonts: %v", options.Fonts)
 	err = tmpl.Execute(w, options)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func importHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Parse our multipart form, 10 << 20 specifies a maximum
+	// upload of 10 MB files.
+	r.ParseMultipartForm(10 << 20)
+	// FormFile returns the first file for the given key `myFile`
+	// it also returns the FileHeader so we can get the Filename,
+	// the Header and the size of the file
+	file, handler, err := r.FormFile("import")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	dst, err := os.OpenFile(options.configFile, os.O_RDWR|os.O_CREATE, 0755)
+	defer dst.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Writing new config ini file")
+	// Copy the uploaded file to the created file on the filesystem
+	if _, err := io.Copy(dst, file); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	go delayedExit()
+
+	tmpl, err := htmlTemplate.New("confirm.html").Parse(confirmHTML)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(w, nil)
 	if err != nil {
 		panic(err)
 	}

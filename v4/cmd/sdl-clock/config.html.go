@@ -16,7 +16,7 @@ const configHTML = `
 			</div>
 		{{end}}
 		<div class="config-form">
-			<form action="/save" method="post">
+			<form action="/import" method="post" enctype="multipart/form-data">
 				<fieldset>
 					<legend>Project links</legend>
 					<ul>
@@ -25,6 +25,17 @@ const configHTML = `
 					</ul>
 				</fieldset>
 
+				<fieldset>
+					<legend>Config Import / Export</legend>
+					<p><a href="/export">Download current configuration.</a></p>
+					<label for="import"><span>Import configurations file</span>
+						<input type="file" id="import" name="import" />
+					</label>
+					<input type="submit" value="upload" />
+				</fieldset>
+			</form>
+
+			<form action="/save" method="post">
 				<fieldset>
 					<legend>General settings</legend>
 					<label for="Face">
