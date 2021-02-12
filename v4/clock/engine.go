@@ -39,7 +39,6 @@ type SourceOptions struct {
 	Tod      bool   `long:"tod" description:"Enable time-of-day as a source"`
 	TimeZone string `long:"timezone" description:"Time zone to use for ToD display" default:"Europe/Helsinki"`
 	Hidden   bool   `long:"hidden" description:"Hide this time source"`
-	UDP      bool
 }
 
 // EngineOptions contains all common options for clock.Engines
