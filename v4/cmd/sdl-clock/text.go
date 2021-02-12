@@ -94,7 +94,13 @@ func drawTextClock(state *clock.State) {
 		}
 
 		renderNumbers(i, text, toSDLColor(clk.TextColor))
-		renderLabel(i, fmt.Sprintf("%.10s", clk.Label), toSDLColor(state.TitleColor))
+		titleColor := toSDLColor(state.TitleColor)
+		if colors.label != titleColor {
+			for row := range textClock.r {
+				textClock.r[row].label = ""
+			}
+		}
+		renderLabel(i, fmt.Sprintf("%.10s", clk.Label), titleColor)
 		renderIcon(i, clk.Icon)
 	}
 
@@ -349,8 +355,7 @@ func renderIcon(i int, icon string) {
 }
 
 func renderLabel(i int, label string, textColor sdl.Color) {
-	if textClock.r[i].label != label &&
-		colors.label == textColor {
+	if textClock.r[i].label != label {
 
 		colors.label = textColor
 		textClock.r[i].label = label
