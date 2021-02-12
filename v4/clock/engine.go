@@ -135,15 +135,17 @@ type Engine struct {
 
 // Clock contains the state of a single component clock / timer
 type Clock struct {
-	Text     string  // Normal clock representation
-	Label    string  // Label text
-	Icon     string  // Icon for the clock type
-	Compact  string  // 4 character condensed output
-	Expired  bool    // true if asscociated timer is expired
-	Mode     int     // Display type
-	Paused   bool    // Is the clock/timer paused?
-	Progress float64 // Progress of the total timer 0-1
-	Hidden   bool    // The timer should not be rendered if true
+	Text      string     // Normal clock representation
+	Label     string     // Label text
+	Icon      string     // Icon for the clock type
+	Compact   string     // 4 character condensed output
+	Expired   bool       // true if asscociated timer is expired
+	Mode      int        // Display type
+	Paused    bool       // Is the clock/timer paused?
+	Progress  float64    // Progress of the total timer 0-1
+	Hidden    bool       // The timer should not be rendered if true
+	TextColor color.RGBA // Color for text
+	BGColor   color.RGBA // Background color
 }
 
 // State is a snapshot of the clock representation on the time State() was called
@@ -158,6 +160,8 @@ type State struct {
 	Caption        string      // Caption for all of the clocks, formely DualText
 	Background     int         // User selected background number
 	Info           string      // Clock information, version, ip-address etc. Should be displayed if not empty
+	TitleColor     color.RGBA
+	TitleBGColor   color.RGBA
 }
 
 // MakeEngine creates a clock engine
@@ -421,20 +425,33 @@ func (engine *Engine) listen() {
 				// FIXME: non semantic ugliness
 				engine.background = message.Counter
 			case "sourceHide":
-				if message.Counter >= 0 && message.Counter < len(engine.sources) {
+				if message.Counter >= 0 &&
+					message.Counter < len(engine.sources) {
+
 					engine.sources[message.Counter].hidden = true
 				}
 			case "sourceShow":
-				if message.Counter >= 0 && message.Counter < len(engine.sources) {
+				if message.Counter >= 0 &&
+					message.Counter < len(engine.sources) {
 					engine.sources[message.Counter].hidden = false
 				}
 			case "sourceTitle":
-				if message.Counter >= 0 && message.Counter < len(engine.sources) {
+				if message.Counter >= 0 &&
+					message.Counter < len(engine.sources) {
+
 					engine.sources[message.Counter].title = message.Data
 				}
 			case "showInfo":
 				engine.showInfo = true
 				engine.infoTimer.Reset(time.Duration(message.Counter) * time.Second)
+			case "sourceColors":
+				if message.Counter >= 0 &&
+					message.Counter < len(engine.sources) &&
+					len(message.Colors) == 2 {
+
+					log.Printf("Setting source %d colors: %v - %v", message.Counter+1, message.Colors[0], message.Colors[1])
+					engine.SetSourceColors(message.Counter, message.Colors[0], message.Colors[1])
+				}
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -572,12 +589,14 @@ func (engine *Engine) State() *State {
 	var clocks []*Clock
 	for _, s := range engine.sources {
 		c := Clock{
-			Text:    "",
-			Compact: "",
-			Label:   s.title,
-			Icon:    "",
-			Expired: false,
-			Hidden:  s.hidden,
+			Text:      "",
+			Compact:   "",
+			Label:     s.title,
+			Icon:      "",
+			Expired:   false,
+			Hidden:    s.hidden,
+			TextColor: s.textColor,
+			BGColor:   s.bgColor,
 		}
 		if s.off {
 			c.Mode = Off
@@ -930,6 +949,11 @@ func (engine *Engine) activateSourceByCounter(c int) {
 			s.off = false
 		}
 	}
+}
+
+func (engine *Engine) SetSourceColors(source int, text, bg color.RGBA) {
+	engine.sources[source].textColor = text
+	engine.sources[source].bgColor = bg
 }
 
 func clockAddresses() string {

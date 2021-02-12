@@ -104,6 +104,20 @@ Set the title text for the given source.
 Parameters:
 1. string; the label text in utf8 encoding.
 
+### `/clock/source/*/colors`
+
+Set the text and background colors for the given source output. **Alpha support will be added on later version**
+
+Parameters:
+1. int; Red component of text color, 0-255
+2. int; Green component of text color, 0-255
+3. int; Blue component of text color, 0-255
+4. int; Alpha for text, 0-255
+5. int; Red component for text background, 0-255
+6. int; Green component for text background, 0-255
+7. int; Blue component for text background, 0-255
+8. int; Alpha for text background, 0-255
+
 ### `/clock/hide`
 
 Hide all time sources.

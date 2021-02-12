@@ -100,6 +100,9 @@ func main() {
 	// Create main clock engine
 	engine, err := clock.MakeEngine(options.EngineOptions)
 	check(err)
+	for i := 0; i < 3; i++ {
+		engine.SetSourceColors(i, toRGBA(colors.row[i]), toRGBA(colors.rowBG[i]))
+	}
 
 	clockTextures = make([]*sdl.Texture, 2)
 

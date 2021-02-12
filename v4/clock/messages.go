@@ -2,6 +2,7 @@ package clock
 
 import (
 	"gitlab.com/Depili/go-osc/osc"
+	"image/color"
 )
 
 var clockUnits = []struct {
@@ -24,6 +25,7 @@ type Message struct {
 	DisplayMessage     *DisplayMessage
 	MediaMessage       *MediaMessage
 	DisplayTextMessage *displayTextMessage
+	Colors             []color.RGBA
 }
 
 // MediaMessage contains data from media players
@@ -181,4 +183,47 @@ func (message CountdownMessage) MarshalOSC(addr string) *osc.Message {
 	return osc.NewMessage(addr,
 		message.Seconds,
 	)
+}
+
+type ColorMessage struct {
+	r   int32
+	g   int32
+	b   int32
+	a   int32
+	bgR int32
+	bgG int32
+	bgB int32
+	bgA int32
+}
+
+func (message *ColorMessage) UnmarshalOSC(msg *osc.Message) error {
+	return msg.UnmarshalArguments(
+		&message.r,
+		&message.g,
+		&message.b,
+		&message.a,
+		&message.bgR,
+		&message.bgG,
+		&message.bgB,
+		&message.bgA,
+	)
+}
+
+func (msg *ColorMessage) ToRGBA() []color.RGBA {
+	text := color.RGBA{
+		R: uint8(msg.r),
+		G: uint8(msg.g),
+		B: uint8(msg.b),
+		A: uint8(msg.a),
+	}
+	bg := color.RGBA{
+		R: uint8(msg.bgR),
+		G: uint8(msg.bgG),
+		B: uint8(msg.bgB),
+		A: uint8(msg.bgA),
+	}
+	ret := make([]color.RGBA, 2)
+	ret[0] = text
+	ret[1] = bg
+	return ret
 }

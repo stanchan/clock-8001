@@ -243,6 +243,27 @@ func (server *Server) handleSourceTitle(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleSourceColor(msg *osc.Message) {
+	debug.Printf("handleSourceColor: %v", msg)
+	if matches := server.sourceRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+
+		cm := ColorMessage{}
+		err := cm.UnmarshalOSC(msg)
+		if err != nil {
+			log.Printf("colors unmarshal: %v - %v", err, msg)
+			return
+		}
+
+		m := Message{
+			Type:    "sourceColors",
+			Counter: counter - 1,
+			Colors:  cm.ToRGBA(),
+		}
+		server.update(m)
+	}
+}
+
 /*
  * Clock sync handlers
  */
@@ -262,6 +283,7 @@ func (server *Server) handleMedia(msg *osc.Message) {
 	err := mm.UnmarshalOSC(msg)
 	if err != nil {
 		log.Printf("error unmarshaling media message: %v", err)
+		return
 	}
 
 	if mm.uuid == server.uuid {
@@ -495,6 +517,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/source/*/hide", server.handleHide)
 	registerHandler(oscServer, "^/clock/source/*/show", server.handleShow)
 	registerHandler(oscServer, "^/clock/source/*/title", server.handleSourceTitle)
+	registerHandler(oscServer, "^/clock/source/*/color", server.handleSourceColor)
 	registerHandler(oscServer, "^/clock/hide", server.handleHideAll)
 	registerHandler(oscServer, "^/clock/show", server.handleShowAll)
 

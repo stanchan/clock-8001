@@ -30,15 +30,9 @@ var textClock struct {
 	numberFont  *ttf.Font
 	labelFont   *ttf.Font
 	iconFont    *ttf.Font
-	todColor    sdl.Color
-	todBG       sdl.Color
-	labelColor  sdl.Color
-	labelBG     sdl.Color
 	r           [3]outputLine
 	glyphRegexp *regexp.Regexp
 	tally       string
-	tallyColor  sdl.Color
-	tallyBG     sdl.Color
 	tallyTex    *sdl.Texture
 }
 
@@ -70,7 +64,7 @@ func initTextClock() {
 
 	textClock.glyphRegexp = regexp.MustCompile(`^[\d:]*$`)
 
-	prerenderFonts()
+	preRenderFonts()
 
 	log.Printf("Text clock face intialized.")
 }
@@ -78,6 +72,8 @@ func initTextClock() {
 func drawTextClock(state *clock.State) {
 	for i := range textClock.r {
 		clk := state.Clocks[i]
+		colors.rowBG[i] = toSDLColor(clk.BGColor)
+
 		if clk.Hidden {
 			continue
 		}
@@ -95,7 +91,7 @@ func drawTextClock(state *clock.State) {
 			text = "00:00:00"
 		}
 
-		renderNumbers(i, text)
+		renderNumbers(i, text, toSDLColor(clk.TextColor))
 		renderLabel(i, fmt.Sprintf("%.10s", clk.Label))
 		renderIcon(i, clk.Icon)
 	}
@@ -121,7 +117,7 @@ func drawSingleLineClock(state *clock.State) {
 
 	if options.DrawBoxes {
 		// Draw the placeholder boxes for timers and labels
-		renderer.SetDrawColor(colors.timerBG.R, colors.timerBG.G, colors.timerBG.B, colors.timerBG.A)
+		renderer.SetDrawColor(colors.rowBG[0].R, colors.rowBG[0].G, colors.rowBG[0].B, colors.rowBG[0].A)
 		renderer.FillRect(&numberBox)
 
 		renderer.SetDrawColor(colors.labelBG.R, colors.labelBG.G, colors.labelBG.B, colors.labelBG.A)
@@ -165,7 +161,7 @@ func draw3TextClocks(state *clock.State) {
 
 		if options.DrawBoxes {
 			// Draw the placeholder boxes for timers and labels
-			renderer.SetDrawColor(colors.timerBG.R, colors.timerBG.G, colors.timerBG.B, colors.timerBG.A)
+			renderer.SetDrawColor(colors.rowBG[i].R, colors.rowBG[i].G, colors.rowBG[i].B, colors.rowBG[i].A)
 			renderer.FillRect(&numberBox)
 
 			renderer.SetDrawColor(colors.labelBG.R, colors.labelBG.G, colors.labelBG.B, colors.labelBG.A)
@@ -241,19 +237,24 @@ func renderText(text string, font *ttf.Font, color sdl.Color) *sdl.Texture {
 	return tex
 }
 
-func prerenderFonts() {
+func preRenderFonts() {
 	log.Printf("Precalcs!")
-	for j := range textClock.r {
-		for i := range textClock.r[j].timeFragments {
-			text := fmt.Sprintf("%01d", i)
-			textClock.r[j].timeFragments[i] = renderText(text, textClock.numberFont, colors.rows[j])
-		}
-		_, _, w, h, _ := textClock.r[j].timeFragments[0].Query()
-		textClock.r[j].fragmentRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
-		textClock.r[j].colonTex = renderText(":", textClock.numberFont, colors.rows[j])
-		_, _, w, h, _ = textClock.r[j].colonTex.Query()
-		textClock.r[j].colonRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
+	for row := range textClock.r {
+		preRenderRowFont(row)
 	}
+}
+
+func preRenderRowFont(row int) {
+	log.Printf("Updating row %d glyphs", row)
+	for i := range textClock.r[row].timeFragments {
+		text := fmt.Sprintf("%01d", i)
+		textClock.r[row].timeFragments[i] = renderText(text, textClock.numberFont, colors.row[row])
+	}
+	_, _, w, h, _ := textClock.r[row].timeFragments[0].Query()
+	textClock.r[row].fragmentRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
+	textClock.r[row].colonTex = renderText(":", textClock.numberFont, colors.row[row])
+	_, _, w, h, _ = textClock.r[row].colonTex.Query()
+	textClock.r[row].colonRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
 }
 
 func createRowTexture(i int, text string) {
@@ -298,7 +299,14 @@ func renderFromGlyphs(i int, text string) {
 	renderer.SetRenderTarget(nil)
 }
 
-func renderNumbers(i int, text string) {
+func renderNumbers(i int, text string, textColor sdl.Color) {
+	if textColor != colors.row[i] {
+		colors.row[i] = textColor
+		preRenderRowFont(i)
+		// Force redrawing of the text
+		textClock.r[i].text = " "
+	}
+
 	if textClock.r[i].text != text {
 		textClock.r[i].text = text
 		if textClock.r[i].textTex != nil {
@@ -310,7 +318,7 @@ func renderNumbers(i int, text string) {
 			createRowTexture(i, text)
 			renderFromGlyphs(i, text)
 		} else {
-			textClock.r[i].textTex = renderText(text, textClock.numberFont, colors.rows[i])
+			textClock.r[i].textTex = renderText(text, textClock.numberFont, colors.row[i])
 		}
 	}
 }
@@ -324,7 +332,7 @@ func renderIcon(i int, icon string) {
 			textClock.r[i].iconTex.Destroy()
 		}
 		if icon != "" {
-			textClock.r[i].iconTex = renderText(icon, textClock.iconFont, colors.rows[i])
+			textClock.r[i].iconTex = renderText(icon, textClock.iconFont, colors.row[i])
 		} else {
 			renderer.SetDrawColor(0, 0, 0, 0)
 			textClock.r[i].iconTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
@@ -365,18 +373,18 @@ func drawTally(state *clock.State) {
 		}
 
 		if textClock.tally != state.Tally ||
-			textClock.tallyColor != tallyColor ||
-			textClock.tallyBG != bgColor {
+			colors.tally != tallyColor ||
+			colors.tallyBG != bgColor {
 			if textClock.tallyTex != nil {
 				textClock.tallyTex.Destroy()
 			}
 			textClock.tally = state.Tally
-			textClock.tallyColor = tallyColor
-			textClock.tallyBG = bgColor
+			colors.tally = tallyColor
+			colors.tallyBG = bgColor
 
-			textClock.tallyTex = renderText(state.Tally, textClock.labelFont, textClock.tallyColor)
+			textClock.tallyTex = renderText(state.Tally, textClock.labelFont, colors.tally)
 			textClock.tallyTex.SetBlendMode(sdl.BLENDMODE_BLEND)
-			textClock.tallyTex.SetAlphaMod(textClock.tallyColor.A)
+			textClock.tallyTex.SetAlphaMod(colors.tally.A)
 		}
 
 		tallyRect := sdl.Rect{X: 10, Y: 25 + (365 * 2), W: 1920 - 20, H: 300}
@@ -391,7 +399,7 @@ func drawTally(state *clock.State) {
 		x2 := x1 + tallyRect.W
 		y2 := y1 + tallyRect.H
 
-		gfx.BoxColor(renderer, x1, y1, x2, y2, textClock.tallyBG)
+		gfx.BoxColor(renderer, x1, y1, x2, y2, colors.tallyBG)
 		copyIntoRect(textClock.tallyTex, tallyRect)
 	}
 }

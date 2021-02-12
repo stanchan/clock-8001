@@ -6,6 +6,7 @@ import (
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
+	"image/color"
 	"log"
 )
 
@@ -15,9 +16,10 @@ var colors struct {
 	text       sdl.Color
 	countdown  sdl.Color
 	tally      sdl.Color
-	rows       [3]sdl.Color
+	tallyBG    sdl.Color
+	row        [3]sdl.Color
+	rowBG      [3]sdl.Color
 	label      sdl.Color
-	timerBG    sdl.Color
 	labelBG    sdl.Color
 	background sdl.Color
 }
@@ -86,13 +88,13 @@ func initColors() {
 	colors.countdown, err = parseColor(options.CountdownColor)
 	check(err)
 
-	colors.rows[0], err = parseColor(options.Row1Color)
+	colors.row[0], err = parseColor(options.Row1Color)
 	check(err)
 
-	colors.rows[1], err = parseColor(options.Row2Color)
+	colors.row[1], err = parseColor(options.Row2Color)
 	check(err)
 
-	colors.rows[2], err = parseColor(options.Row3Color)
+	colors.row[2], err = parseColor(options.Row3Color)
 	check(err)
 
 	colors.label, err = parseColor(options.LabelColor)
@@ -101,8 +103,11 @@ func initColors() {
 	colors.labelBG, err = parseColor(options.LabelBG)
 	check(err)
 
-	colors.timerBG, err = parseColor(options.TimerBG)
+	timerBG, err := parseColor(options.TimerBG)
 	check(err)
+	for i := 0; i < 3; i++ {
+		colors.rowBG[i] = timerBG
+	}
 
 	colors.background, err = parseColor(options.BackgroundColor)
 	check(err)
@@ -360,4 +365,22 @@ func parseColor(s string) (c sdl.Color, err error) {
 		err = fmt.Errorf("parseColor(): invalid length, must be 7 or 4: %v", s)
 	}
 	return
+}
+
+func toSDLColor(in color.RGBA) sdl.Color {
+	return sdl.Color{
+		R: in.R,
+		G: in.G,
+		B: in.B,
+		A: in.A,
+	}
+}
+
+func toRGBA(in sdl.Color) color.RGBA {
+	return color.RGBA{
+		R: in.R,
+		G: in.G,
+		B: in.B,
+		A: in.A,
+	}
 }
