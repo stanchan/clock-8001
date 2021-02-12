@@ -960,11 +960,13 @@ func (engine *Engine) activateSourceByCounter(c int) {
 	}
 }
 
+// SetSourceColors sets the source output colors
 func (engine *Engine) SetSourceColors(source int, text, bg color.RGBA) {
 	engine.sources[source].textColor = text
 	engine.sources[source].bgColor = bg
 }
 
+// SetTitleColors sets the source title colors
 func (engine *Engine) SetTitleColors(text, bg color.RGBA) {
 	engine.titleTextColor = text
 	engine.titleBGColor = bg

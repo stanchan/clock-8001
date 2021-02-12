@@ -185,6 +185,7 @@ func (message CountdownMessage) MarshalOSC(addr string) *osc.Message {
 	)
 }
 
+// ColorMessage holds text and background colors with alpha
 type ColorMessage struct {
 	r   int32
 	g   int32
@@ -196,6 +197,7 @@ type ColorMessage struct {
 	bgA int32
 }
 
+// UnmarshalOSC creates a colormessage from OSC message
 func (message *ColorMessage) UnmarshalOSC(msg *osc.Message) error {
 	return msg.UnmarshalArguments(
 		&message.r,
@@ -209,18 +211,19 @@ func (message *ColorMessage) UnmarshalOSC(msg *osc.Message) error {
 	)
 }
 
-func (msg *ColorMessage) ToRGBA() []color.RGBA {
+// ToRGBA converts the message contents to a slice of color.RGBA
+func (message *ColorMessage) ToRGBA() []color.RGBA {
 	text := color.RGBA{
-		R: uint8(msg.r),
-		G: uint8(msg.g),
-		B: uint8(msg.b),
-		A: uint8(msg.a),
+		R: uint8(message.r),
+		G: uint8(message.g),
+		B: uint8(message.b),
+		A: uint8(message.a),
 	}
 	bg := color.RGBA{
-		R: uint8(msg.bgR),
-		G: uint8(msg.bgG),
-		B: uint8(msg.bgB),
-		A: uint8(msg.bgA),
+		R: uint8(message.bgR),
+		G: uint8(message.bgG),
+		B: uint8(message.bgB),
+		A: uint8(message.bgA),
 	}
 	ret := make([]color.RGBA, 2)
 	ret[0] = text
