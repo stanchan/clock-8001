@@ -131,6 +131,8 @@ type Engine struct {
 	showInfo        bool
 	infoTimer       *timer.Timer
 	uuid            string // Clock unique id
+	titleTextColor  color.RGBA
+	titleBGColor    color.RGBA
 }
 
 // Clock contains the state of a single component clock / timer
@@ -452,6 +454,11 @@ func (engine *Engine) listen() {
 					log.Printf("Setting source %d colors: %v - %v", message.Counter+1, message.Colors[0], message.Colors[1])
 					engine.SetSourceColors(message.Counter, message.Colors[0], message.Colors[1])
 				}
+			case "titleColors":
+				if len(message.Colors) == 2 {
+					log.Printf("Setting title colors: %v - %v", message.Colors[0], message.Colors[1])
+					engine.SetTitleColors(message.Colors[0], message.Colors[1])
+				}
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -655,6 +662,8 @@ func (engine *Engine) State() *State {
 		TallyColor:     &color.RGBA{},
 		Caption:        engine.DualText,
 		Background:     engine.background,
+		TitleColor:     engine.titleTextColor,
+		TitleBGColor:   engine.titleBGColor,
 	}
 
 	if engine.showInfo {
@@ -954,6 +963,11 @@ func (engine *Engine) activateSourceByCounter(c int) {
 func (engine *Engine) SetSourceColors(source int, text, bg color.RGBA) {
 	engine.sources[source].textColor = text
 	engine.sources[source].bgColor = bg
+}
+
+func (engine *Engine) SetTitleColors(text, bg color.RGBA) {
+	engine.titleTextColor = text
+	engine.titleBGColor = bg
 }
 
 func clockAddresses() string {

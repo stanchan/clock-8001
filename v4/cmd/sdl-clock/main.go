@@ -103,6 +103,7 @@ func main() {
 	for i := 0; i < 3; i++ {
 		engine.SetSourceColors(i, toRGBA(colors.row[i]), toRGBA(colors.rowBG[i]))
 	}
+	engine.SetTitleColors(toRGBA(colors.label), toRGBA(colors.labelBG))
 
 	clockTextures = make([]*sdl.Texture, 2)
 

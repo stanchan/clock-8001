@@ -158,6 +158,21 @@ Parameters:
 9. integer; the duration in seconds to show the text for
 10. string; the text to display, in utf8 encoding
 
+### `/clock/titlecolors`
+
+Set the text and background colors for source titles. **Alpha support will be added on later version**
+
+Parameters:
+1. int; Red component of text color, 0-255
+2. int; Green component of text color, 0-255
+3. int; Blue component of text color, 0-255
+4. int; Alpha for text, 0-255
+5. int; Red component for text background, 0-255
+6. int; Green component for text background, 0-255
+7. int; Blue component for text background, 0-255
+8. int; Alpha for text background, 0-255
+
+
 ### `/clock/seconds/off`
 
 Hide the second display from the ring in the round clocks.

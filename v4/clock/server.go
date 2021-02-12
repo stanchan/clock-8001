@@ -264,6 +264,22 @@ func (server *Server) handleSourceColor(msg *osc.Message) {
 	}
 }
 
+func (server *Server) handleTitleColors(msg *osc.Message) {
+	debug.Printf("handleTitleColor: %v", msg)
+	cm := ColorMessage{}
+	err := cm.UnmarshalOSC(msg)
+	if err != nil {
+		log.Printf("colors unmarshal: %v - %v", err, msg)
+		return
+	}
+
+	m := Message{
+		Type:   "titleColors",
+		Colors: cm.ToRGBA(),
+	}
+	server.update(m)
+}
+
 /*
  * Clock sync handlers
  */
@@ -525,6 +541,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/background", server.handleBackground)
 	registerHandler(oscServer, "^/clock/info", server.handleInfo)
 	registerHandler(oscServer, "^/clock/text", server.handleDisplayText)
+	registerHandler(oscServer, "^/clock/titlecolors", server.handleTitleColors)
 	registerHandler(oscServer, "^/clock/seconds/off", server.handleSecondsOff)
 	registerHandler(oscServer, "^/clock/seconds/on", server.handleSecondsOn)
 	registerHandler(oscServer, "^/clock/time/set", server.handleTimeSet)

@@ -70,6 +70,8 @@ func initTextClock() {
 }
 
 func drawTextClock(state *clock.State) {
+	colors.labelBG = toSDLColor(state.TitleBGColor)
+
 	for i := range textClock.r {
 		clk := state.Clocks[i]
 		colors.rowBG[i] = toSDLColor(clk.BGColor)
@@ -92,7 +94,7 @@ func drawTextClock(state *clock.State) {
 		}
 
 		renderNumbers(i, text, toSDLColor(clk.TextColor))
-		renderLabel(i, fmt.Sprintf("%.10s", clk.Label))
+		renderLabel(i, fmt.Sprintf("%.10s", clk.Label), toSDLColor(state.TitleColor))
 		renderIcon(i, clk.Icon)
 	}
 
@@ -146,6 +148,7 @@ func drawSingleLineClock(state *clock.State) {
 
 func draw3TextClocks(state *clock.State) {
 	var x, y int32
+
 	for i := range textClock.r {
 		if state.Clocks[i].Hidden {
 			// Row is hidden
@@ -345,8 +348,11 @@ func renderIcon(i int, icon string) {
 	}
 }
 
-func renderLabel(i int, label string) {
-	if textClock.r[i].label != label {
+func renderLabel(i int, label string, textColor sdl.Color) {
+	if textClock.r[i].label != label &&
+		colors.label == textColor {
+
+		colors.label = textColor
 		textClock.r[i].label = label
 		if textClock.r[i].labelTex != nil {
 			textClock.r[i].labelTex.Destroy()
