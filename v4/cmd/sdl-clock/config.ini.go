@@ -136,24 +136,36 @@ countdown-color={{.CountdownColor}}
 
 # Color for labels
 label-color={{.LabelColor}}
+# Alpha for labels
+label-alpha={{.LabelAlpha}}
 
-# Timer row 1 Color
+# Timer row 1 color
 row1-color={{.Row1Color}}
+# Timer row 1 alpha
+row1-alpha={{.Row1Alpha}}
 
-# Timer row 2 Color
+# Timer row 2 color
 row2-color={{.Row2Color}}
+# Timer row 2 alpha
+row2-alpha={{.Row2Alpha}}
 
-# Timer row 3 Color
+# Timer row 3 color
 row3-color={{.Row3Color}}
+# Timer row 3 alpha
+row3-alpha={{.Row3Alpha}}
 
 # Draw background boxes for timers and labels
 draw-boxes={{.DrawBoxes}}
 
-# Timer background Color
+# Timer background color
 timer-bg-color={{.TimerBG}}
+# Timer background alpha
+timer-bg-alpha={{.TimerBGAlpha}}
 
-# Label background Color
+# Label background color
 label-bg-color={{.LabelBG}}
+# Label background alpa
+label-bg-alpha={{.LabelBGAlpha}}
 
 # Numbers font size
 numbers-size={{.NumberFontSize}}

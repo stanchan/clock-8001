@@ -57,12 +57,17 @@ type clockOptions struct {
 	LabelFont      string `long:"label-font" description:"Font for text clock face labels" default:"RobotoMono-VariableFont_wght.ttf"`
 	IconFont       string `long:"icon-font" description:"Font for text clock face icons" default:"MaterialIcons-Regular.ttf"`
 	Row1Color      string `long:"row1-color" description:"Color for text clock row 1" default:"#FF8000"`
+	Row1Alpha      uint8  `long:"row1-alpha" description:"Alpha channel for text clock row 1" default:"255"`
 	Row2Color      string `long:"row2-color" description:"Color for text clock row 2" default:"#FF8000"`
+	Row2Alpha      uint8  `long:"row2-alpha" description:"Alpha channel for text clock row 2" default:"255"`
 	Row3Color      string `long:"row3-color" description:"Color for text clock row 3" default:"#FF8000"`
+	Row3Alpha      uint8  `long:"row3-alpha" description:"Alpha channel for text clock row 3" default:"255"`
 	LabelColor     string `long:"label-color" description:"Color for text clock labels" default:"#FF8000"`
+	LabelAlpha     uint8  `long:"label-alpha" description:"Alpha channel for label text color" default:"255"`
 	TimerBG        string `long:"timer-bg-color" description:"Color for optional timer background box" default:"#202020"`
+	TimerBGAlpha   uint8  `long:"timer-bg-alpha" description:"Alpha channel for timer background boxes" default:"255"`
 	LabelBG        string `long:"label-bg-color" description:"Color for optional label background box" default:"#202020"`
-	Rows           int    `long:"text-rows" description:"Number of timer lines to display" default:"3" choice:"0" choice:"1" choice:"2" choice:"3"`
+	LabelBGAlpha   uint8  `long:"label-bg-alpha" description:"Alpha channel for label bacground boxes" default:"255"`
 	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
 	NumberFontSize int    `long:"numbers-size" default:"250"`
 	FontPath       string `long:"font-path" description:"Path for loading font choices into web config" default:"."`

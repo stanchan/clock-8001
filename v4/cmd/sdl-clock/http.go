@@ -257,6 +257,30 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.EngineOptions.UDPTimer2, err = strconv.Atoi(r.FormValue("udp-timer-2"))
 	validateNumber(err, "UDP Timer 2")
 
+	alpha, err := strconv.Atoi(r.FormValue("row1-alpha"))
+	validateNumber(err, "Row1 alpha")
+	newOptions.Row1Alpha = uint8(alpha)
+
+	alpha, err = strconv.Atoi(r.FormValue("row2-alpha"))
+	validateNumber(err, "Row2 alpha")
+	newOptions.Row2Alpha = uint8(alpha)
+
+	alpha, err = strconv.Atoi(r.FormValue("row3-alpha"))
+	validateNumber(err, "Row3 alpha")
+	newOptions.Row3Alpha = uint8(alpha)
+
+	alpha, err = strconv.Atoi(r.FormValue("label-alpha"))
+	validateNumber(err, "Label alpha")
+	newOptions.LabelAlpha = uint8(alpha)
+
+	alpha, err = strconv.Atoi(r.FormValue("label-bg-alpha"))
+	validateNumber(err, "Label background alpha")
+	newOptions.LabelBGAlpha = uint8(alpha)
+
+	alpha, err = strconv.Atoi(r.FormValue("timer-bg-alpha"))
+	validateNumber(err, "Timer bg alpha")
+	newOptions.TimerBGAlpha = uint8(alpha)
+
 	// Colors
 	newOptions.TextColor = r.FormValue("TextColor")
 	errors += validateColor(newOptions.TextColor, "Round clock text color")

@@ -393,9 +393,19 @@ const configHTML = `
 						<input type="color" id="Row1Color" name="Row1Color" value="{{.Row1Color}}" />
 					</label>
 
+					<label for="row1-alpha">
+						<span>Alpha for timer row 1</span>
+						<input type="number" min="0" max="255" id="row1-alpha" name="row1-alpha" value="{{.Row1Alpha}}" />
+					</label>
+
 					<label for="Row2Color">
 						<span>Color timer row 2</span>
 						<input type="color" id="Row2Color" name="Row2Color" value="{{.Row2Color}}" />
+					</label>
+
+					<label for="row2-alpha">
+						<span>Alpha for timer row 2</span>
+						<input type="number" min="0" max="255" id="row2-alpha" name="row2-alpha" value="{{.Row2Alpha}}" />
 					</label>
 
 					<label for="Row3Color">
@@ -403,9 +413,19 @@ const configHTML = `
 						<input type="color" id="Row3Color" name="Row3Color" value="{{.Row3Color}}" />
 					</label>
 
+					<label for="row3-alpha">
+						<span>Alpha for timer row 3</span>
+						<input type="number" min="0" max="255" id="row3-alpha" name="row3-alpha" value="{{.Row3Alpha}}" />
+					</label>
+
 					<label for="LabelColor">
-						<span>Color labels</span>
+						<span>Color for timer titles</span>
 						<input type="color" id="LabelColor" name="LabelColor" value="{{.LabelColor}}" />
+					</label>
+
+					<label for="label-alpha">
+						<span>Alpha for timer titles</span>
+						<input type="number" min="0" max="255" id="label-alpha" name="label-alpha" value="{{.LabelAlpha}}" />
 					</label>
 
 					<label for="DrawBoxes">
@@ -414,13 +434,23 @@ const configHTML = `
 					</label>
 
 					<label for="LabelBG">
-						<span>Background color for labels</span>
+						<span>Background color for timer titles</span>
 						<input type="color" id="LabelBG" name="LabelBG" value="{{.LabelBG}}" />
+					</label>
+
+					<label for="label-bg-alpha">
+						<span>Alpha for timer title backgrounds</span>
+						<input type="number" min="0" max="255" id="label-bg-alpha" name="label-bg-alpha" value="{{.LabelBGAlpha}}" />
 					</label>
 
 					<label for="TimerBG">
 						<span>Background color for timers</span>
 						<input type="color" id="TimerBG" name="TimerBG" value="{{.TimerBG}}" />
+					</label>
+
+					<label for="timer-bg-alpha">
+						<span>Alpha for timer backgrounds</span>
+						<input type="number" min="0" max="255" id="timer-bg-alpha" name="timer-bg-alpha" value="{{.TimerBGAlpha}}" />
 					</label>
 
 					<label for="NumberFontSize">

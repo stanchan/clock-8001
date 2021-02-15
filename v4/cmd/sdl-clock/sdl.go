@@ -90,21 +90,27 @@ func initColors() {
 
 	colors.row[0], err = parseColor(options.Row1Color)
 	check(err)
+	colors.row[0].A = options.Row1Alpha
 
 	colors.row[1], err = parseColor(options.Row2Color)
 	check(err)
+	colors.row[1].A = options.Row1Alpha
 
 	colors.row[2], err = parseColor(options.Row3Color)
 	check(err)
+	colors.row[2].A = options.Row1Alpha
 
 	colors.label, err = parseColor(options.LabelColor)
 	check(err)
+	colors.label.A = options.LabelAlpha
 
 	colors.labelBG, err = parseColor(options.LabelBG)
 	check(err)
+	colors.labelBG.A = options.LabelBGAlpha
 
 	timerBG, err := parseColor(options.TimerBG)
 	check(err)
+	timerBG.A = options.TimerBGAlpha
 	for i := 0; i < 3; i++ {
 		colors.rowBG[i] = timerBG
 	}
