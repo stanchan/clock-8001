@@ -258,10 +258,18 @@ func preRenderRowFont(row int) {
 	log.Printf("Updating row %d glyphs", row)
 	for i := range textClock.r[row].timeFragments {
 		text := fmt.Sprintf("%01d", i)
+		if textClock.r[row].timeFragments[i] != nil {
+			textClock.r[row].timeFragments[i].Destroy()
+		}
+
 		textClock.r[row].timeFragments[i] = renderText(text, textClock.numberFont, colors.row[row])
 	}
 	_, _, w, h, _ := textClock.r[row].timeFragments[0].Query()
 	textClock.r[row].fragmentRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
+
+	if textClock.r[row].colonTex != nil {
+		textClock.r[row].colonTex.Destroy()
+	}
 	textClock.r[row].colonTex = renderText(":", textClock.numberFont, colors.row[row])
 	_, _, w, h, _ = textClock.r[row].colonTex.Query()
 	textClock.r[row].colonRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
