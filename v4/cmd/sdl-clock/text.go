@@ -225,7 +225,7 @@ func renderText(text string, font *ttf.Font, color sdl.Color) *sdl.Texture {
 
 	t, err := font.RenderUTF8Blended(text, color)
 	if err != nil {
-		log.Printf("renderText RenderUTF8Blended error: %v")
+		log.Printf("renderText RenderUTF8Blended error: %v", err)
 		log.Printf("rendering error text")
 		t, err = font.RenderUTF8Blended("INVALID TEXT", color)
 		check(err)
@@ -233,11 +233,12 @@ func renderText(text string, font *ttf.Font, color sdl.Color) *sdl.Texture {
 
 	tex, err := renderer.CreateTextureFromSurface(t)
 	if err != nil {
-		log.Printf("renderText CreateTextureFromSurface error: %v")
+		log.Printf("renderText CreateTextureFromSurface error: %v", err)
 		log.Printf("rendering error text")
 		t.Free()
 		t, err = font.RenderUTF8Blended("INVALID TEXT", color)
 		check(err)
+
 		tex, err = renderer.CreateTextureFromSurface(t)
 		check(err)
 	}
