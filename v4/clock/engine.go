@@ -76,6 +76,7 @@ const (
 	Paused    = iota // Paused countdown timer(s)
 	LTC       = iota // LTC display
 	Media     = iota // Playing media counter
+	Slave     = iota // Displaying slaved output
 )
 
 // Misc constants
@@ -136,32 +137,37 @@ type Engine struct {
 
 // Clock contains the state of a single component clock / timer
 type Clock struct {
-	Text      string     // Normal clock representation
-	Label     string     // Label text
-	Icon      string     // Icon for the clock type
-	Compact   string     // 4 character condensed output
-	Expired   bool       // true if asscociated timer is expired
-	Mode      int        // Display type
-	Paused    bool       // Is the clock/timer paused?
-	Progress  float64    // Progress of the total timer 0-1
-	Hidden    bool       // The timer should not be rendered if true
-	TextColor color.RGBA // Color for text
-	BGColor   color.RGBA // Background color
+	Text        string     // Normal clock representation HH:MM:SS(:FF)
+	Hours       int        // Hours on the clock
+	Minutes     int        // Minutes on the clock
+	Seconds     int        // Seconds on the clock
+	Frames      int        // Frames, only on LTC
+	Label       string     // Label text
+	Icon        string     // Icon for the clock type
+	Compact     string     // 4 character condensed output
+	Expired     bool       // true if asscociated timer is expired
+	Mode        int        // Display type
+	Paused      bool       // Is the clock/timer paused?
+	Progress    float64    // Progress of the total timer 0-1
+	Hidden      bool       // The timer should not be rendered if true
+	TextColor   color.RGBA // Color for text
+	BGColor     color.RGBA // Background color
+	HideHours   bool       // Should the hour field of the time be displayed for this clock.
+	HideSeconds bool       // Should seconds be shown for this clock
 }
 
 // State is a snapshot of the clock representation on the time State() was called
 type State struct {
-	Initialized    bool        // Does the clock have valid time or has it received an osc command?
-	Clocks         []*Clock    // All configured clocks / timers
-	Tally          string      // Tally message text
-	TallyColor     *color.RGBA // Tally message color
-	TallyBG        *color.RGBA // Tally message background color
-	Flash          bool        // Flash cycle state
-	DisplaySeconds bool        // Show seconds in text and in the ring for ToD display
-	Background     int         // User selected background number
-	Info           string      // Clock information, version, ip-address etc. Should be displayed if not empty
-	TitleColor     color.RGBA
-	TitleBGColor   color.RGBA
+	Initialized  bool        // Does the clock have valid time or has it received an osc command?
+	Clocks       []*Clock    // All configured clocks / timers
+	Tally        string      // Tally message text
+	TallyColor   *color.RGBA // Tally message color
+	TallyBG      *color.RGBA // Tally message background color
+	Flash        bool        // Flash cycle state
+	Background   int         // User selected background number
+	Info         string      // Clock information, version, ip-address etc. Should be displayed if not empty
+	TitleColor   color.RGBA
+	TitleBGColor color.RGBA
 }
 
 // MakeEngine creates a clock engine
@@ -593,14 +599,15 @@ func (engine *Engine) State() *State {
 	var clocks []*Clock
 	for _, s := range engine.sources {
 		c := Clock{
-			Text:      "",
-			Compact:   "",
-			Label:     s.title,
-			Icon:      "",
-			Expired:   false,
-			Hidden:    s.hidden,
-			TextColor: s.textColor,
-			BGColor:   s.bgColor,
+			Text:        "",
+			Compact:     "",
+			Label:       s.title,
+			Icon:        "",
+			Expired:     false,
+			Hidden:      s.hidden,
+			TextColor:   s.textColor,
+			BGColor:     s.bgColor,
+			HideSeconds: !engine.displaySeconds,
 		}
 		if s.off {
 			c.Mode = Off
@@ -613,12 +620,17 @@ func (engine *Engine) State() *State {
 				// We have LTC time, so display it
 				// engine.initialized = true
 				c.Text = fmt.Sprintf("%02d:%02d:%02d:%02d", ltc.hours, ltc.minutes, ltc.seconds, ltc.frames)
+				c.Hours = ltc.hours
+				c.Minutes = ltc.minutes
+				c.Seconds = ltc.seconds
+				c.Frames = ltc.frames
 			} else if engine.ltcFollow {
 				// Follow the LTC time when signal is lost
 				// Todo: must be easier way to print out the duration...
 				t := time.Now()
 				diff := t.Sub(engine.ltc.target)
 				c.Text = fmt.Sprintf("%s:%02d", formatDuration(diff), 0)
+				c.Hours, c.Minutes, c.Seconds = splatDuration(diff)
 			} else {
 				// Timeout without follow mode
 				c.Text = ""
@@ -627,13 +639,19 @@ func (engine *Engine) State() *State {
 			// Active timer
 			out := s.counter.Output(t)
 			c.Text = out.Text
+			c.Hours = out.Hours
+			c.Minutes = out.Minutes
+			c.Seconds = out.Seconds
 			c.Compact = out.Compact
 			c.Expired = out.Expired
 			c.Paused = out.Paused
 			c.Progress = out.Progress
 			c.Icon = out.Icon
+			c.HideHours = out.HideHours
 
-			if s.counter.media != nil {
+			if s.counter.slave != nil {
+				c.Mode = Slave
+			} else if s.counter.media != nil {
 				c.Mode = Media
 			} else if out.Countdown {
 				c.Mode = Countdown
@@ -645,21 +663,29 @@ func (engine *Engine) State() *State {
 			c.Mode = Normal
 			if engine.format12h {
 				c.Text = t.In(s.tz).Format("03:04:05")
+				c.Hours = t.In(s.tz).Hour() % 12
 			} else {
 				c.Text = t.In(s.tz).Format("15:04:05")
+				c.Hours = t.In(s.tz).Hour()
+			}
+			c.Minutes = t.In(s.tz).Minute()
+			c.Seconds = t.In(s.tz).Second()
+
+			// Hide seconds if requested
+			if !engine.displaySeconds {
+				c.Text = c.Text[0:5]
 			}
 		}
 		clocks = append(clocks, &c)
 	}
 	state := State{
-		Initialized:    engine.initialized,
-		Clocks:         clocks,
-		Flash:          engine.flash(t),
-		DisplaySeconds: engine.displaySeconds,
-		TallyColor:     &color.RGBA{},
-		Background:     engine.background,
-		TitleColor:     engine.titleTextColor,
-		TitleBGColor:   engine.titleBGColor,
+		Initialized:  engine.initialized,
+		Clocks:       clocks,
+		Flash:        engine.flash(t),
+		TallyColor:   &color.RGBA{},
+		Background:   engine.background,
+		TitleColor:   engine.titleTextColor,
+		TitleBGColor: engine.titleBGColor,
 	}
 
 	if engine.showInfo {
@@ -990,8 +1016,13 @@ func clockAddresses() string {
 }
 
 func formatDuration(diff time.Duration) string {
-	hours := int32(diff.Truncate(time.Hour).Hours())
-	minutes := int32(diff.Truncate(time.Minute).Minutes()) - (hours * 60)
-	seconds := int32(diff.Truncate(time.Second).Seconds()) - (((hours * 60) + minutes) * 60)
+	hours, minutes, seconds := splatDuration(diff)
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+func splatDuration(diff time.Duration) (hours, minutes, seconds int) {
+	hours = int(diff.Truncate(time.Hour).Hours())
+	minutes = int(diff.Truncate(time.Minute).Minutes()) - (hours * 60)
+	seconds = int(diff.Truncate(time.Second).Seconds()) - (((hours * 60) + minutes) * 60)
+	return
 }

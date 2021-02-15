@@ -8,7 +8,6 @@ import (
 	"log"
 	"math"
 	"strconv"
-	"strings"
 )
 
 /*
@@ -62,45 +61,38 @@ func drawRoundClocks(state *clock.State) {
 
 		if mainClock.Text != "" {
 			if mainClock.Mode == clock.LTC {
-				parts := strings.Split(mainClock.Text, ":")
-				tally = fmt.Sprintf(" %s", parts[0]) // Hours
-				hours = parts[1]                     // Minutes
-				minutes = parts[2]                   // Seconds
-				seconds = parts[3]                   // Frames
+				tally = fmt.Sprintf(" %02d", mainClock.Hours)
+				hours = fmt.Sprintf("%02d", mainClock.Minutes)
+				minutes = fmt.Sprintf("%02d", mainClock.Seconds)
+				seconds = fmt.Sprintf("%02d", mainClock.Frames)
 				if options.EngineOptions.LTCSeconds {
-					leds, _ = strconv.Atoi(minutes)
+					leds = mainClock.Minutes
 				} else {
-					leds, _ = strconv.Atoi(seconds)
+					leds = mainClock.Seconds
 				}
 				colors.tally = colors.text
 
 			} else if !mainClock.Hidden {
-				parts := strings.Split(mainClock.Text, ":")
-				if len(parts) == 2 {
-					// "00:00" view
-					hours = "00"
-					minutes = parts[0]
-					seconds = parts[1]
-					leds, _ = strconv.Atoi(minutes)
-				} else if len(parts) == 3 {
-					// "00:00:00" view
-					hours = parts[0]
-					minutes = parts[1]
-					seconds = parts[2]
-					leds, _ = strconv.Atoi(seconds)
-				} else {
-					// Unknown
-					hours = "XX"
-					minutes = "XX"
-					seconds = "XX"
-					leds = 0
-				}
+				// Non-LTC clocks
+				hours = fmt.Sprintf("%02d", mainClock.Hours)
+				minutes = fmt.Sprintf("%02d", mainClock.Minutes)
+				seconds = fmt.Sprintf("%02d", mainClock.Seconds)
+				leds = mainClock.Seconds
 
-				if !state.DisplaySeconds && mainClock.Mode == clock.Normal {
+				if mainClock.HideSeconds && mainClock.Mode == clock.Normal {
 					seconds = ""
 				}
 
-				if mainClock.Mode == clock.Countdown || mainClock.Mode == clock.Media {
+				// Shift counters with zero hours up on fields
+				if mainClock.Mode != clock.Normal &&
+					hours == "00" {
+					hours = minutes
+					minutes = seconds
+					seconds = ""
+				}
+
+				if mainClock.Mode == clock.Countdown ||
+					mainClock.Mode == clock.Media {
 					if mainClock.Expired {
 						// TODO: Multiple different options of expired timers?
 						seconds = ""
@@ -114,21 +106,12 @@ func drawRoundClocks(state *clock.State) {
 							minutes = ""
 						}
 					} else {
-						if hours == "00" {
-							hours = minutes
-							minutes = seconds
-							seconds = ""
-						}
 						leds = int(math.Floor(mainClock.Progress * 59))
 					}
 				} else if mainClock.Mode == clock.Countup {
 					if mainClock.Expired {
 						hours = "00"
 						minutes = "00"
-						seconds = ""
-					} else if hours == "00" {
-						hours = minutes
-						minutes = seconds
 						seconds = ""
 					}
 					leds, _ = strconv.Atoi(minutes)

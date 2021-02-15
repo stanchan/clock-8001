@@ -61,6 +61,7 @@ type CounterOutput struct {
 	Compact   string        // Compact 4-character output
 	Progress  float64       // Percentage of total time elapsed of the countdown, 0-1
 	Diff      time.Duration // raw difference
+	HideHours bool
 }
 
 // Output generates the static output of the counter for use in clock displays
@@ -179,7 +180,7 @@ func (counter *Counter) slaveOutput() *CounterOutput {
 
 	text := fmt.Sprintf("%02d:%02d:%02d", hours, abs(minutes), abs(seconds))
 	if counter.slave.hideHours {
-		text = fmt.Sprintf("%02d:%02d", minutes, abs(seconds))
+		text = text[3:8]
 	}
 
 	out := &CounterOutput{
@@ -195,6 +196,7 @@ func (counter *Counter) slaveOutput() *CounterOutput {
 		Icon:      counter.slave.icon,
 		Progress:  0,
 		Diff:      0,
+		HideHours: counter.slave.hideHours,
 	}
 
 	return out
@@ -237,13 +239,14 @@ func (counter *Counter) Target(target time.Time) {
 
 // SetSlave sets the counter state as a slave from external source
 func (counter *Counter) SetSlave(hours, minutes, seconds int, hideHours bool, icon string) {
-	counter.slave = &slaveState{
+	s := &slaveState{
 		hours:     hours,
 		minutes:   minutes,
 		seconds:   seconds,
 		hideHours: hideHours,
 		icon:      icon,
 	}
+	counter.slave = s
 	counter.active = true
 }
 
