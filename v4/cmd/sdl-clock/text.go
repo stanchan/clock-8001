@@ -170,11 +170,15 @@ func draw3TextClocks(state *clock.State) {
 
 		if options.DrawBoxes {
 			// Draw the placeholder boxes for timers and labels
-			renderer.SetDrawColor(colors.rowBG[i].R, colors.rowBG[i].G, colors.rowBG[i].B, colors.rowBG[i].A)
-			renderer.FillRect(&numberBox)
+			gfx.BoxColor(renderer,
+				numberBox.X, numberBox.Y,
+				numberBox.X+numberBox.W, numberBox.Y+numberBox.H,
+				colors.rowBG[i])
 
-			renderer.SetDrawColor(colors.labelBG.R, colors.labelBG.G, colors.labelBG.B, colors.labelBG.A)
-			renderer.FillRect(&labelR)
+			gfx.BoxColor(renderer,
+				labelR.X, labelR.Y,
+				labelR.X+labelR.W, labelR.Y+labelR.H,
+				colors.labelBG)
 		}
 
 		copyIntoRect(textClock.r[i].labelTex, labelR)
@@ -244,6 +248,7 @@ func renderText(text string, font *ttf.Font, color sdl.Color) *sdl.Texture {
 	}
 	t.Free()
 	t = nil
+	tex.SetAlphaMod(color.A)
 	return tex
 }
 
@@ -263,6 +268,7 @@ func preRenderRowFont(row int) {
 		}
 
 		textClock.r[row].timeFragments[i] = renderText(text, textClock.numberFont, colors.row[row])
+		textClock.r[row].timeFragments[i].SetAlphaMod(colors.row[row].A)
 	}
 	_, _, w, h, _ := textClock.r[row].timeFragments[0].Query()
 	textClock.r[row].fragmentRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
@@ -271,6 +277,7 @@ func preRenderRowFont(row int) {
 		textClock.r[row].colonTex.Destroy()
 	}
 	textClock.r[row].colonTex = renderText(":", textClock.numberFont, colors.row[row])
+	textClock.r[row].colonTex.SetAlphaMod(colors.row[row].A)
 	_, _, w, h, _ = textClock.r[row].colonTex.Query()
 	textClock.r[row].colonRect = sdl.Rect{X: 0, Y: 0, W: w, H: h}
 }

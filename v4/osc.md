@@ -106,7 +106,7 @@ Parameters:
 
 ### `/clock/source/*/colors`
 
-Set the text and background colors for the given source output. **Alpha support will be added on later version**
+Set the text and background colors for the given source output.
 
 Parameters:
 1. int; Red component of text color, 0-255
@@ -160,7 +160,7 @@ Parameters:
 
 ### `/clock/titlecolors`
 
-Set the text and background colors for source titles. **Alpha support will be added on later version**
+Set the text and background colors for source titles.
 
 Parameters:
 1. int; Red component of text color, 0-255
