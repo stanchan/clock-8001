@@ -83,7 +83,7 @@ func (fbDest *feedbackDestination) broadcastAll(port string) {
 				for i := range n.IP {
 					broadcast[i] = n.IP[i] | (^n.Mask[i])
 				}
-				log.Printf(" -> using broadcast address %v", broadcast)
+				debug.Printf(" -> using broadcast address %v", broadcast)
 
 				dest := fmt.Sprintf("%v:%v", broadcast, port)
 
