@@ -66,9 +66,9 @@ func drawRoundClocks(state *clock.State) {
 				minutes = fmt.Sprintf("%02d", mainClock.Seconds)
 				seconds = fmt.Sprintf("%02d", mainClock.Frames)
 				if options.EngineOptions.LTCSeconds {
-					leds = mainClock.Minutes
-				} else {
 					leds = mainClock.Seconds
+				} else {
+					leds = mainClock.Frames
 				}
 				colors.tally = colors.text
 
