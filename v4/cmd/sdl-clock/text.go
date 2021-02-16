@@ -62,7 +62,7 @@ func initTextClock() {
 	}
 	textClock.iconFont = f
 
-	textClock.glyphRegexp = regexp.MustCompile(`^[\d:]*$`)
+	textClock.glyphRegexp = regexp.MustCompile(`^[\d:]+$`)
 
 	preRenderFonts()
 
