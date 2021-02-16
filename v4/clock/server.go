@@ -332,6 +332,7 @@ func (server *Server) handleResetMedia(msg *osc.Message) {
 	err := msg.UnmarshalArguments(&timeStamp, &uuid)
 	if err != nil {
 		log.Printf("Unmarshal %v: %v", msg, err)
+		return
 	}
 
 	if uuid == server.uuid {
