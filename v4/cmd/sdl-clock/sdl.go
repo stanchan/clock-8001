@@ -19,6 +19,7 @@ var colors struct {
 	tallyBG    sdl.Color
 	row        [3]sdl.Color
 	rowBG      [3]sdl.Color
+	icon       [3]sdl.Color
 	label      sdl.Color
 	labelBG    sdl.Color
 	background sdl.Color
@@ -99,6 +100,10 @@ func initColors() {
 	colors.row[2], err = parseColor(options.Row3Color)
 	check(err)
 	colors.row[2].A = options.Row1Alpha
+
+	for i := 0; i < 3; i++ {
+		colors.icon[i] = colors.row[i]
+	}
 
 	colors.label, err = parseColor(options.LabelColor)
 	check(err)

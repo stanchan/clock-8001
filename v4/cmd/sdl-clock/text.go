@@ -101,7 +101,7 @@ func drawTextClock(state *clock.State) {
 			}
 		}
 		renderLabel(i, fmt.Sprintf("%.10s", clk.Label), titleColor)
-		renderIcon(i, clk.Icon)
+		renderIcon(i, clk.Icon, colors.row[i])
 	}
 
 	// Clear output and setup background
@@ -348,23 +348,24 @@ func renderNumbers(i int, text string, textColor sdl.Color) {
 	}
 }
 
-func renderIcon(i int, icon string) {
+func renderIcon(row int, icon string, textColor sdl.Color) {
 	var err error
 	icon = materialIcon(icon)
-	if textClock.r[i].icon != icon {
-		textClock.r[i].icon = icon
-		if textClock.r[i].iconTex != nil {
-			textClock.r[i].iconTex.Destroy()
+	if textClock.r[row].icon != icon || colors.icon[row] != textColor {
+		colors.icon[row] = textColor
+		textClock.r[row].icon = icon
+		if textClock.r[row].iconTex != nil {
+			textClock.r[row].iconTex.Destroy()
 		}
 		if icon != "" {
-			textClock.r[i].iconTex = renderText(icon, textClock.iconFont, colors.row[i])
+			textClock.r[row].iconTex = renderText(icon, textClock.iconFont, colors.icon[row])
 		} else {
 			renderer.SetDrawColor(0, 0, 0, 0)
-			textClock.r[i].iconTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
+			textClock.r[row].iconTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
 			check(err)
-			err = textClock.r[i].iconTex.SetBlendMode(sdl.BLENDMODE_BLEND)
+			err = textClock.r[row].iconTex.SetBlendMode(sdl.BLENDMODE_BLEND)
 			check(err)
-			err = textClock.r[i].iconTex.SetAlphaMod(0)
+			err = textClock.r[row].iconTex.SetAlphaMod(0)
 			check(err)
 		}
 	}
