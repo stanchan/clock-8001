@@ -185,6 +185,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		ltcActive:      false,
 		format12h:      options.Format12h,
 		off:            false,
+		messageColor:   &color.RGBA{255, 255, 155, 255},
 	}
 	uuid, err := machineid.ProtectedID("clock-8001")
 	if err != nil {
