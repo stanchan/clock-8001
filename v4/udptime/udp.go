@@ -25,14 +25,15 @@ const (
 
 // Message is a struct for upd time commands from stage timer 2 and irisdown
 type Message struct {
-	Minutes int
-	Seconds int
-	Green   bool
-	Red     bool
+	Minutes  int
+	Seconds  int
+	Green    bool
+	Red      bool
+	OverTime bool
 }
 
 func (msg *Message) String() string {
-	return fmt.Sprintf("%02d:%02d Green: %v Red %v", msg.Minutes, msg.Seconds, msg.Green, msg.Red)
+	return fmt.Sprintf("%02d:%02d Overtime: %v Green: %v Red %v", msg.OverTime, msg.Minutes, msg.Seconds, msg.Green, msg.Red)
 }
 
 // Listen for udptime messages on a port
@@ -80,7 +81,8 @@ func Decode(data []byte) (*Message, error) {
 
 	if data[0]&0x0a == 0x0a {
 		// Negative value, ignore the msd.
-		msg.Minutes = -1 * int(parseBCDByte(data[0]&0xF0))
+		msg.OverTime = true
+		msg.Minutes = int(parseBCDByte(data[0] & 0xF0))
 	} else {
 		msg.Minutes = int(parseBCDByte(data[0]))
 	}

@@ -274,12 +274,19 @@ func (engine *Engine) listenUDPTime() {
 	}
 
 	for {
+		var msg *udptime.Message
+		var t int
 		select {
-		case msg := <-chan1:
-			engine.udpCounters[0].SetSlave(0, msg.Minutes, msg.Seconds, true, "")
-		case msg := <-chan2:
-			engine.udpCounters[1].SetSlave(0, msg.Minutes, msg.Seconds, true, "")
+		case msg = <-chan1:
+			t = 0
+		case msg = <-chan2:
+			t = 1
 		}
+		icon := ""
+		if msg.OverTime {
+			icon = "+"
+		}
+		engine.udpCounters[t].SetSlave(0, msg.Minutes, msg.Seconds, true, icon)
 	}
 }
 

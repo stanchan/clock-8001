@@ -461,6 +461,8 @@ func materialIcon(icon string) string {
 		return "\ue040"
 	case "▶":
 		return "\ue037"
+	case "+":
+		return "\ue145"
 	}
 	return ""
 }

@@ -75,6 +75,7 @@ func drawRoundClocks(state *clock.State) {
 			} else if !mainClock.Hidden {
 				// Non-LTC clocks
 				hours = fmt.Sprintf("%02d", mainClock.Hours)
+
 				minutes = fmt.Sprintf("%02d", mainClock.Minutes)
 				seconds = fmt.Sprintf("%02d", mainClock.Seconds)
 				leds = mainClock.Seconds
@@ -89,6 +90,13 @@ func drawRoundClocks(state *clock.State) {
 					hours = minutes
 					minutes = seconds
 					seconds = ""
+				}
+
+				// UDPTime overtime icon
+				if mainClock.Icon == "+" {
+					tmp := []rune(hours)
+					tmp[0] = '+'
+					hours = string(tmp)
 				}
 
 				if mainClock.Mode == clock.Countdown ||
