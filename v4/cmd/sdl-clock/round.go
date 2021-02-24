@@ -59,6 +59,13 @@ func drawRoundClocks(state *clock.State) {
 		seconds := ""
 		leds := 0
 
+		// Normalize timers over 100 hours
+		if mainClock.Hours > 99 {
+			mainClock.Hours = 99
+			mainClock.Minutes = 59
+			mainClock.Seconds = 59
+		}
+
 		if mainClock.Text != "" {
 			if mainClock.Mode == clock.LTC {
 				tally = fmt.Sprintf(" %02d", mainClock.Hours)
