@@ -145,13 +145,15 @@ func initTextures() {
 	}
 
 	// Texture for 12 static circles
+	renderer.SetDrawColor(0, 0, 0, 0)
 	staticTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	check(err)
-	err = staticTexture.SetBlendMode(sdl.BLENDMODE_NONE)
+	err = staticTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
 	check(err)
 
 	err = renderer.SetRenderTarget(staticTexture)
 	check(err)
+	renderer.Clear()
 
 	if !options.small {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, colors.static)
@@ -168,13 +170,15 @@ func initTextures() {
 	}
 
 	// Texture for the second marker circles
+	renderer.SetDrawColor(0, 0, 0, 0)
 	secTexture, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, textureSize, textureSize)
 	check(err)
-	err = secTexture.SetBlendMode(sdl.BLENDMODE_NONE)
+	err = secTexture.SetBlendMode(sdl.BLENDMODE_BLEND)
 	check(err)
 
 	err = renderer.SetRenderTarget(secTexture)
 	check(err)
+	renderer.Clear()
 
 	if !options.small {
 		gfx.FilledCircleColor(renderer, textureCoord, textureCoord, textureRadius, colors.sec)
