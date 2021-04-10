@@ -42,7 +42,18 @@ You can place the following files on the sd-card FAT partition to customize the 
 * `enable_ssh` delete this file and remote ssh logins to the raspberry pi will not be allowed
 * `enable_ltc` delete this file and the LTC audio -> OSC functionality will not be active
 
-#### Web configuration interface
+### Hyperpixel4 displays
+
+The image supports both the retangular and square hyperpixel4 displays from Pimoroni. To use them you need to rename either `config.txt.hp4_square` or `config.txt.hp4_rect` to `config.txt`
+
+For the square display you need to also modify `clock_cmd.sh` to contain:
+```
+/hyperpixel4_rect/hyperpixel4-init
+/root/sdl-clock -C /boot/clock.ini
+```
+So that the display is initialized on boot.
+
+### Web configuration interface
 
 The new unified images have a web configuration interface for the clock settings. You can access this interface by pointing your browser to the address of the clock. The default username is `admin` and the default password is `clockwork`. You should change them from the interface or the clock.ini file.
 
