@@ -617,10 +617,7 @@ func (engine *Engine) State() *State {
 			BGColor:     s.bgColor,
 			HideSeconds: !engine.displaySeconds,
 		}
-		if s.off {
-			c.Mode = Off
-			c.Hidden = true
-		} else if s.ltc && engine.ltcActive {
+		if s.ltc && engine.ltcActive {
 			c.Expired = engine.ltcTimeout
 			c.Mode = LTC
 			ltc := engine.ltc
@@ -799,14 +796,14 @@ func (engine *Engine) TargetCounter(counter int, target string, countdown bool) 
 // showAll returns main display to normal clock
 func (engine *Engine) showAll() {
 	for _, s := range engine.sources {
-		s.off = false
+		s.hidden = false
 	}
 }
 
 // hideAll blanks the clock display
 func (engine *Engine) hideAll() {
 	for _, s := range engine.sources {
-		s.off = true
+		s.hidden = true
 	}
 }
 
@@ -985,7 +982,7 @@ func (engine *Engine) oscSender() {
 func (engine *Engine) activateSourceByCounter(c int) {
 	for _, s := range engine.sources {
 		if s.counter == engine.Counters[c] {
-			s.off = false
+			s.hidden = false
 		}
 	}
 }

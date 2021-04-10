@@ -17,7 +17,6 @@ type source struct {
 	ltc       bool // LTC timecode decoded from sound input
 	timer     bool // Countdown / up timer
 	tod       bool // Time of day, lowest priority
-	off       bool // Display is off, but row not hidden
 	hidden    bool // Master control to turn output off
 	textColor color.RGBA
 	bgColor   color.RGBA
