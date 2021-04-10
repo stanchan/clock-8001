@@ -787,6 +787,7 @@ func (engine *Engine) TargetCounter(counter int, target string, countdown bool) 
 		}
 
 		engine.Counters[counter].Target(target)
+		engine.activateSourceByCounter(counter)
 		debug.Printf("Counter target set!")
 	} else {
 		log.Printf("Illegal timer target string, string: %v, err: %v", target, err)
