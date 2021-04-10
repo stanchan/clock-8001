@@ -1,16 +1,54 @@
-## Version 4.0.0 beta1
-Possibly unstable preview release. config.ini, command line options and OSC api isn
-t stable yet. Not recommended for production use.
+## Version 4.1.0
+* New:
+  * Support for hyperpixel4 square displays
+  * Documentation for the displays in README.md
 
-* BREAKING: config.ini has been changed
-* BREAKING: some of the OSC commands result in slightly different behaviour
-* Internal clock engine has been reworked
-* Added new text based clock face
-* Added more fine grained clock timer source configuration
-* Implemented the mitti and millumin handling inside the main clock executable
-* New OSC API is still to be written
-  * Also new companion module needs to be written
+## Version 4.0.3
+* Bugfixes:
+  * Unhide sources when starting a targeted count
 
+## Version 4.0.2
+* Bugfixes:
+  * Hide behaviour of the different osc commands to be uniform
+  * Starting a timer to given target while clock is paused
+
+## Version 4.0.1
+* Fixed hyperpixel4-square configuration
+
+## Version 4.0.0
+### New feature highlights
+
+* Support for different clock faces
+  * Single round clock
+  * Dual round clocks
+  * Text clocks
+    * 3 and 1 clocks per screen
+* New concept of sources and timers
+  * A clock face displays a clock source, which can be associated to a timer and different sources for the time, eg. LTC
+  * Timers can be used on multiple clock setups
+* HTTP configuration editor with input validation
+  * import / export for the whole configuration file
+* New OSC commands, see osc.md
+  * New companion module version supporting the V4 commands and feedback
+  * Background selection
+  * Timers targeting a certain time-of-day
+  * Sending of text messages with custom text and background colors
+  * Setting of clock source labels
+* Info overlay shown on startup containing version, ip and port information
+* Support of LTC input via usb-soundcard / hifiberry dac+ adc pro hat
+* Mitti and millumin message processing completely built in
+  * You can choose which timers are the destinations of the playback state
+* Support for sending and receiving timers as Interspace Industries Countdown2 UDP messages for display units
+  * Also supported by StageTimer2 and Irisdown
+
+### Breaking changes
+
+* clock configuration file contents have been changed.
+* OSC commands have been changed, compatibility with v3 commands has been kept as close as possible
+  * V3 commands will be dropped at a later date
+* OSC feedback has been changed
+* Command line arguments have been changed
+* New dependencies; sdl-ttf, sdl-image, ttf fonts for text rendering
 
 ## Version 3.16.3
 * BUGFIX: Do not unpause counters when started
