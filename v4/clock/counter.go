@@ -223,6 +223,15 @@ func (counter *Counter) Start(countdown bool, timer time.Duration) {
 	counter.state = &s
 
 	counter.countdown = countdown
+
+	t := time.Now()
+
+	if counter.countdown {
+		counter.state.left = counter.state.target.Sub(t).Truncate(time.Second)
+	} else {
+		counter.state.left = t.Sub(counter.state.target).Truncate(time.Second)
+	}
+
 	counter.active = true
 }
 
