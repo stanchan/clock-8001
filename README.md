@@ -46,7 +46,7 @@ You can place the following files on the sd-card FAT partition to customize the 
 
 The image supports both the retangular and square hyperpixel4 displays from Pimoroni. To use them you need to rename either `config.txt.hp4_square` or `config.txt.hp4_rect` to `config.txt`
 
-For the square display you need to also modify `clock_cmd.sh` to contain:
+For the rectangular display you need to also modify `clock_cmd.sh` to contain:
 ```
 /hyperpixel4_rect/hyperpixel4-init
 /root/sdl-clock -C /boot/clock.ini
