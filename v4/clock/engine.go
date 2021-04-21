@@ -899,7 +899,7 @@ func (engine *Engine) printVersion() {
 		for _, mod := range clockModule.Deps {
 			log.Printf("Dep: %s: version %s", mod.Path, mod.Version)
 			if mod.Path == "gitlab.com/Depili/clock-8001" {
-				gitTag = mod.Version
+				// gitTag = mod.Version
 			}
 		}
 	} else {

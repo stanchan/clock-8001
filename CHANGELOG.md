@@ -1,3 +1,6 @@
+## Version 4.1.1
+* Fix version information stamping in build automation
+
 ## Version 4.1.0
 * New:
   * Support for hyperpixel4 square displays

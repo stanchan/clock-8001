@@ -109,7 +109,7 @@ build_v4:
   stage: build
   script:
     - cd v4
-    - go build gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
+    - make build
   artifacts:
      paths:
      - v4/sdl-clock

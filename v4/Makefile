@@ -1,12 +1,12 @@
 PROJECT_NAME := "clock-8001"
-PKG := "gitlab.com/Depili/$(PROJECT_NAME)/v3"
+PKG := "gitlab.com/Depili/$(PROJECT_NAME)/v4"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 BINARIES := clock-bridge matrix-clock sdl-clock multi-clock
 GOLINT := "$(GOPATH)/bin/golint"
 GIT_TAG ?= $(shell git describe --tags --abbrev=0 HEAD)
 GIT_COMMIT ?= $(shell git rev-list -1 HEAD)
-VERSION_PKG := gitlab.com/Depili/clock-8001/clock
+VERSION_PKG := gitlab.com/Depili/clock-8001/v4/clock
 GO_LD_FLAGS := "-X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)"
 
 .PHONY: all dep build clean test coverage coverhtml lint
@@ -37,10 +37,9 @@ dep: ## Get the dependencies
 
 build: dep ## Build the binary file
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT)
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/clock-bridge
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/multi-clock
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/sdl-clock
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v3/cmd/matrix-clock
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
+	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/multi-clock
+	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
 
 clean: ## Remove previous build
 	@rm -f $(BINARIES)
