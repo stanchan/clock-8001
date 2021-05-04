@@ -298,6 +298,18 @@ func drawDots() {
 	setMatrix(19, 16, colors.text)
 }
 
+// Fills the screen with white
+func drawWhiteScreen() {
+	err := renderer.SetRenderTarget(nil)
+	check(err)
+
+	err = renderer.SetDrawColor(255, 255, 255, 255)
+	check(err)
+
+	err = renderer.Clear()
+	check(err)
+}
+
 // setMatrix draws a "led matrix" pixel
 func setMatrix(cy, cx int, color sdl.Color) {
 	x := gridStartX + int32(cx*gridSpacing)

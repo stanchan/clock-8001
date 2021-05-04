@@ -425,6 +425,14 @@ func (server *Server) handleInfo(msg *osc.Message) {
 	server.update(m)
 }
 
+func (server *Server) handleFlash(msg *osc.Message) {
+	debug.Printf("handleFlash")
+	m := Message{
+		Type: "screenFlash",
+	}
+	server.update(m)
+}
+
 /*
  * Deprecated message handlers awaiting removal
  */
@@ -546,6 +554,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/seconds/off", server.handleSecondsOff)
 	registerHandler(oscServer, "^/clock/seconds/on", server.handleSecondsOn)
 	registerHandler(oscServer, "^/clock/time/set", server.handleTimeSet)
+	registerHandler(oscServer, "^/clock/flash", server.handleFlash)
 
 	// Deprecated
 	registerHandler(oscServer, "^/clock/dual/text", server.handleDualText)

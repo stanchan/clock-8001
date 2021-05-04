@@ -89,14 +89,17 @@ func main() {
 
 			// Get the clock state snapshot
 			state := engine.State()
-
-			checkBackgroundUpdate(state)
-			if options.textClock {
-				drawTextClock(state)
-			} else if options.countdown {
-				drawCountdown()
+			if state.ScreenFlash {
+				drawWhiteScreen()
 			} else {
-				drawRoundClocks(state)
+				checkBackgroundUpdate(state)
+				if options.textClock {
+					drawTextClock(state)
+				} else if options.countdown {
+					drawCountdown()
+				} else {
+					drawRoundClocks(state)
+				}
 			}
 
 			if state.Info != "" {

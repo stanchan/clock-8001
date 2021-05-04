@@ -25,6 +25,7 @@ const Version = "4.0.0"
 // State feedback timer
 const stateTimer = time.Second / 2
 const udpTimer = time.Second / 10
+const flashDuration = 200 * time.Millisecond
 
 // Will get overridden by ldflags in Makefile
 var gitCommit = "Unknown"
@@ -133,6 +134,7 @@ type Engine struct {
 	uuid            string // Clock unique id
 	titleTextColor  color.RGBA
 	titleBGColor    color.RGBA
+	screenFlash     bool
 }
 
 // Clock contains the state of a single component clock / timer
@@ -166,8 +168,9 @@ type State struct {
 	Flash        bool        // Flash cycle state
 	Background   int         // User selected background number
 	Info         string      // Clock information, version, ip-address etc. Should be displayed if not empty
-	TitleColor   color.RGBA
-	TitleBGColor color.RGBA
+	TitleColor   color.RGBA  // Color for the clock title text
+	TitleBGColor color.RGBA  // Background color for clock title text
+	ScreenFlash  bool        // Set to true if the screen should be flashed white
 }
 
 // MakeEngine creates a clock engine
@@ -332,6 +335,7 @@ func (engine *Engine) listen() {
 	milluminTimer := timer.NewTimer(updateTimeout)
 	stateTicker := time.NewTicker(stateTimer)
 	udpTicker := time.NewTicker(udpTimer)
+	flashTimer := timer.NewTimer(flashDuration)
 
 	for {
 		select {
@@ -470,10 +474,15 @@ func (engine *Engine) listen() {
 					log.Printf("Setting title colors: %v - %v", message.Colors[0], message.Colors[1])
 					engine.SetTitleColors(message.Colors[0], message.Colors[1])
 				}
+			case "screenFlash":
+				engine.screenFlash = true
+				flashTimer.Reset(flashDuration)
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
 
+		case <-flashTimer.C:
+			engine.screenFlash = false
 		case <-mittiTimer.C:
 			engine.mittiCounter.ResetMedia()
 		case <-milluminTimer.C:
@@ -691,6 +700,7 @@ func (engine *Engine) State() *State {
 		Background:   engine.background,
 		TitleColor:   engine.titleTextColor,
 		TitleBGColor: engine.titleBGColor,
+		ScreenFlash:  engine.screenFlash,
 	}
 
 	if engine.showInfo {
