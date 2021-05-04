@@ -1,3 +1,7 @@
+## Version 4.2.0
+* New:
+  * /clock/flash command, it flashes the screen white for 200ms
+
 ## Version 4.1.1
 * Fix version information stamping in build automation
 
