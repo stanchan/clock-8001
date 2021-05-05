@@ -77,6 +77,15 @@ Resumes a paused timer.
 
 Stops a given timer.
 
+### `/clock/timer/*/signal`
+
+Sets the signal color for the given timer
+
+Parameters:
+1. integer; Red component of the signal color
+2. integer; Green component of the signal color
+3. integer; Blue component of the signal color
+
 ### `/clock/pause`
 
 Pauses all timers.

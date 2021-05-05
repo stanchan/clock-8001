@@ -3,6 +3,7 @@ package clock
 import (
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"gitlab.com/Depili/go-osc/osc"
+	"image/color"
 	"log"
 	"regexp"
 	"strconv"
@@ -171,6 +172,36 @@ func (server *Server) handleResume(msg *osc.Message) {
 		Type: "resume",
 	}
 	server.update(message)
+}
+
+func (server *Server) handleTimerSignal(msg *osc.Message) {
+	debug.Printf("handleTimerSignal: %v", msg)
+	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+		var r, g, b int32
+		err := msg.UnmarshalArguments(&r, &g, &b)
+		if err != nil {
+			log.Printf("handleTimerSignal: %v %v", err, msg)
+			return
+		}
+
+		colors := make([]color.RGBA, 1)
+		colors[0] = color.RGBA{
+			R: uint8(r),
+			G: uint8(g),
+			B: uint8(b),
+			A: 255,
+		}
+		message := Message{
+			Type:    "timerSignal",
+			Counter: counter,
+			Colors:  colors,
+		}
+
+		server.update(message)
+	} else {
+		log.Printf("handleTimerSignal: Invalid message: %v", msg)
+	}
 }
 
 /*
@@ -532,6 +563,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/timer/*/countup/target", server.handleCountupTarget)
 	registerHandler(oscServer, "^/clock/timer/*/countup$", server.handleCountupStart)
 	registerHandler(oscServer, "^/clock/timer/*/modify", server.handleTimerModify)
+	registerHandler(oscServer, "^/clock/timer/*/signal", server.handleTimerSignal)
 	registerHandler(oscServer, "^/clock/timer/*/stop", server.handleTimerStop)
 	registerHandler(oscServer, "^/clock/timer/*/pause", server.handleTimerPause)
 	registerHandler(oscServer, "^/clock/timer/*/resume", server.handleTimerResume)

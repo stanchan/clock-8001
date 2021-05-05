@@ -20,6 +20,7 @@ var colors struct {
 	row        [3]sdl.Color
 	rowBG      [3]sdl.Color
 	icon       [3]sdl.Color
+	signal     [4]sdl.Color
 	label      sdl.Color
 	labelBG    sdl.Color
 	background sdl.Color
@@ -103,6 +104,10 @@ func initColors() {
 
 	for i := 0; i < 3; i++ {
 		colors.icon[i] = colors.row[i]
+	}
+
+	for i := 0; i < 4; i++ {
+		colors.signal[i] = sdl.Color{R: 0, G: 0, B: 0, A: 0}
 	}
 
 	colors.label, err = parseColor(options.LabelColor)

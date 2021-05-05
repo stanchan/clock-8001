@@ -7,6 +7,7 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/debug"
+	"image/color"
 	"log"
 	"regexp"
 	"strconv"
@@ -19,6 +20,7 @@ type outputLine struct {
 	iconTex       *sdl.Texture
 	textTex       *sdl.Texture
 	labelTex      *sdl.Texture
+	signalTex     *sdl.Texture
 	timeFragments [10]*sdl.Texture
 	fragmentRect  sdl.Rect
 	colonTex      *sdl.Texture
@@ -102,6 +104,7 @@ func drawTextClock(state *clock.State) {
 		}
 		renderLabel(i, fmt.Sprintf("%.10s", clk.Label), titleColor)
 		renderIcon(i, clk.Icon, colors.row[i])
+		renderSignal(i, clk.SignalColor, colors.signal[i])
 	}
 
 	// Clear output and setup background
@@ -122,6 +125,7 @@ func drawSingleLineClock(state *clock.State) {
 	numberBox := sdl.Rect{X: 25, Y: 290, H: 440, W: 1920 - 50}
 	iconR := sdl.Rect{X: 25, Y: 290, H: 440, W: 300}
 	textR := sdl.Rect{X: 375, Y: 290, H: 440, W: 1920 - 425}
+	signalR := sdl.Rect{X: 1920 - 170, Y: 115, H: 150, W: 150}
 
 	if options.DrawBoxes {
 		// Draw the placeholder boxes for timers and labels
@@ -133,6 +137,7 @@ func drawSingleLineClock(state *clock.State) {
 	}
 
 	copyIntoRect(textClock.r[0].labelTex, labelR)
+	copyIntoRect(textClock.r[0].signalTex, signalR)
 	if state.Clocks[0].Mode != clock.LTC {
 		// Clock time
 
@@ -167,7 +172,7 @@ func draw3TextClocks(state *clock.State) {
 		iconR := sdl.Rect{X: x, Y: y, W: 300, H: 300}
 		x = 10
 		labelR := sdl.Rect{X: x, Y: y, W: 500, H: 100}
-
+		signalR := sdl.Rect{X: iconR.X - 175, Y: y + 125, W: 150, H: 150}
 		if options.DrawBoxes {
 			// Draw the placeholder boxes for timers and labels
 			gfx.BoxColor(renderer,
@@ -181,6 +186,7 @@ func draw3TextClocks(state *clock.State) {
 				colors.labelBG)
 		}
 
+		copyIntoRect(textClock.r[i].signalTex, signalR)
 		copyIntoRect(textClock.r[i].labelTex, labelR)
 		if state.Clocks[i].Mode != clock.LTC {
 			// Clock time
@@ -361,13 +367,31 @@ func renderIcon(row int, icon string, textColor sdl.Color) {
 			textClock.r[row].iconTex = renderText(icon, textClock.iconFont, colors.icon[row])
 		} else {
 			renderer.SetDrawColor(0, 0, 0, 0)
-			textClock.r[row].iconTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
+			textClock.r[row].signalTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
 			check(err)
-			err = textClock.r[row].iconTex.SetBlendMode(sdl.BLENDMODE_BLEND)
+			err = textClock.r[row].signalTex.SetBlendMode(sdl.BLENDMODE_BLEND)
 			check(err)
 			err = textClock.r[row].iconTex.SetAlphaMod(0)
 			check(err)
 		}
+	}
+}
+
+func renderSignal(i int, newColor color.RGBA, oldColor sdl.Color) {
+	var err error
+	c := toSDLColor(newColor)
+	if c != oldColor {
+		if textClock.r[i].signalTex != nil {
+			textClock.r[i].signalTex.Destroy()
+		}
+		renderer.SetDrawColor(0, 0, 0, 0)
+		textClock.r[i].signalTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 150, 150)
+		check(err)
+		err = textClock.r[i].signalTex.SetBlendMode(sdl.BLENDMODE_BLEND)
+		check(err)
+		renderer.SetRenderTarget(textClock.r[i].signalTex)
+		gfx.FilledCircleColor(renderer, 75, 75, 74, c)
+		colors.signal[i] = c
 	}
 }
 

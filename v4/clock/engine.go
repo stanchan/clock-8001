@@ -156,6 +156,7 @@ type Clock struct {
 	BGColor     color.RGBA // Background color
 	HideHours   bool       // Should the hour field of the time be displayed for this clock.
 	HideSeconds bool       // Should seconds be shown for this clock
+	SignalColor color.RGBA
 }
 
 // State is a snapshot of the clock representation on the time State() was called
@@ -477,6 +478,12 @@ func (engine *Engine) listen() {
 			case "screenFlash":
 				engine.screenFlash = true
 				flashTimer.Reset(flashDuration)
+			case "timerSignal":
+				if message.Counter >= 0 &&
+					message.Counter < len(engine.sources) &&
+					len(message.Colors) == 1 {
+					engine.Counters[message.Counter].signalColor = message.Colors[0]
+				}
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -662,6 +669,7 @@ func (engine *Engine) State() *State {
 			c.Progress = out.Progress
 			c.Icon = out.Icon
 			c.HideHours = out.HideHours
+			c.SignalColor = out.SignalColor
 
 			if s.counter.slave != nil {
 				c.Mode = Slave

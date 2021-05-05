@@ -3,6 +3,7 @@ package clock
 import (
 	"fmt"
 	"gitlab.com/Depili/clock-8001/v4/debug"
+	"image/color"
 	"time"
 )
 
@@ -12,12 +13,13 @@ import (
 
 // Counter abstracts a generic counter counting up or down
 type Counter struct {
-	state     *counterState
-	media     *mediaState
-	slave     *slaveState
-	active    bool // Is this counter active?
-	countdown bool // Count up / down from the target
-	paused    bool // Is the counter paused?
+	state       *counterState
+	media       *mediaState
+	slave       *slaveState
+	active      bool // Is this counter active?
+	countdown   bool // Count up / down from the target
+	paused      bool // Is the counter paused?
+	signalColor color.RGBA
 }
 
 type slaveState struct {
@@ -47,34 +49,37 @@ type counterState struct {
 
 // CounterOutput the data structure returned by Counter.Output() and contains the static state of the counter at that time
 type CounterOutput struct {
-	Active    bool          // True if the counter is active
-	Media     bool          // True if counter represents a playing media file
-	Countdown bool          // True if counting down, false if counting up
-	Paused    bool          // True if counter has been paused
-	Looping   bool          // True if the playing media is looping in the player
-	Expired   bool          // Has the countdown timer expired?
-	Hours     int           // Hour part of the timer
-	Minutes   int           // Minutes of the timer, 0-60
-	Seconds   int           // Seconds of the timer, 0-60
-	Text      string        // HH:MM:SS string representation
-	Icon      string        // Single unicode glyph to use as an icon for the timer
-	Compact   string        // Compact 4-character output
-	Progress  float64       // Percentage of total time elapsed of the countdown, 0-1
-	Diff      time.Duration // raw difference
-	HideHours bool
+	Active      bool          // True if the counter is active
+	Media       bool          // True if counter represents a playing media file
+	Countdown   bool          // True if counting down, false if counting up
+	Paused      bool          // True if counter has been paused
+	Looping     bool          // True if the playing media is looping in the player
+	Expired     bool          // Has the countdown timer expired?
+	Hours       int           // Hour part of the timer
+	Minutes     int           // Minutes of the timer, 0-60
+	Seconds     int           // Seconds of the timer, 0-60
+	Text        string        // HH:MM:SS string representation
+	Icon        string        // Single unicode glyph to use as an icon for the timer
+	Compact     string        // Compact 4-character output
+	Progress    float64       // Percentage of total time elapsed of the countdown, 0-1
+	Diff        time.Duration // raw difference
+	HideHours   bool
+	SignalColor color.RGBA
 }
 
 // Output generates the static output of the counter for use in clock displays
 func (counter *Counter) Output(t time.Time) *CounterOutput {
+	var out *CounterOutput
 	if counter.slave != nil {
-		return counter.slaveOutput()
+		out = counter.slaveOutput()
+	} else if counter.media != nil {
+		out = counter.mediaOutput()
+	} else {
+		out = counter.normalOutput(t)
 	}
+	out.SignalColor = counter.signalColor
 
-	if counter.media != nil {
-		return counter.mediaOutput()
-	}
-
-	return counter.normalOutput(t)
+	return out
 }
 
 func (counter *Counter) mediaOutput() *CounterOutput {
