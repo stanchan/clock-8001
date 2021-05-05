@@ -188,6 +188,10 @@ Sets the local time of the clock.
 Parameters:
 1. string; time of day in format `01:02:03` where 01 is the hours in 24 hour format, 02 the minutes and 03 the seconds.
 
+### `/clock/flash`
+
+Flashes the screen full white for 200ms
+
 ## Internal commands
 
 These are used to bridge different state information accross multiple clocks.
