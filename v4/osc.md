@@ -85,6 +85,7 @@ Parameters:
 1. integer; Red component of the signal color
 2. integer; Green component of the signal color
 3. integer; Blue component of the signal color
+4. integer; Alpha component of the signal color
 
 ### `/clock/pause`
 

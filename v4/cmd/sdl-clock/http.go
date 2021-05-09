@@ -163,6 +163,9 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	newOptions.DrawBoxes = r.FormValue("DrawBoxes") != ""
 
+	newOptions.EngineOptions.AutoSignals = r.FormValue("auto-signals") != ""
+	newOptions.EngineOptions.SignalStart = r.FormValue("signal-start") != ""
+
 	// Strings, will not be validated
 	newOptions.HTTPUser = r.FormValue("HTTPUser")
 	newOptions.HTTPPassword = r.FormValue("HTTPPassword")
@@ -281,6 +284,10 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	validateNumber(err, "Timer bg alpha")
 	newOptions.TimerBGAlpha = uint8(alpha)
 
+	newOptions.EngineOptions.SignalThresholdWarning, err = strconv.Atoi(r.FormValue("signal-threshold-warning"))
+	validateNumber(err, "Warning signal threshold")
+
+	newOptions.EngineOptions.SignalThresholdEnd, err = strconv.Atoi(r.FormValue("signal-threshold-end"))
 	// Colors
 	newOptions.TextColor = r.FormValue("TextColor")
 	errors += validateColor(newOptions.TextColor, "Round clock text color")
@@ -307,6 +314,13 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	newOptions.BackgroundColor = r.FormValue("BackgroundColor")
 	errors += validateColor(newOptions.BackgroundColor, "Background color")
+
+	newOptions.EngineOptions.SignalColorStart = r.FormValue("signal-color-start")
+	errors += validateColor(newOptions.EngineOptions.SignalColorStart, "Signal color: start")
+	newOptions.EngineOptions.SignalColorWarning = r.FormValue("signal-color-warning")
+	errors += validateColor(newOptions.EngineOptions.SignalColorStart, "Signal color: warning")
+	newOptions.EngineOptions.SignalColorEnd = r.FormValue("signal-color-end")
+	errors += validateColor(newOptions.EngineOptions.SignalColorStart, "Signal color: end")
 
 	if errors != "" {
 		tmpl, err := htmlTemplate.New("config.html").Parse(configHTML)

@@ -104,7 +104,7 @@ func drawTextClock(state *clock.State) {
 		}
 		renderLabel(i, fmt.Sprintf("%.10s", clk.Label), titleColor)
 		renderIcon(i, clk.Icon, colors.row[i])
-		renderSignal(i, clk.SignalColor, colors.signal[i])
+		renderSignal(i, clk.SignalColor)
 	}
 
 	// Clear output and setup background
@@ -377,10 +377,10 @@ func renderIcon(row int, icon string, textColor sdl.Color) {
 	}
 }
 
-func renderSignal(i int, newColor color.RGBA, oldColor sdl.Color) {
+func renderSignal(i int, newColor color.RGBA) {
 	var err error
 	c := toSDLColor(newColor)
-	if c != oldColor {
+	if c != colors.signal[i] {
 		if textClock.r[i].signalTex != nil {
 			textClock.r[i].signalTex.Destroy()
 		}

@@ -104,6 +104,30 @@ source4.tod={{.EngineOptions.Source4.Tod}}
 source4.timezone={{.EngineOptions.Source4.TimeZone}}
 source4.hidden={{.EngineOptions.Source4.Hidden}}
 
+
+# Timer color signals
+
+# Automatically set the signal color based on time remaining
+auto-signals={{.EngineOptions.AutoSignals}}
+
+# In automation mode, set a color on timer start
+signal-start={{.EngineOptions.SignalStart}}
+
+# Start signal color (in HTML color format #FFFFFF)
+signal-color-start={{.EngineOptions.SignalColorStart}}
+
+# Time threshold for warning color, in seconds. Set to 0 to disable
+signal-threshold-warning={{.EngineOptions.SignalThresholdWarning}}
+
+# Warning signal color (in HTML color format #FFFFFF)
+signal-color-warning={{.EngineOptions.SignalColorWarning}}
+
+# Time threshold for end color, in seconds.
+signal-threshold-end={{.EngineOptions.SignalThresholdEnd}}
+
+# End signal color (in HTML color format #FFFFFF)
+signal-color-end={{.EngineOptions.SignalColorEnd}}
+
 # Counter number for Mitti OSC feedback
 mitti={{.EngineOptions.Mitti}}
 

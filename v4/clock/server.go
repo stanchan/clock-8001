@@ -178,8 +178,8 @@ func (server *Server) handleTimerSignal(msg *osc.Message) {
 	debug.Printf("handleTimerSignal: %v", msg)
 	if matches := server.timerRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
 		counter, _ := strconv.Atoi(matches[1])
-		var r, g, b int32
-		err := msg.UnmarshalArguments(&r, &g, &b)
+		var r, g, b, a int32
+		err := msg.UnmarshalArguments(&r, &g, &b, &a)
 		if err != nil {
 			log.Printf("handleTimerSignal: %v %v", err, msg)
 			return
@@ -190,7 +190,7 @@ func (server *Server) handleTimerSignal(msg *osc.Message) {
 			R: uint8(r),
 			G: uint8(g),
 			B: uint8(b),
-			A: 255,
+			A: uint8(a),
 		}
 		message := Message{
 			Type:    "timerSignal",

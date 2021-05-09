@@ -31,6 +31,12 @@ const flashDuration = 200 * time.Millisecond
 var gitCommit = "Unknown"
 var gitTag = "v4.0.0"
 
+const (
+	colorStart   = 0
+	colorWarning = 1
+	colorEnd     = 2
+)
+
 // SourceOptions contains all options for clock display sources.
 type SourceOptions struct {
 	Text     string `long:"text" description:"Title text for the time source"`
@@ -61,6 +67,14 @@ type EngineOptions struct {
 	Millumin        int    `long:"millumin" description:"Counter number for Millumin OSC feedback" default:"9"`
 	Ignore          string `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
 	ShowInfo        int    `long:"info-timer" description:"Show clock status for x seconds on startup" default:"30"`
+
+	AutoSignals            bool   `long:"auto-signals" description:"Automatic signal colors based on timer state"`
+	SignalStart            bool   `long:"signal-start" description:"Set signal color on timer start"`
+	SignalColorStart       string `long:"signal-color-start" description:"Signal colors for timers above thresholds" default:"#00FF00"`
+	SignalColorWarning     string `long:"signal-color-warning" description:"Signal colors for timers between thresholds" default:"#FFFF00"`
+	SignalColorEnd         string `long:"signal-color-end" description:"Signal colors for timers bellow thresholds" default:"#FF0000"`
+	SignalThresholdWarning int    `long:"signal-threshold-warning" description:"Threshold for medium color transition (seconds)" default:"180"`
+	SignalThresholdEnd     int    `long:"signal-threshold-end" description:"Threshold for medium color transition (seconds)" default:"60"`
 
 	Source1 *SourceOptions `group:"1st clock display source" namespace:"source1"`
 	Source2 *SourceOptions `group:"2nd clock display source" namespace:"source2"`
@@ -99,42 +113,47 @@ type ltcData struct {
 
 // Engine contains the state machine for clock-8001
 type Engine struct {
-	mode            int        // Main display mode
-	Counters        []*Counter // Timer counters
-	sources         []*source  // Time sources for 1-3 displays
-	displaySeconds  bool
-	flashPeriod     int
-	clockServer     *Server
-	oscServer       osc.Server
-	timeout         time.Duration // Timeout for osc tally events
-	oscTally        bool          // Tally text was from osc event
-	message         string        // Full tally message as received from OSC
-	messageColor    *color.RGBA   // Tally message color from OSC
-	messageBG       *color.RGBA
-	oscDests        *feedbackDestination // udp connections to send osc feedback to
-	oscSendChan     chan []byte
-	udpDests        []*feedbackDestination // Stagetimer2 udp time destinations
-	udpCounters     []*Counter
-	initialized     bool     // Show version on startup until ntp synced or receiving OSC control
-	ltc             *ltcData // LTC time code status
-	ltcShowSeconds  bool     // Toggles led display on LTC mode between seconds and frames
-	ltcFollow       bool     // Continue on internal timer if LTC signal is lost
-	ltcEnabled      bool     // Toggle LTC mode on or off
-	ltcTimeout      bool     // Set to true if LTC signal is lost by the ltc timer
-	ltcActive       bool     // Do we have a active LTC to display?
-	format12h       bool     // Use 12 hour format for time-of-day
-	off             bool     // Is the engine output off?
-	ignoreRegexp    *regexp.Regexp
-	mittiCounter    *Counter
-	milluminCounter *Counter
-	background      int
-	info            string // Version, ip address etc
-	showInfo        bool
-	infoTimer       *timer.Timer
-	uuid            string // Clock unique id
-	titleTextColor  color.RGBA
-	titleBGColor    color.RGBA
-	screenFlash     bool
+	mode                   int        // Main display mode
+	Counters               []*Counter // Timer counters
+	sources                []*source  // Time sources for 1-3 displays
+	displaySeconds         bool
+	flashPeriod            int
+	clockServer            *Server
+	oscServer              osc.Server
+	timeout                time.Duration // Timeout for osc tally events
+	oscTally               bool          // Tally text was from osc event
+	message                string        // Full tally message as received from OSC
+	messageColor           *color.RGBA   // Tally message color from OSC
+	messageBG              *color.RGBA
+	oscDests               *feedbackDestination // udp connections to send osc feedback to
+	oscSendChan            chan []byte
+	udpDests               []*feedbackDestination // Stagetimer2 udp time destinations
+	udpCounters            []*Counter
+	initialized            bool     // Show version on startup until ntp synced or receiving OSC control
+	ltc                    *ltcData // LTC time code status
+	ltcShowSeconds         bool     // Toggles led display on LTC mode between seconds and frames
+	ltcFollow              bool     // Continue on internal timer if LTC signal is lost
+	ltcEnabled             bool     // Toggle LTC mode on or off
+	ltcTimeout             bool     // Set to true if LTC signal is lost by the ltc timer
+	ltcActive              bool     // Do we have a active LTC to display?
+	format12h              bool     // Use 12 hour format for time-of-day
+	off                    bool     // Is the engine output off?
+	ignoreRegexp           *regexp.Regexp
+	mittiCounter           *Counter
+	milluminCounter        *Counter
+	background             int
+	info                   string // Version, ip address etc
+	showInfo               bool
+	infoTimer              *timer.Timer
+	uuid                   string // Clock unique id
+	titleTextColor         color.RGBA
+	titleBGColor           color.RGBA
+	screenFlash            bool
+	autoSignals            bool
+	signalStart            bool
+	signalColors           [3]color.RGBA
+	signalThresholdWarning time.Duration
+	signalThresholdEnd     time.Duration
 }
 
 // Clock contains the state of a single component clock / timer
@@ -177,25 +196,38 @@ type State struct {
 // MakeEngine creates a clock engine
 func MakeEngine(options *EngineOptions) (*Engine, error) {
 	var engine = Engine{
-		mode:           Normal,
-		displaySeconds: true,
-		oscTally:       false,
-		timeout:        time.Duration(options.Timeout) * time.Millisecond,
-		initialized:    false,
-		oscDests:       nil,
-		ltcShowSeconds: options.LTCSeconds,
-		ltcFollow:      options.LTCFollow,
-		ltcEnabled:     !options.DisableLTC,
-		ltcActive:      false,
-		format12h:      options.Format12h,
-		off:            false,
-		messageColor:   &color.RGBA{255, 255, 155, 255},
+		mode:                   Normal,
+		displaySeconds:         true,
+		oscTally:               false,
+		timeout:                time.Duration(options.Timeout) * time.Millisecond,
+		initialized:            false,
+		oscDests:               nil,
+		ltcShowSeconds:         options.LTCSeconds,
+		ltcFollow:              options.LTCFollow,
+		ltcEnabled:             !options.DisableLTC,
+		ltcActive:              false,
+		format12h:              options.Format12h,
+		off:                    false,
+		messageColor:           &color.RGBA{255, 255, 155, 255},
+		autoSignals:            options.AutoSignals,
+		signalStart:            options.SignalStart,
+		signalThresholdWarning: time.Duration(options.SignalThresholdWarning) * time.Second,
+		signalThresholdEnd:     time.Duration(options.SignalThresholdEnd) * time.Second,
 	}
 	uuid, err := machineid.ProtectedID("clock-8001")
 	if err != nil {
 		log.Fatalf("Failed to generate unique identifier: %v", err)
 	}
 	engine.uuid = uuid
+
+	for i, s := range []string{options.SignalColorStart, options.SignalColorWarning, options.SignalColorEnd} {
+		c := color.RGBA{A: 255}
+		_, err = fmt.Sscanf(s, "#%02x%02x%02x", &c.R, &c.G, &c.B)
+		if err != nil {
+			return nil, err
+		}
+		engine.signalColors[i] = c
+	}
 
 	log.Printf("Source1: %v", options.Source1)
 	log.Printf("Source2: %v", options.Source2)
@@ -632,71 +664,15 @@ func (engine *Engine) State() *State {
 			TextColor:   s.textColor,
 			BGColor:     s.bgColor,
 			HideSeconds: !engine.displaySeconds,
+			SignalColor: color.RGBA{R: 0, G: 0, B: 0, A: 0},
 		}
+
 		if s.ltc && engine.ltcActive {
-			c.Expired = engine.ltcTimeout
-			c.Mode = LTC
-			ltc := engine.ltc
-			if !engine.ltcTimeout {
-				// We have LTC time, so display it
-				// engine.initialized = true
-				c.Text = fmt.Sprintf("%02d:%02d:%02d:%02d", ltc.hours, ltc.minutes, ltc.seconds, ltc.frames)
-				c.Hours = ltc.hours
-				c.Minutes = ltc.minutes
-				c.Seconds = ltc.seconds
-				c.Frames = ltc.frames
-			} else if engine.ltcFollow {
-				// Follow the LTC time when signal is lost
-				// Todo: must be easier way to print out the duration...
-				t := time.Now()
-				diff := t.Sub(engine.ltc.target)
-				c.Text = fmt.Sprintf("%s:%02d", formatDuration(diff), 0)
-				c.Hours, c.Minutes, c.Seconds = splatDuration(diff)
-			} else {
-				// Timeout without follow mode
-				c.Text = ""
-			}
+			engine.ltcState(&c, s)
 		} else if s.timer && s.counter.active {
-			// Active timer
-			out := s.counter.Output(t)
-			c.Text = out.Text
-			c.Hours = out.Hours
-			c.Minutes = out.Minutes
-			c.Seconds = out.Seconds
-			c.Compact = out.Compact
-			c.Expired = out.Expired
-			c.Paused = out.Paused
-			c.Progress = out.Progress
-			c.Icon = out.Icon
-			c.HideHours = out.HideHours
-			c.SignalColor = out.SignalColor
-
-			if s.counter.slave != nil {
-				c.Mode = Slave
-			} else if s.counter.media != nil {
-				c.Mode = Media
-			} else if out.Countdown {
-				c.Mode = Countdown
-			} else {
-				c.Mode = Countup
-			}
+			engine.timerState(&c, s, t)
 		} else if s.tod {
-			// Time of day
-			c.Mode = Normal
-			if engine.format12h {
-				c.Text = t.In(s.tz).Format("03:04:05")
-				c.Hours = t.In(s.tz).Hour() % 12
-			} else {
-				c.Text = t.In(s.tz).Format("15:04:05")
-				c.Hours = t.In(s.tz).Hour()
-			}
-			c.Minutes = t.In(s.tz).Minute()
-			c.Seconds = t.In(s.tz).Second()
-
-			// Hide seconds if requested
-			if !engine.displaySeconds {
-				c.Text = c.Text[0:5]
-			}
+			engine.todState(&c, s, t)
 		}
 		clocks = append(clocks, &c)
 	}
@@ -723,6 +699,91 @@ func (engine *Engine) State() *State {
 	}
 
 	return &state
+}
+
+func (engine *Engine) todState(c *Clock, s *source, t time.Time) {
+	// Time of day
+	c.Mode = Normal
+	if engine.format12h {
+		c.Text = t.In(s.tz).Format("03:04:05")
+		c.Hours = t.In(s.tz).Hour() % 12
+	} else {
+		c.Text = t.In(s.tz).Format("15:04:05")
+		c.Hours = t.In(s.tz).Hour()
+	}
+	c.Minutes = t.In(s.tz).Minute()
+	c.Seconds = t.In(s.tz).Second()
+
+	// Hide seconds if requested
+	if !engine.displaySeconds {
+		c.Text = c.Text[0:5]
+	}
+}
+
+func (engine *Engine) ltcState(c *Clock, s *source) {
+	c.Expired = engine.ltcTimeout
+	c.Mode = LTC
+	ltc := engine.ltc
+	if !engine.ltcTimeout {
+		// We have LTC time, so display it
+		// engine.initialized = true
+		c.Text = fmt.Sprintf("%02d:%02d:%02d:%02d", ltc.hours, ltc.minutes, ltc.seconds, ltc.frames)
+		c.Hours = ltc.hours
+		c.Minutes = ltc.minutes
+		c.Seconds = ltc.seconds
+		c.Frames = ltc.frames
+	} else if engine.ltcFollow {
+		// Follow the LTC time when signal is lost
+		// Todo: must be easier way to print out the duration...
+		t := time.Now()
+		diff := t.Sub(engine.ltc.target)
+		c.Text = fmt.Sprintf("%s:%02d", formatDuration(diff), 0)
+		c.Hours, c.Minutes, c.Seconds = splatDuration(diff)
+	} else {
+		// Timeout without follow mode
+		c.Text = ""
+	}
+}
+
+func (engine *Engine) timerState(c *Clock, s *source, t time.Time) {
+	// Active timer
+	out := s.counter.Output(t)
+	c.Text = out.Text
+	c.Hours = out.Hours
+	c.Minutes = out.Minutes
+	c.Seconds = out.Seconds
+	c.Compact = out.Compact
+	c.Expired = out.Expired
+	c.Paused = out.Paused
+	c.Progress = out.Progress
+	c.Icon = out.Icon
+	c.HideHours = out.HideHours
+
+	if engine.autoSignals {
+		if out.Countdown {
+			if out.Diff < engine.signalThresholdEnd {
+				c.SignalColor = engine.signalColors[colorEnd]
+			} else if out.Diff < engine.signalThresholdWarning {
+				c.SignalColor = engine.signalColors[colorWarning]
+			} else if engine.signalStart {
+				c.SignalColor = engine.signalColors[colorStart]
+			}
+		} else if engine.signalStart {
+			c.SignalColor = engine.signalColors[colorStart]
+		}
+	} else {
+		c.SignalColor = out.SignalColor
+	}
+
+	if s.counter.slave != nil {
+		c.Mode = Slave
+	} else if s.counter.media != nil {
+		c.Mode = Media
+	} else if out.Countdown {
+		c.Mode = Countdown
+	} else {
+		c.Mode = Countup
+	}
 }
 
 /*

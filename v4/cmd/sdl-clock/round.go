@@ -175,6 +175,8 @@ func drawRoundClocks(state *clock.State) {
 
 		drawStaticCircles()
 		drawSecondCircles(leds)
+		renderSignal(i, mainClock.SignalColor)
+		copyIntoRect(textClock.r[i].signalTex, sdl.Rect{X: 25, Y: 905, H: 150, W: 150})
 	}
 
 	composeRoundClocks(state)

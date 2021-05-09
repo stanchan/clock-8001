@@ -318,6 +318,47 @@ const configHTML = `
 			</fieldset>
 
 			<fieldset>
+				<legend>Timer signal colors</legend>
+				<label for="auto-signals">
+					<span>Automatically set signal color per timer state</span>
+					<input type="checkbox" id="auto-signals" name="auto-signals" {{if .EngineOptions.AutoSignals}} checked {{end}} />
+				</label>
+
+				<label for="signal-start">
+					<span>In automation mode, set a color on timer start</span>
+					<input type="checkbox" id="signal-start" name="signal-start" {{if .EngineOptions.SignalStart}} checked {{end}} />
+				</label>
+
+				<label for="signal-color-start">
+					<span>Start signal color</span>
+					<input type="color" id="signal-color-start" name="signal-color-start" value="{{.EngineOptions.SignalColorStart}}" />
+				</label>
+
+				<label for="signal-threshold-warning">
+					<span>Time threshold for warning color, in seconds. Set to 0 to disable.</span>
+					<input type="number" min="0" id="signal-threshold-warning" name="signal-threshold-warning" value="{{.EngineOptions.SignalThresholdWarning}}" />
+				</label>
+
+
+				<label for="signal-color-warning">
+					<span>Warning signal color</span>
+					<input type="color" id="signal-color-warning" name="signal-color-warning" value="{{.EngineOptions.SignalColorWarning}}" />
+				</label>
+
+				<label for="signal-threshold-end">
+					<span>Time threshold for end color, in seconds.</span>
+					<input type="number" min="0" id="signal-threshold-end" name="signal-threshold-end" value="{{.EngineOptions.SignalThresholdEnd}}" />
+				</label>
+
+				<label for="signal-color-end">
+					<span>End signal color</span>
+					<input type="color" id="signal-color-end" name="signal-color-end" value="{{.EngineOptions.SignalColorEnd}}" />
+				</label>
+
+			</fieldset>
+
+
+			<fieldset>
 				<legend>Mitti and Millumin</legend>
 
 				<label for="mitti">
