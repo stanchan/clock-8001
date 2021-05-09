@@ -1,3 +1,8 @@
+## Version 4.3.0
+* New: Color signals for timers
+  * `/clock/timer/*/signal` OSC command
+  * Optional automation for the signal colors based on timer thresholds
+
 ## Version 4.2.0
 * New:
   * /clock/flash command, it flashes the screen white for 200ms
