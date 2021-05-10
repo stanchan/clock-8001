@@ -1,3 +1,6 @@
+## Version 4.3.1
+* Bugfix for the signal colors
+
 ## Version 4.3.0
 * New: Color signals for timers
   * `/clock/timer/*/signal` OSC command

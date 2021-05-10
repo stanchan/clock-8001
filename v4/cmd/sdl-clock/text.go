@@ -367,9 +367,9 @@ func renderIcon(row int, icon string, textColor sdl.Color) {
 			textClock.r[row].iconTex = renderText(icon, textClock.iconFont, colors.icon[row])
 		} else {
 			renderer.SetDrawColor(0, 0, 0, 0)
-			textClock.r[row].signalTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
+			textClock.r[row].iconTex, err = renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_TARGET, 1, 1)
 			check(err)
-			err = textClock.r[row].signalTex.SetBlendMode(sdl.BLENDMODE_BLEND)
+			err = textClock.r[row].iconTex.SetBlendMode(sdl.BLENDMODE_BLEND)
 			check(err)
 			err = textClock.r[row].iconTex.SetAlphaMod(0)
 			check(err)
@@ -390,6 +390,7 @@ func renderSignal(i int, newColor color.RGBA) {
 		err = textClock.r[i].signalTex.SetBlendMode(sdl.BLENDMODE_BLEND)
 		check(err)
 		renderer.SetRenderTarget(textClock.r[i].signalTex)
+		renderer.Clear()
 		gfx.FilledCircleColor(renderer, 75, 75, 74, c)
 		colors.signal[i] = c
 	}
