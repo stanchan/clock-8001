@@ -1,3 +1,8 @@
+## Version 4.4.0
+* New: Initial hardware signal light support
+  * Currently only pimoroni Unicorn HD and Ubercorn hats are supported
+  * You can control the color via OSC by groups, or the light color can follow source 1
+
 ## Version 4.3.1
 * Bugfix for the signal colors
 
