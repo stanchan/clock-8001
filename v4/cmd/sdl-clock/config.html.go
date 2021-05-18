@@ -355,6 +355,31 @@ const configHTML = `
 					<input type="color" id="signal-color-end" name="signal-color-end" value="{{.EngineOptions.SignalColorEnd}}" />
 				</label>
 
+				<label for="signal-hw-type">
+						<span>Signal hardware type</span>
+						<select name="signal-hw-type" id="signal-hw-type">
+						<option value="unicorn-hd" {{if eq .SignalType "unicorn-hd"}} selected {{end}}>Pimoroni Unicorn HD or Ubercorn</option>
+						<option value="none" {{if eq .SignalType "none"}} selected {{end}}>None</option>
+					</select><br />
+				</label>
+
+				<label for="signal-hw-group">
+					<span>Hardware signal group</span>
+					<input type="number" min="0" id="signal-hw-group" name="signal-hw-group" value="{{.EngineOptions.SignalHardware}}" />
+				</label>
+
+				<label for="signal-hw-brightness">
+					<span>Hardware signal master brightness, 0 = off, 255 = maximum brightness</span>
+					<input type="number" min="0" max="255" id="signal-hw-brightness" name="signal-hw-brightness" value="{{.SignalBrightness}}" />
+				</label>
+
+
+				<label for="signal-hw-follow">
+					<span>Hardware signal follows source 1 color</span>
+					<input type="checkbox" id="signal-hw-follow" name="signal-hw-follow" {{if .SignalFollow}} checked {{end}} />
+				</label>
+
+
 			</fieldset>
 
 

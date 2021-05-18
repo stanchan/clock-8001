@@ -165,6 +165,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	newOptions.EngineOptions.AutoSignals = r.FormValue("auto-signals") != ""
 	newOptions.EngineOptions.SignalStart = r.FormValue("signal-start") != ""
+	newOptions.SignalFollow = r.FormValue("signal-hw-follow") != ""
 
 	// Strings, will not be validated
 	newOptions.HTTPUser = r.FormValue("HTTPUser")
@@ -178,6 +179,12 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.Face = r.FormValue("Face")
 	if f := newOptions.Face; (f != "round") && (f != "dual-round") && (f != "text") && (f != "small") && (f != "single") {
 		errors += fmt.Sprintf("<li>Clock face selection is invalid (%s)</li>", newOptions.Face)
+	}
+
+	// Signal hardware type
+	newOptions.SignalType = r.FormValue("signal-hw-type")
+	if t := newOptions.SignalType; (t != "unicorn-hd") && (t != "none") {
+		errors += fmt.Sprintf("<li>Signal hardware type selection is invalid (%s)</li>", newOptions.SignalType)
 	}
 
 	// UDPTime
@@ -288,6 +295,14 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	validateNumber(err, "Warning signal threshold")
 
 	newOptions.EngineOptions.SignalThresholdEnd, err = strconv.Atoi(r.FormValue("signal-threshold-end"))
+	validateNumber(err, "End signal threshold")
+
+	newOptions.EngineOptions.SignalHardware, err = strconv.Atoi(r.FormValue("signal-hw-group"))
+	validateNumber(err, "Signal hardware group")
+
+	newOptions.SignalBrightness, err = strconv.Atoi(r.FormValue("signal-hw-brightness"))
+	validateNumber(err, "Signal hardware brightness")
+
 	// Colors
 	newOptions.TextColor = r.FormValue("TextColor")
 	errors += validateColor(newOptions.TextColor, "Round clock text color")

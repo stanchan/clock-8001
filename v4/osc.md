@@ -202,6 +202,15 @@ Parameters:
 
 Flashes the screen full white for 200ms
 
+### `/clock/signal/*` where * is the signal group number
+
+Sets the color of the hardware signal leds
+
+Parameters:
+1. int; Red component of the color
+2. int; Green component of the color
+3. int; Blue component of the color
+
 ## Internal commands
 
 These are used to bridge different state information accross multiple clocks.

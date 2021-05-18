@@ -75,6 +75,7 @@ type EngineOptions struct {
 	SignalColorEnd         string `long:"signal-color-end" description:"Signal colors for timers bellow thresholds" default:"#FF0000"`
 	SignalThresholdWarning int    `long:"signal-threshold-warning" description:"Threshold for medium color transition (seconds)" default:"180"`
 	SignalThresholdEnd     int    `long:"signal-threshold-end" description:"Threshold for medium color transition (seconds)" default:"60"`
+	SignalHardware         int    `long:"signal-hw-group" description:"Hardware signal group number" default:"1"`
 
 	Source1 *SourceOptions `group:"1st clock display source" namespace:"source1"`
 	Source2 *SourceOptions `group:"2nd clock display source" namespace:"source2"`
@@ -154,6 +155,8 @@ type Engine struct {
 	signalColors           [3]color.RGBA
 	signalThresholdWarning time.Duration
 	signalThresholdEnd     time.Duration
+	signalHardwareColor    color.RGBA
+	signalHardware         int
 }
 
 // Clock contains the state of a single component clock / timer
@@ -180,17 +183,18 @@ type Clock struct {
 
 // State is a snapshot of the clock representation on the time State() was called
 type State struct {
-	Initialized  bool        // Does the clock have valid time or has it received an osc command?
-	Clocks       []*Clock    // All configured clocks / timers
-	Tally        string      // Tally message text
-	TallyColor   *color.RGBA // Tally message color
-	TallyBG      *color.RGBA // Tally message background color
-	Flash        bool        // Flash cycle state
-	Background   int         // User selected background number
-	Info         string      // Clock information, version, ip-address etc. Should be displayed if not empty
-	TitleColor   color.RGBA  // Color for the clock title text
-	TitleBGColor color.RGBA  // Background color for clock title text
-	ScreenFlash  bool        // Set to true if the screen should be flashed white
+	Initialized         bool        // Does the clock have valid time or has it received an osc command?
+	Clocks              []*Clock    // All configured clocks / timers
+	Tally               string      // Tally message text
+	TallyColor          *color.RGBA // Tally message color
+	TallyBG             *color.RGBA // Tally message background color
+	Flash               bool        // Flash cycle state
+	Background          int         // User selected background number
+	Info                string      // Clock information, version, ip-address etc. Should be displayed if not empty
+	TitleColor          color.RGBA  // Color for the clock title text
+	TitleBGColor        color.RGBA  // Background color for clock title text
+	ScreenFlash         bool        // Set to true if the screen should be flashed white
+	HardwareSignalColor color.RGBA
 }
 
 // MakeEngine creates a clock engine
@@ -213,6 +217,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		signalStart:            options.SignalStart,
 		signalThresholdWarning: time.Duration(options.SignalThresholdWarning) * time.Second,
 		signalThresholdEnd:     time.Duration(options.SignalThresholdEnd) * time.Second,
+		signalHardware:         options.SignalHardware,
 	}
 	uuid, err := machineid.ProtectedID("clock-8001")
 	if err != nil {
@@ -516,6 +521,10 @@ func (engine *Engine) listen() {
 					len(message.Colors) == 1 {
 					engine.Counters[message.Counter].signalColor = message.Colors[0]
 				}
+			case "hardwareSignal":
+				if message.Counter == engine.signalHardware && len(message.Colors) == 1 {
+					engine.signalHardwareColor = message.Colors[0]
+				}
 			}
 			// We have received a osc command, so stop the version display
 			engine.initialized = true
@@ -677,14 +686,15 @@ func (engine *Engine) State() *State {
 		clocks = append(clocks, &c)
 	}
 	state := State{
-		Initialized:  engine.initialized,
-		Clocks:       clocks,
-		Flash:        engine.flash(t),
-		TallyColor:   &color.RGBA{},
-		Background:   engine.background,
-		TitleColor:   engine.titleTextColor,
-		TitleBGColor: engine.titleBGColor,
-		ScreenFlash:  engine.screenFlash,
+		Initialized:         engine.initialized,
+		Clocks:              clocks,
+		Flash:               engine.flash(t),
+		TallyColor:          &color.RGBA{},
+		Background:          engine.background,
+		TitleColor:          engine.titleTextColor,
+		TitleBGColor:        engine.titleBGColor,
+		ScreenFlash:         engine.screenFlash,
+		HardwareSignalColor: engine.signalHardwareColor,
 	}
 
 	if engine.showInfo {

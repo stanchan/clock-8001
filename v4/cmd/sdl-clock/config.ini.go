@@ -128,6 +128,20 @@ signal-threshold-end={{.EngineOptions.SignalThresholdEnd}}
 # End signal color (in HTML color format #FFFFFF)
 signal-color-end={{.EngineOptions.SignalColorEnd}}
 
+# Signal hardware type: supported: none, unicorn-hd
+signal-hw-type={{.SignalType}}
+
+# Signal hardware group number
+signal-hw-group={{.EngineOptions.SignalHardware}}
+
+# Signal hardware brighness adjustment 0-255, 0 == disabled, 255 == full brightness
+signal-hw-brightness={{.SignalBrightness}}
+
+# Hardware signal follows source 1 signal color
+signal-hw-follow={{.SignalFollow}}
+
+# Mitti and Millumin
+
 # Counter number for Mitti OSC feedback
 mitti={{.EngineOptions.Mitti}}
 

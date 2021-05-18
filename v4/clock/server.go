@@ -13,6 +13,7 @@ import (
 const (
 	timerPattern  = `/clock/timer/(\d)/`
 	sourcePattern = `/clock/source/([1-4])/`
+	signalPattern = `/clock/signal/(\d)`
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance
@@ -22,6 +23,7 @@ func MakeServer(oscServer *osc.Server, uuid string) *Server {
 		Debug:        false,
 		timerRegexp:  regexp.MustCompile(timerPattern),
 		sourceRegexp: regexp.MustCompile(sourcePattern),
+		signalRegexp: regexp.MustCompile(signalPattern),
 		uuid:         uuid,
 	}
 
@@ -36,6 +38,7 @@ type Server struct {
 	Debug        bool
 	timerRegexp  *regexp.Regexp
 	sourceRegexp *regexp.Regexp
+	signalRegexp *regexp.Regexp
 	lastMedia    time.Time
 	uuid         string
 }
@@ -464,6 +467,35 @@ func (server *Server) handleFlash(msg *osc.Message) {
 	server.update(m)
 }
 
+func (server *Server) handleHardwareSignal(msg *osc.Message) {
+	debug.Printf("handleHardwareSignal: %v", msg)
+	if matches := server.signalRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
+		counter, _ := strconv.Atoi(matches[1])
+		var r, g, b, a int32
+		err := msg.UnmarshalArguments(&r, &g, &b, &a)
+		if err != nil {
+			log.Printf("handleHardwareSignal: %v %v", err, msg)
+			return
+		}
+
+		colors := make([]color.RGBA, 1)
+		colors[0] = color.RGBA{
+			R: uint8(r),
+			G: uint8(g),
+			B: uint8(b),
+		}
+		message := Message{
+			Type:    "hardwareSignal",
+			Counter: counter,
+			Colors:  colors,
+		}
+
+		server.update(message)
+	} else {
+		log.Printf("handleHardwareSignal: Invalid message: %v", msg)
+	}
+}
+
 /*
  * Deprecated message handlers awaiting removal
  */
@@ -587,6 +619,7 @@ func (server *Server) setup(oscServer *osc.Server) {
 	registerHandler(oscServer, "^/clock/seconds/on", server.handleSecondsOn)
 	registerHandler(oscServer, "^/clock/time/set", server.handleTimeSet)
 	registerHandler(oscServer, "^/clock/flash", server.handleFlash)
+	registerHandler(oscServer, "^/clock/signal/*", server.handleHardwareSignal)
 
 	// Deprecated
 	registerHandler(oscServer, "^/clock/dual/text", server.handleDualText)

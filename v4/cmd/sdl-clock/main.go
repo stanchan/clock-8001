@@ -7,6 +7,7 @@ import (
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/debug"
 	"gitlab.com/Depili/clock-8001/v4/util"
+	"image/color"
 	"log"
 	"os"
 	"os/signal"
@@ -30,6 +31,10 @@ func main() {
 
 	if !options.DisableHTTP {
 		go runHTTP()
+	}
+
+	if hw, ok := signalHardwareList[options.SignalType]; ok {
+		hw.Init()
 	}
 
 	// Initialize SDL
@@ -113,6 +118,14 @@ func main() {
 			// Update the canvas
 			renderer.Present()
 			// debug.Printf("Frame time: %d ms\n", time.Now().Sub(startTime).Milliseconds())
+			if signalHardware != nil {
+				c := state.HardwareSignalColor
+				if options.SignalFollow {
+					c = state.Clocks[0].SignalColor
+				}
+				signalHardware.Fill(signalBrightness(c))
+				signalHardware.Update()
+			}
 		}
 	}
 }
@@ -280,6 +293,15 @@ func defaultSourceConfig() {
 		Counter:  4,
 		Tod:      true,
 		TimeZone: "Europe/Helsinki",
+	}
+}
+
+func signalBrightness(c color.RGBA) color.RGBA {
+	return color.RGBA{
+		R: uint8(int(c.R) * options.SignalBrightness / 255),
+		G: uint8(int(c.G) * options.SignalBrightness / 255),
+		B: uint8(int(c.B) * options.SignalBrightness / 255),
+		A: 255,
 	}
 }
 

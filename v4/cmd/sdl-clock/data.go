@@ -4,6 +4,7 @@ import (
 	"gitlab.com/Depili/clock-8001/v4/clock"
 	"gitlab.com/Depili/clock-8001/v4/util"
 	htmlTemplate "html/template"
+	"image/color"
 )
 
 var winTitle = "SDL CLOCK"
@@ -22,6 +23,20 @@ const secondRadius192 = secondRadius1080 * 192 / 1080
 
 var secCircles []util.Point
 var staticCircles []util.Point
+
+type signalHW interface {
+	Fill(color.RGBA)
+	Update() error
+	Close() error
+}
+
+type signalHardwareProvider interface {
+	Init()
+}
+
+var signalHardwareList map[string]signalHardwareProvider = make(map[string]signalHardwareProvider)
+
+var signalHardware signalHW
 
 type optionsColor struct {
 	R uint8 `long:"red" description:"Red component of the color"`
@@ -71,6 +86,10 @@ type clockOptions struct {
 	DrawBoxes      bool   `long:"draw-boxes" description:"Draw the container boxes for timers"`
 	NumberFontSize int    `long:"numbers-size" default:"250"`
 	FontPath       string `long:"font-path" description:"Path for loading font choices into web config" default:"."`
+
+	SignalBrightness int    `long:"signal-hw-brightness" description:"Brightness for the hardware signal lamps, 0-255" default:"128"`
+	SignalType       string `long:"signal-hw-type" description:"Hardware signal type" default:"unicorn-hd" choice:"none" choice:"unicorn-hd"`
+	SignalFollow     bool   `long:"signal-hw-follow" description:"Hardware signal follows source 1"`
 
 	CountdownTarget string `long:"countdown-target" default:"2020-12-24 00:00:00"`
 	Raspberry       bool   // Is the host a raspberry pi
