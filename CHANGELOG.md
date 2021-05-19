@@ -1,3 +1,6 @@
+## Version 4.4.1
+* Bugfix: Load the SPI kernel modules in the clock image for unicorn hats
+
 ## Version 4.4.0
 * New: Initial hardware signal light support
   * Currently only pimoroni Unicorn HD and Ubercorn hats are supported
