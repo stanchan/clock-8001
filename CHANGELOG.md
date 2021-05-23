@@ -1,3 +1,9 @@
+## Version 4.5.0
+* New: Customizable overtime behaviour
+  * Handling of overtime countdowns can now be customized
+  * Readout can be chosen to be either: show zeros, show blank, continue counting up
+  * The extra visibility can be chosen to be: none, blink, change background color or change both background and blink
+
 ## Version 4.4.1
 * Bugfix: Load the SPI kernel modules in the clock image for unicorn hats
 
