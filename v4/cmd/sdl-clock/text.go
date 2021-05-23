@@ -87,7 +87,7 @@ func drawTextClock(state *clock.State) {
 			if !state.Flash {
 				text = " "
 			} else {
-				text = "00:00:00"
+				text = clk.Text
 			}
 		}
 

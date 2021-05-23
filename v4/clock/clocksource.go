@@ -20,4 +20,5 @@ type source struct {
 	hidden    bool // Master control to turn output off
 	textColor color.RGBA
 	bgColor   color.RGBA
+	overtime  color.RGBA
 }

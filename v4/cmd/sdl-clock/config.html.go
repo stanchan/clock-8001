@@ -185,6 +185,12 @@ const configHTML = `
 						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
 						<input type="checkbox" id="source1-hidden" name="source1-hidden" {{if .EngineOptions.Source1.Hidden}} checked {{end}} />
 					</label>
+
+					<label for="source1-overtime-color">
+						<span>Background color for overtime countdowns</span>
+						<input type="color" id="source1-overtime-color" name="source1-overtime-color" value="{{.EngineOptions.Source1.OvertimeColor}}" />
+					</label>
+
 				</fieldset>
 				<fieldset>
 					<legend>Source 2</legend>
@@ -227,6 +233,11 @@ const configHTML = `
 					<label for="source2-hidden">
 						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
 						<input type="checkbox" id="source2-hidden" name="source2-hidden" {{if .EngineOptions.Source2.Hidden}} checked {{end}} />
+					</label>
+
+					<label for="source2-overtime-color">
+						<span>Background color for overtime countdowns</span>
+						<input type="color" id="source2-overtime-color" name="source2-overtime-color" value="{{.EngineOptions.Source2.OvertimeColor}}" />
 					</label>
 				</fieldset>
 				<fieldset>
@@ -271,6 +282,11 @@ const configHTML = `
 						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
 						<input type="checkbox" id="source3-hidden" name="source3-hidden" {{if .EngineOptions.Source3.Hidden}} checked {{end}} />
 					</label>
+
+					<label for="source3-overtime-color">
+						<span>Background color for overtime countdowns</span>
+						<input type="color" id="source3-overtime-color" name="source3-overtime-color" value="{{.EngineOptions.Source3.OvertimeColor}}" />
+					</label>
 				</fieldset>
 				<fieldset>
 					<legend>Source 4</legend>
@@ -314,9 +330,36 @@ const configHTML = `
 						<span>Initially hide this source. Can be toggled by OSC on runtime.</span>
 						<input type="checkbox" id="source4-hidden" name="source4-hidden" {{if .EngineOptions.Source4.Hidden}} checked {{end}} />
 					</label>
+
+					<label for="source4-overtime-color">
+						<span>Background color for overtime countdowns</span>
+						<input type="color" id="source4-overtime-color" name="source4-overtime-color" value="{{.EngineOptions.Source4.OvertimeColor}}" />
+					</label>
 				</fieldset>
 			</fieldset>
 
+			<fieldset>
+				<legend>Overtime behaviour</legend>
+
+				<label for="overtime-count-mode">
+					<span>Countdown readout for overtime timers</span>
+					<select name="overtime-count-mode" id="overtime-count-mode">
+						<option value="zero" {{if eq .EngineOptions.OvertimeCountMode "zero"}} selected {{end}}>Show 00:00:00</option>
+						<option value="blank" {{if eq .EngineOptions.OvertimeCountMode "blank"}} selected {{end}}>Blank display</option>
+						<option value="continue" {{if eq .EngineOptions.OvertimeCountMode "continue"}} selected {{end}}>Continue counting up</option>
+					</select>
+				</label>
+
+				<label for="overtime-visibility">
+					<span>Extra visibility for overtime timers</span>
+					<select name="overtime-visibility" id="overtime-visibility">
+						<option value="blink" {{if eq .EngineOptions.OvertimeVisibility "blink"}} selected {{end}}>Blink readout</option>
+						<option value="none" {{if eq .EngineOptions.OvertimeVisibility "none"}} selected {{end}}>No extra visibility</option>
+						<option value="background" {{if eq .EngineOptions.OvertimeVisibility "background"}} selected {{end}}>Change background color</option>
+						<option value="both" {{if eq .EngineOptions.OvertimeVisibility "both"}} selected {{end}}>Change background + blink</option>
+					</select>
+				</label>
+			</fieldset>
 			<fieldset>
 				<legend>Timer signal colors</legend>
 				<label for="auto-signals">

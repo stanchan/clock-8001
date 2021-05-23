@@ -79,6 +79,8 @@ source1.tod={{.EngineOptions.Source1.Tod}}
 source1.timezone={{.EngineOptions.Source1.TimeZone}}
 # Initially hide this source, can be toggled via OSC
 source1.hidden={{.EngineOptions.Source1.Hidden}}
+# Background color for overtime countdown timers
+source1.overtime-color={{.EngineOptions.Source1.OvertimeColor}}
 
 source2.text={{.EngineOptions.Source2.Text}}
 source2.ltc={{.EngineOptions.Source2.LTC}}
@@ -87,6 +89,7 @@ source2.counter={{.EngineOptions.Source2.Counter}}
 source2.tod={{.EngineOptions.Source2.Tod}}
 source2.timezone={{.EngineOptions.Source2.TimeZone}}
 source2.hidden={{.EngineOptions.Source2.Hidden}}
+source2.overtime-color={{.EngineOptions.Source2.OvertimeColor}}
 
 source3.text={{.EngineOptions.Source3.Text}}
 source3.ltc={{.EngineOptions.Source3.LTC}}
@@ -95,6 +98,7 @@ source3.counter={{.EngineOptions.Source3.Counter}}
 source3.tod={{.EngineOptions.Source3.Tod}}
 source3.timezone={{.EngineOptions.Source3.TimeZone}}
 source3.hidden={{.EngineOptions.Source3.Hidden}}
+source3.overtime-color={{.EngineOptions.Source3.OvertimeColor}}
 
 source4.text={{.EngineOptions.Source4.Text}}
 source4.ltc={{.EngineOptions.Source4.LTC}}
@@ -103,7 +107,23 @@ source4.counter={{.EngineOptions.Source4.Counter}}
 source4.tod={{.EngineOptions.Source4.Tod}}
 source4.timezone={{.EngineOptions.Source4.TimeZone}}
 source4.hidden={{.EngineOptions.Source4.Hidden}}
+source4.overtime-color={{.EngineOptions.Source4.OvertimeColor}}
 
+
+# Overtime behaviour
+
+# What to do with the countdown numbers when timer hits zero?
+# zero - show 00:00:00
+# blank - show nothing
+# continue - continue counting up
+overtime-count-mode={{.EngineOptions.OvertimeCountMode}}
+
+# Extra visibility for overtime timers
+# none - no extra visibility
+# blink - blink the timer readout
+# background - change the background color to the overtime color
+# both - change background and blink
+overtime-visibility={{.EngineOptions.OvertimeVisibility}}
 
 # Timer color signals
 

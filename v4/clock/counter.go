@@ -127,7 +127,7 @@ func (counter *Counter) normalOutput(t time.Time) *CounterOutput {
 	}
 
 	var icon string
-	diff := counter.Diff(t).Truncate(time.Second)
+	diff := counter.Diff(t)
 
 	hours := int(diff.Truncate(time.Hour).Hours())
 	minutes := int(diff.Truncate(time.Minute).Minutes()) - (hours * 60)
@@ -361,7 +361,7 @@ func (counter *Counter) Diff(t time.Time) time.Duration {
 		return counter.state.left
 	}
 	if counter.countdown {
-		return counter.state.target.Sub(t).Truncate(time.Second)
+		return counter.state.target.Sub(t)
 	}
 	return t.Sub(counter.state.target)
 }

@@ -193,6 +193,18 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 		errors += fmt.Sprintf("<li>UDP time selection is invalid (%s)</li>", newOptions.EngineOptions.UDPTime)
 	}
 
+	// Overtime count mode
+	newOptions.EngineOptions.OvertimeCountMode = r.FormValue("overtime-count-mode")
+	if f := newOptions.EngineOptions.OvertimeCountMode; (f != "zero") && (f != "blank") && (f != "continue") {
+		errors += fmt.Sprintf("<li>Overtime count mode selection is invalid (%s)</li>", newOptions.EngineOptions.OvertimeCountMode)
+	}
+
+	// Overtime visibility
+	newOptions.EngineOptions.OvertimeVisibility = r.FormValue("overtime-visibility")
+	if f := newOptions.EngineOptions.OvertimeVisibility; (f != "blink") && (f != "none") && (f != "background") && (f != "both") {
+		errors += fmt.Sprintf("<li>Overtime visibility selection is invalid (%s)</li>", newOptions.EngineOptions.OvertimeVisibility)
+	}
+
 	// Filenames
 	newOptions.NumberFont = r.FormValue("NumberFont")
 	errors += validateFile(newOptions.NumberFont, "Number font")
@@ -336,6 +348,15 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	errors += validateColor(newOptions.EngineOptions.SignalColorStart, "Signal color: warning")
 	newOptions.EngineOptions.SignalColorEnd = r.FormValue("signal-color-end")
 	errors += validateColor(newOptions.EngineOptions.SignalColorStart, "Signal color: end")
+
+	newOptions.EngineOptions.Source1.OvertimeColor = r.FormValue("source1-overtime-color")
+	errors += validateColor(newOptions.EngineOptions.Source1.OvertimeColor, "Source1 overtime color")
+	newOptions.EngineOptions.Source2.OvertimeColor = r.FormValue("source2-overtime-color")
+	errors += validateColor(newOptions.EngineOptions.Source2.OvertimeColor, "Source2 overtime color")
+	newOptions.EngineOptions.Source3.OvertimeColor = r.FormValue("source3-overtime-color")
+	errors += validateColor(newOptions.EngineOptions.Source3.OvertimeColor, "Source3 overtime color")
+	newOptions.EngineOptions.Source4.OvertimeColor = r.FormValue("source4-overtime-color")
+	errors += validateColor(newOptions.EngineOptions.Source4.OvertimeColor, "Source4 overtime color")
 
 	if errors != "" {
 		tmpl, err := htmlTemplate.New("config.html").Parse(configHTML)

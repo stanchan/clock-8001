@@ -39,34 +39,37 @@ const (
 
 // SourceOptions contains all options for clock display sources.
 type SourceOptions struct {
-	Text     string `long:"text" description:"Title text for the time source"`
-	Counter  int    `long:"counter" description:"Counter number to associate with this source, leave empty to disable it as a suorce" default:"0"`
-	LTC      bool   `long:"ltc" description:"Enable LTC as a source"`
-	Timer    bool   `long:"timer" description:"Enable timer counter as a source"`
-	Tod      bool   `long:"tod" description:"Enable time-of-day as a source"`
-	TimeZone string `long:"timezone" description:"Time zone to use for ToD display" default:"Europe/Helsinki"`
-	Hidden   bool   `long:"hidden" description:"Hide this time source"`
+	Text          string `long:"text" description:"Title text for the time source"`
+	Counter       int    `long:"counter" description:"Counter number to associate with this source, leave empty to disable it as a suorce" default:"0"`
+	LTC           bool   `long:"ltc" description:"Enable LTC as a source"`
+	Timer         bool   `long:"timer" description:"Enable timer counter as a source"`
+	Tod           bool   `long:"tod" description:"Enable time-of-day as a source"`
+	TimeZone      string `long:"timezone" description:"Time zone to use for ToD display" default:"Europe/Helsinki"`
+	Hidden        bool   `long:"hidden" description:"Hide this time source"`
+	OvertimeColor string `long:"overtime-color" description:"Background color for overtime countdowns, in HTML format #FFFFFF" default:"#FF0000"`
 }
 
 // EngineOptions contains all common options for clock.Engines
 type EngineOptions struct {
-	Flash           int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
-	ListenAddr      string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
-	Timeout         int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
-	Connect         string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
-	DisableOSC      bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
-	DisableFeedback bool   `long:"disable-feedback" description:"Disable OSC feedback"`
-	DisableLTC      bool   `long:"disable-ltc" description:"Disable LTC display mode"`
-	LTCSeconds      bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
-	UDPTime         string `long:"udp-time" description:"Stagetimer2 UDP protocol support" choice:"off" choice:"send" choice:"receive" default:"receive"`
-	UDPTimer1       int    `long:"udp-timer-1" description:"Timer to send as UDP timer 1 (port 36700)" default:"1"`
-	UDPTimer2       int    `long:"udp-timer-2" description:"Timer to send as UDP timer 2 (port 36701)" default:"2"`
-	LTCFollow       bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
-	Format12h       bool   `long:"format-12h" description:"Use 12 hour format for time-of-day display"`
-	Mitti           int    `long:"mitti" description:"Counter number for Mitti OSC feedback" default:"8"`
-	Millumin        int    `long:"millumin" description:"Counter number for Millumin OSC feedback" default:"9"`
-	Ignore          string `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
-	ShowInfo        int    `long:"info-timer" description:"Show clock status for x seconds on startup" default:"30"`
+	Flash              int    `long:"flash" description:"Flashing interval when countdown reached zero (ms), 0 disables" default:"500"`
+	ListenAddr         string `long:"osc-listen" description:"Address to listen for incoming osc messages" default:"0.0.0.0:1245"`
+	Timeout            int    `short:"d" long:"timeout" description:"Timeout for OSC message updates in milliseconds" default:"1000"`
+	Connect            string `short:"o" long:"osc-dest" description:"Address to send OSC feedback to" default:"255.255.255.255:1245"`
+	DisableOSC         bool   `long:"disable-osc" description:"Disable OSC control and feedback"`
+	DisableFeedback    bool   `long:"disable-feedback" description:"Disable OSC feedback"`
+	DisableLTC         bool   `long:"disable-ltc" description:"Disable LTC display mode"`
+	LTCSeconds         bool   `long:"ltc-seconds" description:"Show seconds on the ring in LTC mode"`
+	UDPTime            string `long:"udp-time" description:"Stagetimer2 UDP protocol support" choice:"off" choice:"send" choice:"receive" default:"receive"`
+	UDPTimer1          int    `long:"udp-timer-1" description:"Timer to send as UDP timer 1 (port 36700)" default:"1"`
+	UDPTimer2          int    `long:"udp-timer-2" description:"Timer to send as UDP timer 2 (port 36701)" default:"2"`
+	LTCFollow          bool   `long:"ltc-follow" description:"Continue on internal clock if LTC signal is lost. If unset display will blank when signal is gone."`
+	Format12h          bool   `long:"format-12h" description:"Use 12 hour format for time-of-day display"`
+	Mitti              int    `long:"mitti" description:"Counter number for Mitti OSC feedback" default:"8"`
+	Millumin           int    `long:"millumin" description:"Counter number for Millumin OSC feedback" default:"9"`
+	Ignore             string `long:"millumin-ignore-layer" value-name:"REGEXP" description:"Ignore matching millumin layers (case-insensitive regexp)" default:"ignore"`
+	ShowInfo           int    `long:"info-timer" description:"Show clock status for x seconds on startup" default:"30"`
+	OvertimeCountMode  string `long:"overtime-count-mode" description:"Behaviour for expired countdown timer counts" default:"zero" choice:"zero" choice:"blank" choice:"continue"`
+	OvertimeVisibility string `long:"overtime-visibility" description:"Extra visibility for overtime timers" default:"blink" choice:"blink" choice:"background" choice:"both" choice:"none"`
 
 	AutoSignals            bool   `long:"auto-signals" description:"Automatic signal colors based on timer state"`
 	SignalStart            bool   `long:"signal-start" description:"Set signal color on timer start"`
@@ -157,6 +160,8 @@ type Engine struct {
 	signalThresholdEnd     time.Duration
 	signalHardwareColor    color.RGBA
 	signalHardware         int
+	overtimeCountMode      string
+	overtimeVisibility     string
 }
 
 // Clock contains the state of a single component clock / timer
@@ -218,6 +223,8 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 		signalThresholdWarning: time.Duration(options.SignalThresholdWarning) * time.Second,
 		signalThresholdEnd:     time.Duration(options.SignalThresholdEnd) * time.Second,
 		signalHardware:         options.SignalHardware,
+		overtimeCountMode:      options.OvertimeCountMode,
+		overtimeVisibility:     options.OvertimeVisibility,
 	}
 	uuid, err := machineid.ProtectedID("clock-8001")
 	if err != nil {
@@ -791,6 +798,28 @@ func (engine *Engine) timerState(c *Clock, s *source, t time.Time) {
 		c.Mode = Media
 	} else if out.Countdown {
 		c.Mode = Countdown
+		if out.Expired {
+			switch engine.overtimeCountMode {
+			case "zero":
+				// Default, nothing to do
+			case "blank":
+				c.Icon = ""
+				c.Text = ""
+			case "continue":
+				overtimeFormat(out, c)
+				c.Text = fmt.Sprintf("%02d:%02d:%02d", c.Hours, c.Minutes, c.Seconds)
+			}
+			switch engine.overtimeVisibility {
+			case "none":
+				c.Expired = false
+			case "blink":
+			case "background":
+				c.Expired = false
+				c.BGColor = s.overtime
+			case "both":
+				c.BGColor = s.overtime
+			}
+		}
 	} else {
 		c.Mode = Countup
 	}
@@ -1019,14 +1048,21 @@ func (engine *Engine) initSources(sources []*SourceOptions) error {
 			return err
 		}
 
+		c := color.RGBA{A: 255}
+		_, err = fmt.Sscanf(s.OvertimeColor, "#%02x%02x%02x", &c.R, &c.G, &c.B)
+		if err != nil {
+			return err
+		}
+
 		engine.sources[i] = &source{
-			counter: engine.Counters[s.Counter],
-			tod:     s.Tod,
-			timer:   s.Timer,
-			ltc:     s.LTC,
-			tz:      tz,
-			title:   s.Text,
-			hidden:  s.Hidden,
+			counter:  engine.Counters[s.Counter],
+			tod:      s.Tod,
+			timer:    s.Timer,
+			ltc:      s.LTC,
+			tz:       tz,
+			title:    s.Text,
+			hidden:   s.Hidden,
+			overtime: c,
 		}
 	}
 	log.Printf("Initialized %d clock display sources", len(engine.sources))
@@ -1087,6 +1123,17 @@ func (engine *Engine) SetSourceColors(source int, text, bg color.RGBA) {
 func (engine *Engine) SetTitleColors(text, bg color.RGBA) {
 	engine.titleTextColor = text
 	engine.titleBGColor = bg
+}
+
+func overtimeFormat(out *CounterOutput, c *Clock) {
+	if out.Diff < 1*time.Second {
+		out.Diff -= 1 * time.Second
+	}
+	c.Icon = "+"
+	c.Hours = -int(out.Diff.Truncate(time.Hour).Hours())
+	c.Minutes = -int(out.Diff.Truncate(time.Minute).Minutes()) - (c.Hours * 60)
+	c.Seconds = -int(out.Diff.Truncate(time.Second).Seconds()) - (((c.Hours * 60) + c.Minutes) * 60)
+
 }
 
 func clockAddresses() string {
