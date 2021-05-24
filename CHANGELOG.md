@@ -1,3 +1,8 @@
+## Version 4.5.1
+* Bugfixes:
+  * Config generation for overtime colors
+  * Round clock and overtime visibility modes
+
 ## Version 4.5.0
 * New: Customizable overtime behaviour
   * Handling of overtime countdowns can now be customized
