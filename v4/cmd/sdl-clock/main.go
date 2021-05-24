@@ -263,36 +263,40 @@ func createRings() {
 
 func defaultSourceConfig() {
 	options.EngineOptions.Source1 = &clock.SourceOptions{
-		Text:     "",
-		LTC:      true,
-		Timer:    true,
-		Counter:  1,
-		Tod:      true,
-		TimeZone: "Europe/Helsinki",
+		Text:          "",
+		LTC:           true,
+		Timer:         true,
+		Counter:       1,
+		Tod:           true,
+		TimeZone:      "Europe/Helsinki",
+		OvertimeColor: "#FF0000",
 	}
 	options.EngineOptions.Source2 = &clock.SourceOptions{
-		Text:     "",
-		LTC:      true,
-		Timer:    true,
-		Counter:  2,
-		Tod:      true,
-		TimeZone: "Europe/Helsinki",
+		Text:          "",
+		LTC:           true,
+		Timer:         true,
+		Counter:       2,
+		Tod:           true,
+		TimeZone:      "Europe/Helsinki",
+		OvertimeColor: "#FF0000",
 	}
 	options.EngineOptions.Source3 = &clock.SourceOptions{
-		Text:     "",
-		LTC:      true,
-		Timer:    true,
-		Counter:  3,
-		Tod:      true,
-		TimeZone: "Europe/Helsinki",
+		Text:          "",
+		LTC:           true,
+		Timer:         true,
+		Counter:       3,
+		Tod:           true,
+		TimeZone:      "Europe/Helsinki",
+		OvertimeColor: "#FF0000",
 	}
 	options.EngineOptions.Source4 = &clock.SourceOptions{
-		Text:     "",
-		LTC:      true,
-		Timer:    true,
-		Counter:  4,
-		Tod:      true,
-		TimeZone: "Europe/Helsinki",
+		Text:          "",
+		LTC:           true,
+		Timer:         true,
+		Counter:       4,
+		Tod:           true,
+		TimeZone:      "Europe/Helsinki",
+		OvertimeColor: "#FF0000",
 	}
 }
 
