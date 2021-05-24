@@ -110,15 +110,11 @@ func drawRoundClocks(state *clock.State) {
 					mainClock.Mode == clock.Media {
 					if mainClock.Expired {
 						// TODO: Multiple different options of expired timers?
-						seconds = ""
-						leds = 59
-						if state.Flash {
-							hours = "00"
-							minutes = "00"
-
-						} else {
+						if !state.Flash {
 							hours = ""
 							minutes = ""
+							seconds = ""
+							leds = 59
 						}
 					} else {
 						leds = int(math.Floor(mainClock.Progress * 59))
