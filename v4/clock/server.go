@@ -471,8 +471,8 @@ func (server *Server) handleHardwareSignal(msg *osc.Message) {
 	debug.Printf("handleHardwareSignal: %v", msg)
 	if matches := server.signalRegexp.FindStringSubmatch(msg.Address); len(matches) == 2 {
 		counter, _ := strconv.Atoi(matches[1])
-		var r, g, b, a int32
-		err := msg.UnmarshalArguments(&r, &g, &b, &a)
+		var r, g, b int32
+		err := msg.UnmarshalArguments(&r, &g, &b)
 		if err != nil {
 			log.Printf("handleHardwareSignal: %v %v", err, msg)
 			return
