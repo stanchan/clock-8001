@@ -1,3 +1,6 @@
+## Version 4.5.2
+* Bugfix: /clock/signal/* OSC command was expecting 4 parameters
+
 ## Version 4.5.1
 * Bugfixes:
   * Config generation for overtime colors
