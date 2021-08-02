@@ -11,15 +11,23 @@ import (
  * Counters representing generic countdowns / ups
  */
 
+const (
+	autoColorOff   = iota
+	autoColorStart = iota
+	autoColorWarn  = iota
+	autoColorEnd   = iota
+)
+
 // Counter abstracts a generic counter counting up or down
 type Counter struct {
-	state       *counterState
-	media       *mediaState
-	slave       *slaveState
-	active      bool // Is this counter active?
-	countdown   bool // Count up / down from the target
-	paused      bool // Is the counter paused?
-	signalColor color.RGBA
+	state          *counterState
+	media          *mediaState
+	slave          *slaveState
+	active         bool // Is this counter active?
+	countdown      bool // Count up / down from the target
+	paused         bool // Is the counter paused?
+	signalColor    color.RGBA
+	autoColorState int
 }
 
 type slaveState struct {
@@ -364,6 +372,13 @@ func (counter *Counter) Diff(t time.Time) time.Duration {
 		return counter.state.target.Sub(t)
 	}
 	return t.Sub(counter.state.target)
+}
+
+func (counter *Counter) setAutoColor(c color.RGBA, state int) {
+	if counter.autoColorState != state {
+		counter.autoColorState = state
+		counter.signalColor = c
+	}
 }
 
 func abs(i int) int {

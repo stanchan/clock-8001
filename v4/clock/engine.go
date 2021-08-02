@@ -683,6 +683,10 @@ func (engine *Engine) State() *State {
 			SignalColor: color.RGBA{R: 0, G: 0, B: 0, A: 0},
 		}
 
+		if s.timer {
+			c.SignalColor = s.counter.signalColor
+		}
+
 		if s.ltc && engine.ltcActive {
 			engine.ltcState(&c, s)
 		} else if s.timer && s.counter.active {
@@ -690,6 +694,7 @@ func (engine *Engine) State() *State {
 		} else if s.tod {
 			engine.todState(&c, s, t)
 		}
+
 		clocks = append(clocks, &c)
 	}
 	state := State{
@@ -779,15 +784,20 @@ func (engine *Engine) timerState(c *Clock, s *source, t time.Time) {
 	if engine.autoSignals {
 		if out.Countdown {
 			if out.Diff < engine.signalThresholdEnd {
-				c.SignalColor = engine.signalColors[colorEnd]
+				s.counter.setAutoColor(engine.signalColors[colorEnd], autoColorEnd)
 			} else if out.Diff < engine.signalThresholdWarning {
-				c.SignalColor = engine.signalColors[colorWarning]
+				s.counter.setAutoColor(engine.signalColors[colorWarning], autoColorWarn)
 			} else if engine.signalStart {
-				c.SignalColor = engine.signalColors[colorStart]
+				s.counter.setAutoColor(engine.signalColors[colorStart], autoColorStart)
+			} else {
+				s.counter.setAutoColor(color.RGBA{R: 0, G: 0, B: 0, A: 0}, autoColorOff)
 			}
 		} else if engine.signalStart {
-			c.SignalColor = engine.signalColors[colorStart]
+			s.counter.setAutoColor(engine.signalColors[colorStart], autoColorStart)
+		} else {
+			s.counter.setAutoColor(color.RGBA{R: 0, G: 0, B: 0, A: 0}, autoColorOff)
 		}
+		c.SignalColor = s.counter.signalColor
 	} else {
 		c.SignalColor = out.SignalColor
 	}
