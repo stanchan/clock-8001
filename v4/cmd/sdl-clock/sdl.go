@@ -143,10 +143,18 @@ func initTextures() {
 		textureSize = 5
 		textureCoord = 3
 		textureRadius = 3
-		gridStartX = 32
-		gridStartY = 32
-		gridSize = 3
-		gridSpacing = 4
+		if options.Face == "144" {
+			gridStartX = 24
+			gridStartY = 24
+			gridSize = 2
+			gridSpacing = 3
+		} else {
+			// 192x192px clock
+			gridStartX = 32
+			gridStartY = 32
+			gridSize = 3
+			gridSpacing = 4
+		}
 	}
 
 	// Texture for 12 static circles

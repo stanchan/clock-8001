@@ -216,6 +216,12 @@ func parseOptions() {
 	case "dual-round":
 		options.dualClock = true
 	case "small":
+		// Legacy option
+		options.small = true
+		options.Face = "192"
+	case "144":
+		options.small = true
+	case "192":
 		options.small = true
 	case "text":
 		options.textClock = true
@@ -252,7 +258,10 @@ func dumpConfig() {
 
 // createRings creates the coordinate rings for the static and second rings
 func createRings() {
-	if options.small {
+	if options.Face == "144" {
+		secCircles = util.Points(center144, secondRadius144, 60)
+		staticCircles = util.Points(center144, staticRadius144, 12)
+	} else if options.Face == "small" || options.Face == "192" {
 		secCircles = util.Points(center192, secondRadius192, 60)
 		staticCircles = util.Points(center192, staticRadius192, 12)
 	} else {

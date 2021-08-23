@@ -14,12 +14,19 @@ var gridStartY int32 = 149
 var gridSize int32 = 20
 var gridSpacing = 25
 
-const center1080 = 1080 / 2
-const center192 = 192 / 2
-const staticRadius1080 = 500
-const secondRadius1080 = 450
-const staticRadius192 = staticRadius1080 * 192 / 1080
-const secondRadius192 = secondRadius1080 * 192 / 1080
+const (
+	center1080       = 1080 / 2
+	center192        = 192 / 2
+	center144        = 144 / 2
+	staticRadius1080 = 500
+	secondRadius1080 = 450
+
+	staticRadius192 = staticRadius1080 * 192 / 1080
+	secondRadius192 = secondRadius1080 * 192 / 1080
+
+	staticRadius144 = staticRadius1080 * 144 / 1080
+	secondRadius144 = secondRadius1080 * 144 / 1080
+)
 
 var secCircles []util.Point
 var staticCircles []util.Point
@@ -46,7 +53,7 @@ type optionsColor struct {
 
 type clockOptions struct {
 	Config          func(s string) error `short:"C" long:"config" description:"read config from a file"`
-	Face            string               `long:"face" description:"Select the clock face to use" default:"round" choice:"round" choice:"dual-round" choice:"small" choice:"text" choice:"single" choice:"countdown"`
+	Face            string               `long:"face" description:"Select the clock face to use" default:"round" choice:"round" choice:"dual-round" choice:"small" choice:"text" choice:"single" choice:"countdown" choice:"144" choice:"192"`
 	Debug           bool                 `long:"debug" description:"Enable debug output"`
 	HTTPPort        string               `long:"http-port" description:"Port to listen on for the http configuration interface" default:":8080"`
 	DisableHTTP     bool                 `long:"disable-http" description:"Disable the web configuration interface"`

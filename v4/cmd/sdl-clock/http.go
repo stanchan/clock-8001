@@ -177,7 +177,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Clock face type
 	newOptions.Face = r.FormValue("Face")
-	if f := newOptions.Face; (f != "round") && (f != "dual-round") && (f != "text") && (f != "small") && (f != "single") {
+	if f := newOptions.Face; (f != "round") && (f != "dual-round") && (f != "text") && (f != "small") && (f != "single") && (f != "144") && (f != "192") {
 		errors += fmt.Sprintf("<li>Clock face selection is invalid (%s)</li>", newOptions.Face)
 	}
 
