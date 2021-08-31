@@ -1,3 +1,11 @@
+## Version 4.6.0
+* Features:
+  * 144x144px round clock face
+  * 288x144px text clock face
+  * Improved signal color handling, You can now override the automation set colors via osc commands
+    * If enabled, automation does one color change when timer thresholds are reached, but doesn't prevent manually setting the signal colors.
+
+
 ## Version 4.5.2
 * Bugfix: /clock/signal/* OSC command was expecting 4 parameters
 
