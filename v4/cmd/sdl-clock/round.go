@@ -160,7 +160,7 @@ func drawRoundClocks(state *clock.State) {
 		// Dots between hours and minutes
 		haveDisplay := (hours != "") && (minutes != "")
 		if haveDisplay && (!mainClock.Paused || state.Flash) && (mainClock.Mode != clock.Off) {
-			drawDots()
+			drawDots(14, 15, colors.text)
 		}
 
 		// Draw the text

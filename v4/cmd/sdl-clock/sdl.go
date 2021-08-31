@@ -298,17 +298,17 @@ func drawStaticCircles() {
 }
 
 // drawDots draws the two dots between hours and minutes on the clock
-func drawDots() {
+func drawDots(y int, x int, c sdl.Color) {
 	// Draw the dots between hours and minutes
-	setMatrix(14, 15, colors.text)
-	setMatrix(14, 16, colors.text)
-	setMatrix(15, 15, colors.text)
-	setMatrix(15, 16, colors.text)
+	setMatrix(y, x, c)
+	setMatrix(y, x+1, c)
+	setMatrix(y+1, x, c)
+	setMatrix(y+1, x+1, c)
 
-	setMatrix(18, 15, colors.text)
-	setMatrix(18, 16, colors.text)
-	setMatrix(19, 15, colors.text)
-	setMatrix(19, 16, colors.text)
+	setMatrix(y+4, x, c)
+	setMatrix(y+4, x+1, c)
+	setMatrix(y+5, x, c)
+	setMatrix(y+5, x+1, c)
 }
 
 // Fills the screen with white

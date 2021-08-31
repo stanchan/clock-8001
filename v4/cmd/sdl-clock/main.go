@@ -49,6 +49,8 @@ func main() {
 
 	if options.textClock {
 		initTextClock()
+	} else if options.Face == "288x144" {
+		initSmallTextClock()
 	} else if options.countdown {
 		initCountdown()
 	} else {
@@ -100,6 +102,8 @@ func main() {
 				checkBackgroundUpdate(state)
 				if options.textClock {
 					drawTextClock(state)
+				} else if options.Face == "288x144" {
+					drawSmallTextClock(state)
 				} else if options.countdown {
 					drawCountdown()
 				} else {
