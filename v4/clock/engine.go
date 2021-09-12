@@ -264,7 +264,7 @@ func MakeEngine(options *EngineOptions) (*Engine, error) {
 	sources[3] = options.Source4
 
 	if err := engine.initSources(sources); err != nil {
-		log.Printf("Error initializing engine clock sources")
+		log.Printf("Error initializing engine clock sources: %v", err)
 		return nil, err
 	}
 	engine.initOSC(options)

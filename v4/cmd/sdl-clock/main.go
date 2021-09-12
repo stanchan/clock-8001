@@ -15,6 +15,7 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	_ "time/tzdata"
 )
 
 var parser = flags.NewParser(&options, flags.Default)
