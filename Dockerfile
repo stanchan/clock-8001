@@ -1,5 +1,5 @@
 # Base image: https://hub.docker.com/_/golang/
-FROM golang:1.14
+FROM golang:1.17
 MAINTAINER Vesa-Pekka Palmu <vpalmu@depili.fi>
 
 # Install golint
