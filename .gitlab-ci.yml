@@ -115,7 +115,14 @@ build_v4:
      - v4/sdl-clock
      - v4/clock_port80.ini
 
-
+build_v4_windows:
+  stage: build
+  script:
+    - cd v4
+    - make windows
+  artifacts:
+    paths:
+      - v4/sdl-clock.exe
 
 deploy_latest:
     stage: deploy

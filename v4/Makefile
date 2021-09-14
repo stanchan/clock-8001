@@ -2,7 +2,7 @@ PROJECT_NAME := "clock-8001"
 PKG := "gitlab.com/Depili/$(PROJECT_NAME)/v4"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
-BINARIES := clock-bridge matrix-clock sdl-clock multi-clock
+BINARIES := clock-bridge matrix-clock sdl-clock multi-clock sdl-clock.exe
 GOLINT := "$(GOPATH)/bin/golint"
 GIT_TAG ?= $(shell git describe --tags --abbrev=0 HEAD)
 GIT_COMMIT ?= $(shell git rev-list -1 HEAD)
@@ -40,6 +40,11 @@ build: dep ## Build the binary file
 	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
 	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/multi-clock
 	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
+
+windows: dep ## Build the binary file
+	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT)
+	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+
 
 clean: ## Remove previous build
 	@rm -f $(BINARIES)
