@@ -43,7 +43,7 @@ build: dep ## Build the binary file
 
 windows: dep ## Build the binary file
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT)
-	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
 
 
 clean: ## Remove previous build
