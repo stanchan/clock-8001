@@ -15,7 +15,7 @@ RUN echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-7 main" | tee -a
 
 # Install clang from LLVM repository and sdl2 headers
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    clang-7 \
+    clang \
     libsdl2-dev \
     libsdl2-gfx-dev \
     libsdl2-ttf-dev \
