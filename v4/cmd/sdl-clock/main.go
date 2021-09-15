@@ -86,9 +86,16 @@ func main() {
 		case <-eventTicker.C:
 			// SDL event polling
 			e := sdl.PollEvent()
-			switch e.(type) {
+			switch t := e.(type) {
 			case *sdl.QuitEvent:
 				os.Exit(0)
+			case *sdl.KeyboardEvent:
+				key := t.Keysym.Sym
+				if key == sdl.K_f {
+					window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
+				} else if key == sdl.K_ESCAPE {
+					window.SetFullscreen(0)
+				}
 			}
 		case <-updateTicker.C:
 			// Display update
