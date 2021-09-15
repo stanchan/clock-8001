@@ -865,6 +865,9 @@ func (engine *Engine) StopCounter(counter int) {
 	}
 
 	engine.Counters[counter].Stop()
+	if engine.autoSignals {
+		engine.Counters[counter].signalColor = color.RGBA{R: 0, G: 0, B: 0, A: 0}
+	}
 }
 
 // PauseCounter pauses a given counter
