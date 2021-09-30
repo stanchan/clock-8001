@@ -1,0 +1,32 @@
+{
+  "RT_GROUP_ICON": {
+    "APP": {
+      "0000": [
+        "icon256.png",
+        "icon128.png",
+        "icon64.png",
+        "icon16.png"
+      ]
+    }
+  },
+  "RT_MANIFEST": {
+    "#1": {
+      "0409": {}
+    }
+  },
+  "RT_VERSION": {
+    "#1": {
+      "0409": {
+        "info": {
+          "0409": {
+            "FileDescription": "OSC controller stage timer",
+            "InternalName": "sdl-clock",
+            "LegalCopyright": "© Vesa-Pekka Palmu",
+            "OriginalFilename": "sdl-clock.exe",
+            "ProductName": "clock-8001"
+          }
+        }
+      }
+    }
+  }
+}
