@@ -1,6 +1,6 @@
 module gitlab.com/Depili/clock-8001/v4
 
-go 1.13
+go 1.17
 
 require (
 	github.com/denisbrodbeck/machineid v1.0.1
@@ -17,4 +17,9 @@ require (
 	gitlab.com/Depili/ubercorn v1.0.0
 	golang.org/x/sys v0.0.0-20200301153931-2f85c7ec1e52 // indirect
 	golang.org/x/tools v0.0.0-20200228224639-71482053b885 // indirect
+)
+
+require (
+	periph.io/x/conn/v3 v3.6.7 // indirect
+	periph.io/x/host/v3 v3.6.7 // indirect
 )

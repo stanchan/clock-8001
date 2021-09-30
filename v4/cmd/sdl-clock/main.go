@@ -47,6 +47,7 @@ func main() {
 	setupScaling()
 	initColors()
 	initTextures()
+	initAudio()
 
 	if options.textClock {
 		initTextClock()
@@ -116,6 +117,9 @@ func main() {
 					drawCountdown()
 				} else {
 					drawRoundClocks(state)
+				}
+				for i := 0; i < numAudioSources; i++ {
+					checkBeep(state, i)
 				}
 			}
 

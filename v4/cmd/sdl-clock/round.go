@@ -38,6 +38,13 @@ func initRoundClock() {
 		err = clockTextures[i].SetBlendMode(sdl.BLENDMODE_BLEND)
 		check(err)
 	}
+
+	if options.dualClock {
+		numAudioSources = 4
+	} else {
+		numAudioSources = 2
+	}
+
 	log.Printf("Round clock initialized")
 }
 

@@ -98,6 +98,8 @@ type clockOptions struct {
 	SignalType       string `long:"signal-hw-type" description:"Hardware signal type" default:"unicorn-hd" choice:"none" choice:"unicorn-hd"`
 	SignalFollow     bool   `long:"signal-hw-follow" description:"Hardware signal follows source 1"`
 
+	AudioEnabled bool `long:"audio" description:"Play beeps when a timer is about to expire"`
+
 	CountdownTarget string `long:"countdown-target" default:"2020-12-24 00:00:00"`
 	Raspberry       bool   // Is the host a raspberry pi
 	ConfigTxt       string // /boot/config.txt contents

@@ -68,6 +68,12 @@ func initTextClock() {
 
 	preRenderFonts()
 
+	if options.singleLine {
+		numAudioSources = 1
+	} else {
+		numAudioSources = 3
+	}
+
 	log.Printf("Text clock face intialized.")
 }
 
