@@ -38,6 +38,9 @@ LabelFont={{.LabelFont}}
 # Font for icons
 IconFont={{.IconFont}}
 
+# Enable audio, currently produces the BBC bips on 5 last seconds of a countdown
+AudioEnabled={{.AudioEnabled}}
+
 # Show clock info for X seconds at startup
 info-timer={{.EngineOptions.ShowInfo}}
 
@@ -112,7 +115,7 @@ source4.overtime-color={{.EngineOptions.Source4.OvertimeColor}}
 
 # Overtime behaviour
 
-# What to do with the countdown numbers when timer hits zero?
+# Countdown readout for overtime timers
 # zero - show 00:00:00
 # blank - show nothing
 # continue - continue counting up

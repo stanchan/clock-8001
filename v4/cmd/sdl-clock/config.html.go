@@ -127,6 +127,10 @@ const configHTML = `
 						<input type="color" id="BackgroundColor" name="BackgroundColor" value="{{.BackgroundColor}}" />
 					</label>
 
+					<label for="AudioEnabled">
+						<span>Enable audio cues for expiring countdown timers.</span>
+						<input type="checkbox" id="AudioEnabled" name="AudioEnabled" {{if .AudioEnabled}} checked {{end}}/>
+					</label>
 				</fieldset>
 				<fieldset>
 					<legend>Time sources</legend>

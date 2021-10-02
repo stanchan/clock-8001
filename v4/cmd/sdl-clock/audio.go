@@ -20,6 +20,9 @@ var numAudioSources int
 var lastBeep []int
 
 func initAudio() {
+	if !options.AudioEnabled {
+		return
+	}
 	var err error
 
 	if err = mix.OpenAudio(44100, mix.DEFAULT_FORMAT, 2, 4096); err != nil {
@@ -39,6 +42,9 @@ func initAudio() {
 }
 
 func checkBeep(s *clock.State, i int) {
+	if !options.AudioEnabled {
+		return
+	}
 	clk := s.Clocks[i]
 	if clk.Mode == clock.Countdown {
 		if clk.Hours == 0 && clk.Minutes == 0 {
@@ -46,9 +52,9 @@ func checkBeep(s *clock.State, i int) {
 				lastBeep[i] = 6
 			} else if clk.Seconds <= 5 && lastBeep[i] > clk.Seconds {
 				if clk.Seconds == 0 {
-					longBeep.Play(1, 0)
+					longBeep.Play(-1, 0)
 				} else {
-					shortBeep.Play(1, 0)
+					shortBeep.Play(-1, 0)
 				}
 				lastBeep[i]--
 			}

@@ -167,6 +167,8 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	newOptions.EngineOptions.SignalStart = r.FormValue("signal-start") != ""
 	newOptions.SignalFollow = r.FormValue("signal-hw-follow") != ""
 
+	newOptions.AudioEnabled = r.FormValue("AudioEnabled") != ""
+
 	// Strings, will not be validated
 	newOptions.HTTPUser = r.FormValue("HTTPUser")
 	newOptions.HTTPPassword = r.FormValue("HTTPPassword")
