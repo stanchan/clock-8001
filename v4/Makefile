@@ -42,9 +42,14 @@ build: dep ## Build the binary file
 	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
 
 windows: dep ## Build the binary file
-	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT)
-	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for windows
+	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG) -H windowsgui" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
 
+macos:
+	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for macos
+	$(shell export GOOS=darwin; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" -o sdl-clock_amd64 gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	## $(shell export GOOS=darwin; export GOARCH=arm64; export CGO_CFLAGS="-isysroot $(shell xcrun --sdk macosx11.1 --show-sdk-path) -arch arm64 -I/usr/local/include"; export CGO_LDFLAGS="-isysroot $(shell xcrun --sdk macosx11.1 --show-sdk-path) -arch arm64 -L/usr/local/lib"; export CGO_ENABLED=1 ;go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" -o sdl-clock_arm64 gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	## @lipo -create -output sdl-clock_fat sdl-clock_amd64 sdl-clock_arm64
 
 clean: ## Remove previous build
 	@rm -f $(BINARIES)
