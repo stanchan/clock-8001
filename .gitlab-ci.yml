@@ -22,7 +22,6 @@ before_script:
   - mkdir -p /go/src/gitlab.com/Depili /go/src/_/builds
   - cp -r $CI_PROJECT_DIR /go/src/gitlab.com/Depili/clock-8001
   - ln -s /go/src/gitlab.com/Depili /go/src/_/builds/clock-8001
-  - make dep
 
 # unit_tests:
 #   stage: test
@@ -66,17 +65,17 @@ lint_code_v4:
     - make lint
 
 
-create_config:
-    stage: test
-    script:
-     - cd v3
-     - make build
-     - ./sdl-clock --dump-config > clock.ini
-     - ./sdl-clock --http-port :80 --dump-config > clock_port80.ini
-    artifacts:
-        paths:
-            - v3/clock.ini
-            - v3/clock_port80.ini
+# create_config:
+#    stage: test
+#    script:
+#     - cd v3
+#     - make build
+#     - ./sdl-clock --dump-config > clock.ini
+#     - ./sdl-clock --http-port :80 --dump-config > clock_port80.ini
+#    artifacts:
+#        paths:
+#            - v3/clock.ini
+#            - v3/clock_port80.ini
 
 create_config_4:
     stage: test
@@ -88,20 +87,20 @@ create_config_4:
             - v4/clock_port80.ini
             - v4/clock_port8080.ini
 
-build:
-  image: registry.gitlab.com/depili/clock-8001-build:master
-  stage: build
-  script:
-    - cd v3
-    - make build
-  artifacts:
-     paths:
-     - v3/matrix-clock
-     - v3/sdl-clock
-     - v3/clock-bridge
-     - v3/clock.ini
-     - v3/clock_port80.ini
-     - fonts/7x13.bdf
+# build:
+#   image: registry.gitlab.com/depili/clock-8001-build:master
+#   stage: build
+#   script:
+#     - cd v3
+#     - make build
+#   artifacts:
+#      paths:
+#      - v3/matrix-clock
+#      - v3/sdl-clock
+#      - v3/clock-bridge
+#      - v3/clock.ini
+#      - v3/clock_port80.ini
+#      - fonts/7x13.bdf
 
 build_v4:
   image: registry.gitlab.com/depili/clock-8001-build:master
@@ -130,14 +129,13 @@ deploy_latest:
     before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
-        - cd v3
+        - cd v4
         - ls
         - sshpass -V
         - export SSHPASS=$USER_PASS
         - export TS=$(date +%Y-%m-%d-%H%M%S)
         - sshpass -e scp -o stricthostkeychecking=no sdl-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/sdl-clock-$TS
-        - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/matrix-clock-$TS
-        - sshpass -e scp -o stricthostkeychecking=no clock-bridge clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/clock-bridge-$TS
+        - sshpass -e scp -o stricthostkeychecking=no clock-8001.msi clock8001@kissa.depili.fi:/var/www/html/clock-8001/testing/clock-8001-$TS.msi
     only:
         - master
         - tags
@@ -147,21 +145,16 @@ deploy_release:
     before_script: []
     script:
         - apt-get update -qq && apt-get install -y -qq sshpass
-        - cd v3
+        - cd v4
         - ls
         - sshpass -V
         - export SSHPASS=$USER_PASS
         - export TS=$(date +%Y-%m-%d-%H%M%S)
         - sshpass -e scp -o stricthostkeychecking=no sdl-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/releases/sdl-clock-$CI_COMMIT_TAG
-        - sshpass -e scp -o stricthostkeychecking=no matrix-clock clock8001@kissa.depili.fi:/var/www/html/clock-8001/releases/matrix-clock-$CI_COMMIT_TAG
-        - sshpass -e scp -o stricthostkeychecking=no clock-bridge clock8001@kissa.depili.fi:/var/www/html/clock-8001/releases/clock-bridge-$CI_COMMIT_TAG
+        - sshpass -e scp -o stricthostkeychecking=no clock-8001.msi clock8001@kissa.depili.fi:/var/www/html/clock-8001/releases/clock-8001-$CI_COMMIT_TAG.msi
         - curl -X POST -F token=$BR_TOKEN -F "ref=master" -F "variables[CLOCK_TAG]=$CI_COMMIT_TAG" https://gitlab.com/api/v4/projects/10763408/trigger/pipeline
     artifacts:
       paths:
-        - v3/matrix-clock
-        - v3/sdl-clock
-        - v3/clock-bridge
-        - v3/clock.ini
         - v4/sdl-clock
         - v4/clock_port80.ini
         - v4/ttf_fonts
