@@ -22,9 +22,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsdl2-image-dev \
     libsdl2-mixer-dev \
     mingw-w64 \
+    nodejs \
+    npm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Set Clang as default CC
 ENV set_clang /etc/profile.d/set-clang-cc.sh
 RUN echo "export CC=clang-7" | tee -a ${set_clang} && chmod a+x ${set_clang}
+
+RUN npm install -g depili/msi-packager#isolate-mainExecutableFile-error-to-runAfter
