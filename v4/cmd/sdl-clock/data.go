@@ -99,6 +99,7 @@ type clockOptions struct {
 	SignalFollow     bool   `long:"signal-hw-follow" description:"Hardware signal follows source 1"`
 
 	AudioEnabled bool `long:"audio" description:"Play beeps when a timer is about to expire"`
+	TODBeep      bool `long:"tod-beep" description:"Play beeps on each hour on TOD clocks"`
 
 	CountdownTarget string `long:"countdown-target" default:"2020-12-24 00:00:00"`
 	Raspberry       bool   // Is the host a raspberry pi

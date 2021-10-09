@@ -48,16 +48,35 @@ func checkBeep(s *clock.State, i int) {
 	clk := s.Clocks[i]
 	if clk.Mode == clock.Countdown {
 		if clk.Hours == 0 && clk.Minutes == 0 {
-			if clk.Seconds > 5 {
-				lastBeep[i] = 6
-			} else if clk.Seconds <= 5 && lastBeep[i] > clk.Seconds {
+			if clk.Seconds <= 5 && lastBeep[i] > clk.Seconds {
 				if clk.Seconds == 0 {
 					longBeep.Play(-1, 0)
 				} else {
 					shortBeep.Play(-1, 0)
 				}
-				lastBeep[i]--
 			}
+			lastBeep[i] = clk.Seconds
+		}
+	}
+}
+
+func todBeep(s *clock.State, i int) {
+	if !options.TODBeep {
+		return
+	}
+	clk := s.Clocks[i]
+
+	if clk.Mode == clock.Normal {
+		if clk.Minutes == 0 {
+			if clk.Seconds <= 5 && lastBeep[i] > clk.Seconds {
+				if clk.Seconds == 0 {
+					longBeep.Play(-1, 0)
+				} else {
+					shortBeep.Play(-1, 0)
+				}
+			}
+			lastBeep[i] = clk.Seconds
+
 		}
 	}
 }

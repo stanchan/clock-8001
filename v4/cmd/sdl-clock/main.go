@@ -150,6 +150,7 @@ func main() {
 				}
 				for i := 0; i < numAudioSources; i++ {
 					checkBeep(state, i)
+					todBeep(state, i)
 				}
 			}
 

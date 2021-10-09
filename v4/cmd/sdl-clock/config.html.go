@@ -131,6 +131,11 @@ const configHTML = `
 						<span>Enable audio cues for expiring countdown timers.</span>
 						<input type="checkbox" id="AudioEnabled" name="AudioEnabled" {{if .AudioEnabled}} checked {{end}}/>
 					</label>
+					<label for="TODBeep">
+						<span>Enable audio cues for time of day displays on each full hour.</span>
+						<input type="checkbox" id="TODBeep" name="TODBeep" {{if .TODBeep}} checked {{end}}/>
+					</label>
+
 				</fieldset>
 				<fieldset>
 					<legend>Time sources</legend>

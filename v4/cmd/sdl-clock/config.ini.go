@@ -38,8 +38,11 @@ LabelFont={{.LabelFont}}
 # Font for icons
 IconFont={{.IconFont}}
 
-# Enable audio, currently produces the BBC bips on 5 last seconds of a countdown
+# Enable audio cues for countdowns, currently produces the BBC bips on 5 last seconds of a countdown
 AudioEnabled={{.AudioEnabled}}
+
+# Enable audio beeps on each full hour
+TODBeep={{.TODBeep}}
 
 # Show clock info for X seconds at startup
 info-timer={{.EngineOptions.ShowInfo}}
