@@ -105,21 +105,23 @@ func main() {
 					window.SetFullscreen(0)
 				} else if key == sdl.K_c {
 					if !configStarted {
-						var bin string
-						url := fmt.Sprintf("http://localhost%s", options.HTTPPort)
-						if runtime.GOOS == "darwin" {
-							bin = "open"
-						} else if runtime.GOOS == "windows" {
-							bin = "start"
-							url = fmt.Sprintf("\"\" \"%s\"", url)
-						} else if runtime.GOOS == "linux" {
-							bin = "xdg-open"
-						} else {
-							continue
-						}
 						configStarted = true
-						cmd := exec.Command(bin, url)
-						cmd.Run()
+						url := fmt.Sprintf("http://localhost%s", options.HTTPPort)
+						var err error
+
+						switch runtime.GOOS {
+						case "linux":
+							err = exec.Command("xdg-open", url).Start()
+						case "windows":
+							err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+						case "darwin":
+							err = exec.Command("open", url).Start()
+						default:
+							err = fmt.Errorf("unsupported platform")
+						}
+						if err != nil {
+							log.Fatal(err)
+						}
 						configTimer.Reset(time.Second * 5)
 					}
 				}
