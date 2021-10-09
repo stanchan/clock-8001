@@ -8,6 +8,7 @@ GIT_TAG ?= $(shell git describe --tags --abbrev=0 HEAD)
 GIT_COMMIT ?= $(shell git rev-list -1 HEAD)
 VERSION_PKG := gitlab.com/Depili/clock-8001/v4/clock
 GO_LD_FLAGS := "-X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)"
+WIN_VERSION := $(GIT_TAG:v%=%)
 
 .PHONY: all dep build clean test coverage coverhtml lint
 
@@ -41,9 +42,20 @@ build: dep ## Build the binary file
 	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/multi-clock
 	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
 
-windows: dep ## Build the binary file
+config: build
+	@sdl-clock --http-port :80 --defaults --dump-config > clock_port80.ini
+	@sdl-clock --http-port :8080 --defaults --dump-config > clock_port8080.ini
+
+
+windows: dep config ## Build the binary file
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for windows
 	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG) -H windowsgui" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	@mkdir -p windows
+	@cp ttf_fonts/* windows/
+	@cp -r fonts windows/
+	@cp clock_port8080.ini windows/clock.ini
+	@cp sdl-clock.exe windows/
+	@msi-packager windows/ clock-8001.msi -n clock-8001 -v $(WIN_VERSION) -a x86 -u 28bebbbc-0430-4ab0-a322-1660d5824663 -e "sdl-clock.exe" -m Depili -i cmd/sdl-clock/winres/icon.ico
 
 macos:
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for macos

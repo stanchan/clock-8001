@@ -82,12 +82,11 @@ create_config_4:
     stage: test
     script:
      - cd v4
-     - go build gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
-     - ./sdl-clock --http-port :80 --defaults --dump-config > clock_port80.ini
+     - make config
     artifacts:
         paths:
             - v4/clock_port80.ini
-
+            - v4/clock_port8080.ini
 
 build:
   image: registry.gitlab.com/depili/clock-8001-build:master
@@ -114,6 +113,7 @@ build_v4:
      paths:
      - v4/sdl-clock
      - v4/clock_port80.ini
+     - v4/clock_port8080.ini
 
 build_v4_windows:
   stage: build
@@ -123,6 +123,7 @@ build_v4_windows:
   artifacts:
     paths:
       - v4/sdl-clock.exe
+      - v4/clock-8001.msi
 
 deploy_latest:
     stage: deploy
