@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mingw-w64 \
     nodejs \
     npm \
+    wixl \
+    msitools \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
