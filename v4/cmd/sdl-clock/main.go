@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"text/template"
 	"time"
@@ -224,6 +225,19 @@ func parseOptions() {
 			os.Exit(0)
 		} else {
 			panic(err)
+		}
+	}
+
+	if runtime.GOOS == "windows" && options.configFile == "" {
+		// Try to load a hardcoded default config file
+		_, err := os.Stat("clock.ini")
+		if err == nil {
+			ini := flags.NewIniParser(parser)
+			options.configFile = "clock.ini"
+			err := ini.ParseFile("clock.ini")
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
