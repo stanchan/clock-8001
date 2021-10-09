@@ -67,17 +67,14 @@ func todBeep(s *clock.State, i int) {
 	clk := s.Clocks[i]
 
 	if clk.Mode == clock.Normal {
-		if clk.Minutes == 0 {
-			if clk.Seconds <= 5 && lastBeep[i] > clk.Seconds {
-				if clk.Seconds == 0 {
-					longBeep.Play(-1, 0)
-				} else {
-					shortBeep.Play(-1, 0)
-				}
+		if clk.Minutes == 59 {
+			if clk.Seconds >= 55 && lastBeep[i] < clk.Seconds {
+				shortBeep.Play(-1, 0)
 			}
-			lastBeep[i] = clk.Seconds
-
+		} else if clk.Minutes == 0 && clk.Seconds == 00 && lastBeep[i] == 59 {
+			longBeep.Play(-1, 0)
 		}
+		lastBeep[i] = clk.Seconds
 	}
 }
 
