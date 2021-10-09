@@ -106,16 +106,17 @@ func main() {
 				} else if key == sdl.K_c {
 					if !configStarted {
 						var bin string
+						url := fmt.Sprintf("http://localhost%s", options.HTTPPort)
 						if runtime.GOOS == "darwin" {
 							bin = "open"
 						} else if runtime.GOOS == "windows" {
 							bin = "start"
+							url = fmt.Sprintf("\"\" \"%s\"", url)
 						} else if runtime.GOOS == "linux" {
 							bin = "xdg-open"
 						} else {
 							continue
 						}
-						url := fmt.Sprintf("http://localhost%s", options.HTTPPort)
 						configStarted = true
 						cmd := exec.Command(bin, url)
 						cmd.Run()
