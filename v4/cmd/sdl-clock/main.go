@@ -115,7 +115,7 @@ func main() {
 						} else {
 							continue
 						}
-						url := fmt.Sprintf("http://localhost%s", config.HTTPPort)
+						url := fmt.Sprintf("http://localhost%s", options.HTTPPort)
 						configStarted = true
 						cmd := exec.Command(bin, url)
 						cmd.Run()
