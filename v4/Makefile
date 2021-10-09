@@ -43,8 +43,8 @@ build: dep ## Build the binary file
 	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
 
 config: build
-	@sdl-clock --http-port :80 --defaults --dump-config > clock_port80.ini
-	@sdl-clock --http-port :8080 --defaults --dump-config > clock_port8080.ini
+	./sdl-clock --http-port :80 --defaults --dump-config > clock_port80.ini
+	./sdl-clock --http-port :8080 --defaults --dump-config > clock_port8080.ini
 
 
 windows: dep config ## Build the binary file
