@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/desertbit/timer"
 	"github.com/jessevdk/go-flags"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Depili/clock-8001/v4/clock"
@@ -10,6 +11,7 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"runtime"
@@ -80,6 +82,10 @@ func main() {
 
 	log.Printf("Entering main loop\n")
 
+	configStarted := false
+
+	configTimer := timer.NewTimer(time.Second * 5)
+
 	for {
 		select {
 		case <-sigChan:
@@ -97,8 +103,28 @@ func main() {
 					window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
 				} else if key == sdl.K_ESCAPE {
 					window.SetFullscreen(0)
+				} else if key == sdl.K_c {
+					if !configStarted {
+						var bin string
+						if runtime.GOOS == "darwin" {
+							bin = "open"
+						} else if runtime.GOOS == "windows" {
+							bin = "start"
+						} else if runtime.GOOS == "linux" {
+							bin = "xdg-open"
+						} else {
+							continue
+						}
+						url := fmt.Sprintf("http://localhost%s", config.HTTPPort)
+						configStarted = true
+						cmd := exec.Command(bin, url)
+						cmd.Run()
+						configTimer.Reset(time.Second * 5)
+					}
 				}
 			}
+		case <-configTimer.C:
+			configStarted = false
 		case <-updateTicker.C:
 			// Display update
 
