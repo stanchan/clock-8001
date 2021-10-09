@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/hypebeast/go-osc/osc"
+	"gitlab.com/Depili/go-osc/osc"
 	"time"
 )
 
