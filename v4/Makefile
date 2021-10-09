@@ -36,26 +36,43 @@ coverhtml: ## Generate global code coverage report in HTML
 dep: ## Get the dependencies
 	@go get -v -d ./...
 
-build: dep ## Build the binary file
-	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT)
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
-	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/multi-clock
-	# @go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
+clean:
+	@rm -f sdl-clock sdl-clock.exe multi-clock matrix-clock clock_port80.ini clock_port8080.ini clock-8001.msi sdl-clock_amd64 sdl-clock_arm64
+	@rm -fr windows
 
-config: build
+build: dep sdl-clock ## Build the binary file
+
+matrix-clock:
+	@echo Building matrix-clock tag $(GIT_TAG) commit $(GIT_COMMIT)
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
+
+multi-clock:
+	@echo Building multi-clock tag $(GIT_TAG) commit $(GIT_COMMIT)
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/multi-clock
+
+sdl-clock:
+	@echo Building sdl-clock tag $(GIT_TAG) commit $(GIT_COMMIT)
+	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
+
+config: clock_port80.ini clock_port8080.ini
+
+clock_port80.ini: sdl-clock
 	./sdl-clock --http-port :80 --defaults --dump-config > clock_port80.ini
+
+clock_port8080.ini: sdl-clock
 	./sdl-clock --http-port :8080 --defaults --dump-config > clock_port8080.ini
 
 
-windows: dep config ## Build the binary file
-	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for windows
+windows: dep clock_port8080.ini ## Build the binary file
+	@echo Building sdl-clock.exe tag $(GIT_TAG) commit $(GIT_COMMIT) for windows
 	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG) -H windowsgui" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	@echo Building the msi
 	@mkdir -p windows
 	@cp ttf_fonts/* windows/
 	@cp -r fonts windows/
 	@cp clock_port8080.ini windows/clock.ini
 	@cp sdl-clock.exe windows/
-	@msi-packager windows/ clock-8001.msi -n clock-8001 -v $(WIN_VERSION) -a x86 -u 28bebbbc-0430-4ab0-a322-1660d5824663 -e "sdl-clock.exe" -m Depili -i cmd/sdl-clock/winres/icon.ico
+	@msi-packager windows/ clock-8001.msi -l -n clock-8001 -v $(WIN_VERSION) -a x86 -u 28bebbbc-0430-4ab0-a322-1660d5824663 -e "sdl-clock.exe" -m Depili -i cmd/sdl-clock/winres/icon.ico
 
 macos:
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for macos
