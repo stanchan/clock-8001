@@ -6,3 +6,10 @@
 /v3/multi-clock
 /v3/clock-bridge
 /v3/matrix-clock
+/v4/sdl-clock
+/v4/sdl-clock.exe
+/v4/sdl-clock_amd64
+/v4/multi-clock
+/v4/clock-8001.msi
+/v4/windows
+/v4/clock_port*.ini
