@@ -2,7 +2,7 @@ package clock
 
 import (
 	"fmt"
-	"gitlab.com/Depili/clock-8001/v3/debug"
+	"github.com/stanchan/clock-8001/v3/debug"
 	"log"
 	"net"
 	"strings"

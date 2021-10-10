@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"gitlab.com/Depili/clock-8001/v4/clock"
-	"gitlab.com/Depili/go-osc/osc"
+	"github.com/stanchan/clock-8001/v4/clock"
+	"github.com/stanchan/go-osc/osc"
 	"log"
 )
 

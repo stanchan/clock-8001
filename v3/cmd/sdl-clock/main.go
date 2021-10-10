@@ -1,15 +1,15 @@
 package main
 
 import (
-	"gitlab.com/Depili/clock-8001/v3/clock"
-	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
+	"github.com/stanchan/clock-8001/v3/clock"
+	"github.com/stanchan/go-rgb-led-matrix/bdf"
 	// "github.com/depili/go-rgb-led-matrix/matrix"
 	"github.com/jessevdk/go-flags"
 	// "github.com/kidoman/embd"
 	// _ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
+	"github.com/stanchan/clock-8001/v3/debug"
+	"github.com/stanchan/clock-8001/v3/util"
 	"github.com/veandco/go-sdl2/sdl"
-	"gitlab.com/Depili/clock-8001/v3/debug"
-	"gitlab.com/Depili/clock-8001/v3/util"
 	"log"
 	"os"
 	"os/signal"

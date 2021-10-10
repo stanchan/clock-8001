@@ -1,9 +1,10 @@
 package clock
 
 import (
-	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/Depili/clock-8001/debug"
 	"log"
+
+	"github.com/hypebeast/go-osc/osc"
+	"github.com/stanchan/clock-8001/debug"
 )
 
 // MakeServer creates a clock.Server instance from osc.Server instance

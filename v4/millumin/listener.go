@@ -1,8 +1,8 @@
 package millumin
 
 import (
-	"gitlab.com/Depili/clock-8001/v4/debug"
-	"gitlab.com/Depili/go-osc/osc"
+	"github.com/stanchan/clock-8001/v4/debug"
+	"github.com/stanchan/go-osc/osc"
 	"log"
 )
 

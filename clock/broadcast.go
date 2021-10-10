@@ -2,11 +2,12 @@ package clock
 
 import (
 	"fmt"
-	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"net"
 	"strings"
 	"time"
+
+	"github.com/stanchan/clock-8001/debug"
 )
 
 const interfacePollTime = 5 * time.Second

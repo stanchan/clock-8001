@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitlab.com/Depili/ubercorn/unicorn"
+	"github.com/stanchan/ubercorn/unicorn"
 	"log"
 )
 

@@ -2,9 +2,10 @@ package mitti
 
 import (
 	"fmt"
-	"gitlab.com/Depili/clock-8001/debug"
 	"log"
 	"time"
+
+	"github.com/stanchan/clock-8001/debug"
 )
 
 // State is the Mitti playback state from osc messages

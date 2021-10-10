@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/stanchan/clock-8001/v4/clock"
+	"github.com/stanchan/go-rgb-led-matrix/bdf"
 	"github.com/veandco/go-sdl2/sdl"
-	"gitlab.com/Depili/clock-8001/v4/clock"
-	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
 	"log"
 	"math"
 	"strconv"

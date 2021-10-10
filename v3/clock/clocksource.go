@@ -1,7 +1,7 @@
 package clock
 
 import (
-	// "gitlab.com/Depili/clock-8001/v3/debug"
+	// "github.com/stanchan/clock-8001/v3/debug"
 	// "image/color"
 	"time"
 )

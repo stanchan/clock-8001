@@ -1,12 +1,12 @@
 PROJECT_NAME := "clock-8001"
-PKG := "gitlab.com/Depili/$(PROJECT_NAME)/v4"
+PKG := "github.com/stanchan/$(PROJECT_NAME)/v4"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 BINARIES := clock-bridge matrix-clock sdl-clock multi-clock sdl-clock.exe
 GOLINT := "$(GOPATH)/bin/golint"
 GIT_TAG ?= $(shell git describe --tags --abbrev=0 HEAD)
 GIT_COMMIT ?= $(shell git rev-list -1 HEAD)
-VERSION_PKG := gitlab.com/Depili/clock-8001/v4/clock
+VERSION_PKG := github.com/stanchan/clock-8001/v4/clock
 GO_LD_FLAGS := "-X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)"
 WIN_VERSION := $(GIT_TAG:v%=%)
 
@@ -44,15 +44,15 @@ build: dep sdl-clock ## Build the binary file
 
 matrix-clock:
 	@echo Building matrix-clock tag $(GIT_TAG) commit $(GIT_COMMIT)
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/matrix-clock
+	@go build -ldflags $(GO_LD_FLAGS) github.com/stanchan/clock-8001/v4/cmd/matrix-clock
 
 multi-clock:
 	@echo Building multi-clock tag $(GIT_TAG) commit $(GIT_COMMIT)
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/multi-clock
+	@go build -ldflags $(GO_LD_FLAGS) github.com/stanchan/clock-8001/v4/cmd/multi-clock
 
 sdl-clock:
 	@echo Building sdl-clock tag $(GIT_TAG) commit $(GIT_COMMIT)
-	@go build -ldflags $(GO_LD_FLAGS) gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock
+	@go build -ldflags $(GO_LD_FLAGS) github.com/stanchan/clock-8001/v4/cmd/sdl-clock
 
 config: clock_port80.ini clock_port8080.ini
 
@@ -65,7 +65,7 @@ clock_port8080.ini: sdl-clock
 
 windows: dep clock_port8080.ini ## Build the binary file
 	@echo Building sdl-clock.exe tag $(GIT_TAG) commit $(GIT_COMMIT) for windows
-	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG) -H windowsgui" gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	$(shell export CGO_ENABLED=1; export CC=x86_64-w64-mingw32-gcc; export GOOS=windows; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG) -H windowsgui" github.com/stanchan/clock-8001/v4/cmd/sdl-clock)
 	@echo Building the msi
 	@mkdir -p windows
 	@cp ttf_fonts/* windows/
@@ -76,8 +76,8 @@ windows: dep clock_port8080.ini ## Build the binary file
 
 macos:
 	@echo Building tag $(GIT_TAG) commit $(GIT_COMMIT) for macos
-	$(shell export GOOS=darwin; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" -o sdl-clock_amd64 gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
-	## $(shell export GOOS=darwin; export GOARCH=arm64; export CGO_CFLAGS="-isysroot $(shell xcrun --sdk macosx11.1 --show-sdk-path) -arch arm64 -I/usr/local/include"; export CGO_LDFLAGS="-isysroot $(shell xcrun --sdk macosx11.1 --show-sdk-path) -arch arm64 -L/usr/local/lib"; export CGO_ENABLED=1 ;go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" -o sdl-clock_arm64 gitlab.com/Depili/clock-8001/v4/cmd/sdl-clock)
+	$(shell export GOOS=darwin; export GOARCH=amd64; go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" -o sdl-clock_amd64 github.com/stanchan/clock-8001/v4/cmd/sdl-clock)
+	## $(shell export GOOS=darwin; export GOARCH=arm64; export CGO_CFLAGS="-isysroot $(shell xcrun --sdk macosx11.1 --show-sdk-path) -arch arm64 -I/usr/local/include"; export CGO_LDFLAGS="-isysroot $(shell xcrun --sdk macosx11.1 --show-sdk-path) -arch arm64 -L/usr/local/lib"; export CGO_ENABLED=1 ;go build -tags static -ldflags "-s -w -X $(VERSION_PKG).gitCommit=$(GIT_COMMIT) -X $(VERSION_PKG).gitTag=$(GIT_TAG)" -o sdl-clock_arm64 github.com/stanchan/clock-8001/v4/cmd/sdl-clock)
 	## @lipo -create -output sdl-clock_fat sdl-clock_amd64 sdl-clock_arm64
 
 clean: ## Remove previous build

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/desertbit/timer"
 	"github.com/hypebeast/go-osc/osc"
-	"gitlab.com/Depili/clock-8001/v3/debug"
+	"github.com/stanchan/clock-8001/v3/debug"
 	"image/color"
 	"log"
 	"math"
@@ -803,7 +803,7 @@ func (engine *Engine) printVersion() {
 	if ok {
 		for _, mod := range clockModule.Deps {
 			log.Printf("Dep: %s: version %s", mod.Path, mod.Version)
-			if mod.Path == "gitlab.com/Depili/clock-8001" {
+			if mod.Path == "github.com/stanchan/clock-8001" {
 				gitTag = mod.Version
 			}
 		}

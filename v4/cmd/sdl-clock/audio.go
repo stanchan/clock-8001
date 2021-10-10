@@ -2,9 +2,9 @@ package main
 
 import (
 	_ "embed"
+	"github.com/stanchan/clock-8001/v4/clock"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
-	"gitlab.com/Depili/clock-8001/v4/clock"
 )
 
 //go:embed 1kHz_100ms.wav

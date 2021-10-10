@@ -2,8 +2,9 @@ package millumin
 
 import (
 	"fmt"
-	"gitlab.com/Depili/clock-8001/debug"
 	"time"
+
+	"github.com/stanchan/clock-8001/debug"
 )
 
 // State is complete Millumin playback state for all layers

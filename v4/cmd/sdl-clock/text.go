@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/stanchan/clock-8001/v4/clock"
+	"github.com/stanchan/clock-8001/v4/debug"
 	"github.com/veandco/go-sdl2/gfx"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-	"gitlab.com/Depili/clock-8001/v4/clock"
-	"gitlab.com/Depili/clock-8001/v4/debug"
 	"image/color"
 	"log"
 	"regexp"

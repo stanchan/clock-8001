@@ -2,7 +2,7 @@ package millumin
 
 import (
 	"fmt"
-	"gitlab.com/Depili/go-osc/osc"
+	"github.com/stanchan/go-osc/osc"
 	"regexp"
 )
 

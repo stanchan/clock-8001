@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gitlab.com/Depili/clock-8001/v3/clock"
-	"gitlab.com/Depili/clock-8001/v3/util"
+	"github.com/stanchan/clock-8001/v3/clock"
+	"github.com/stanchan/clock-8001/v3/util"
 )
 
 var winTitle = "SDL CLOCK"

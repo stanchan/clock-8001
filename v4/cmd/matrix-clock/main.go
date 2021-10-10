@@ -5,10 +5,10 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi" // This loads the RPi driver
+	"github.com/stanchan/clock-8001/v4/clock"
+	"github.com/stanchan/go-rgb-led-matrix/bdf"
+	"github.com/stanchan/go-rgb-led-matrix/matrix"
 	"github.com/tarm/serial"
-	"gitlab.com/Depili/clock-8001/v4/clock"
-	"gitlab.com/Depili/go-rgb-led-matrix/bdf"
-	"gitlab.com/Depili/go-rgb-led-matrix/matrix"
 	"os"
 	"os/signal"
 	"time"

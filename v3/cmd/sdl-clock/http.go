@@ -4,7 +4,7 @@ import (
 	// "fmt"
 	"crypto/subtle"
 	"encoding/hex"
-	"gitlab.com/Depili/clock-8001/v3/clock"
+	"github.com/stanchan/clock-8001/v3/clock"
 	htmlTemplate "html/template"
 	"io/ioutil"
 	"log"

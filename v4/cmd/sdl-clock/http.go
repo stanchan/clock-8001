@@ -4,7 +4,7 @@ import (
 	// "fmt"
 	"crypto/subtle"
 	"fmt"
-	"gitlab.com/Depili/clock-8001/v4/clock"
+	"github.com/stanchan/clock-8001/v4/clock"
 	htmlTemplate "html/template"
 	"io"
 	"io/ioutil"

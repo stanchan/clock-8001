@@ -2,7 +2,7 @@ package mitti
 
 import (
 	"fmt"
-	"gitlab.com/Depili/clock-8001/v4/debug"
+	"github.com/stanchan/clock-8001/v4/debug"
 	"log"
 	"time"
 )

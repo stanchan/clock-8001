@@ -1,7 +1,7 @@
 package clock
 
 import (
-	"gitlab.com/Depili/go-osc/osc"
+	"github.com/stanchan/go-osc/osc"
 	"image/color"
 )
 
